@@ -7637,9 +7637,11 @@
                 // A room made for THIS test, if the logged-in student is in one
                 // (matched by testCode, since the schedule already synced its
                 // date/duration straight into this real test document).
-                const myRoom = (window.myRoomsCache || []).find(r => r.testCode === t.code);
-                const roomBtn = myRoom ?
-                    `<button class="btn btn-outline" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${myRoom.hostUid === (window.studentInfo && window.studentInfo.uid)})">🔓 Open Room (${(myRoom.memberUids||[]).length} joined)</button>` : "";
+                // NOTE: we intentionally do NOT show an "Open Room" button here
+                // anymore. A student who has joined a room for this test gets
+                // auto-navigated straight into the exam the instant it goes
+                // live (see window.autoEnterStartedRooms) — no manual tap
+                // needed, so a stale "Open Room" button would just be noise.
                 html += `
                     <div class="live-test-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -7654,7 +7656,6 @@
                         </div>
                         ${end ? `<div class="live-countdown live-second-tick" data-end="${end.toISOString()}" style="margin-top:6px;">⏳ Ends in ...</div>` : ""}
                         <button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>
-                        ${roomBtn}
                     </div>
                 `;
             });
@@ -8146,12 +8147,20 @@
                 let html = "";
                 rooms.forEach(r => {
                     const amIHost = r.hostUid === me.uid;
+                    // Once the room is "started" the student is auto-navigated
+                    // straight into the exam (see autoEnterStartedRooms) — no
+                    // button needed, so we just show a quick status line
+                    // instead of an "Open Room" button that would otherwise
+                    // sit there doing nothing useful.
+                    const actionHtml = r.status === 'started' ?
+                        `<div style="text-align:center;font-size:11px;color:var(--danger);margin-top:8px;">🔴 Test live ho chuka hai — automatically shuru ho raha hai...</div>` :
+                        `<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="window.openTestRoomModal('${r.id}', ${amIHost})">🔓 Open Room</button>`;
                     html += `
                         <div class="live-test-card" style="border-color:var(--primary);">
                             <span class="upcoming-badge" style="background:var(--primary);color:#fff;">👥 Test Room ${r.status === 'started' ? '(Live Now)' : '(Waiting)'}</span>
                             <div style="margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🎓 ${r.exam} — ${r.board}</div>
                             <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${amIHost ? 'You created this room' : 'Hosted by ' + r.hostName} • Room: ${r.id} • 👥 ${(r.memberUids||[]).length} joined</div>
-                            <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="window.openTestRoomModal('${r.id}', ${amIHost})">🔓 Open Room</button>
+                            ${actionHtml}
                         </div>
                     `;
                 });
