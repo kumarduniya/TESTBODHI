@@ -5104,7 +5104,6 @@
                     <div class="loader-mini" style="width:28px; height:28px;"></div> <br />
                     <span style="color:var(--text-muted); margin-top:8px; display:inline-block; font-size:13px;">Loading live tests...</span>
                 </div>
-                <div id="my-room-invites"></div>
                 <div id="live-tests-ongoing"></div>
 
                 <div style="margin-top:22px;">
@@ -7630,7 +7629,12 @@
         window.renderLiveOngoingTests = function() {
             const box = document.getElementById('live-tests-ongoing');
             if (!box) return;
-            const liveTests = window.getAllLiveTests();
+            // Any test that came from the Upcoming Schedule (has a linked
+            // scheduledTests entry) is rendered exclusively by that schedule
+            // card below — including once it goes live — so it isn't shown
+            // twice, and so Room controls only ever appear in that one place.
+            const scheduledCodes = new Set((window._scheduledTestsCache || []).map(s => s.testCode).filter(Boolean));
+            const liveTests = window.getAllLiveTests().filter(t => !scheduledCodes.has(t.code));
             const now = new Date();
 
             const ongoing = [];
@@ -7659,12 +7663,6 @@
                 const end = t.liveEnd ? new Date(t.liveEnd) : null;
                 // Static "this test is live for Xh Ym" badge (total duration).
                 const durationBadge = (start && end) ? window.formatDurationBadge(end - start) : "";
-                // A room made for THIS test, if the logged-in student is in one
-                // (matched by testCode, since the schedule already synced its
-                // date/duration straight into this real test document).
-                const myRoom = (window.myRoomsCache || []).find(r => r.testCode === t.code);
-                const roomBtn = myRoom ?
-                    `<button class="btn btn-outline" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${myRoom.hostUid === (window.studentInfo && window.studentInfo.uid)})">🔓 Open Room (${(myRoom.memberUids||[]).length} joined)</button>` : "";
                 html += `
                     <div class="live-test-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -7679,7 +7677,6 @@
                         </div>
                         ${end ? `<div class="live-countdown live-second-tick" data-end="${end.toISOString()}" style="margin-top:6px;">⏳ Ends in ...</div>` : ""}
                         <button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>
-                        ${roomBtn}
                     </div>
                 `;
             });
@@ -7748,31 +7745,65 @@
             return s.trim();
         };
 
-        // Renders only the STILL-UPCOMING (not yet live) schedule entries —
-        // once an entry's time arrives it's shown up in renderLiveOngoingTests
-        // instead, so it isn't duplicated in both places.
+        // Renders the Upcoming Schedule list — the SINGLE control center for
+        // every Live Test Room action. Each card stays visible from "Starts
+        // In..." countdown all the way through to the test actually ending;
+        // it flips into Live Mode IN PLACE the moment its time arrives
+        // (no disappearing from here and reappearing somewhere else), and is
+        // only dropped once the test is genuinely over.
         window.renderUpcomingScheduleList = function() {
             const box = document.getElementById('live-tests-upcoming');
             if (!box) return;
             const now = new Date();
             const items = window._scheduledTestsCache || [];
-            const upcoming = items.filter(it => it.date && new Date(it.date) > now)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
-            if (upcoming.length === 0) {
+
+            const withMeta = items.filter(it => it.date).map(it => {
+                const testDoc = (window.globalActiveTests || []).find(t => t.code === it.testCode) || {};
+                const start = new Date(it.date);
+                const durMin = testDoc.totTime || 0;
+                const end = testDoc.liveEnd ? new Date(testDoc.liveEnd) : (durMin > 0 ? new Date(start.getTime() + durMin * 60000) : null);
+                const isLive = testDoc.testMode === 'live' || now >= start;
+                return { it, testDoc, start, durMin, end, isLive };
+            }).filter(x => !(x.end && now > x.end)) // fully over — drop it
+                .sort((a, b) => a.start - b.start);
+
+            if (withMeta.length === 0) {
                 box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:12px;padding:10px 0;'>Koi upcoming test announcement nahi hai.</p>";
                 return;
             }
             let h = "";
-            upcoming.forEach(it => {
-                const dateStr = new Date(it.date).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            withMeta.forEach(({ it, testDoc, start, end, durMin, isLive }) => {
+                const qsCount = testDoc.qs || (testDoc.questions ? testDoc.questions.length : 0);
+                const marksPerQ = testDoc.marks || 2;
+                const totalMarks = qsCount * marksPerQ;
+                const subject = testDoc.subject || testDoc.sub || it.type || "Mock Test";
+                const dateStr = start.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                const startStr = start.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                const endStr = end ? end.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : "—";
+                const durStr = durMin > 0 ? `${durMin} Min` : "—";
+                const countdownTarget = isLive ? (end || start) : start;
+                const countdownPrefix = isLive ? "Ends in" : "Starts in";
+                const boardSafe = (it.board || "").replace(/'/g, "\\'");
+                const examSafe = (it.exam || "").replace(/'/g, "\\'");
+                const typeSafe = (it.type || "Mock Tests").replace(/'/g, "\\'");
                 h += `
-                    <div class="upcoming-test-card">
+                    <div class="upcoming-test-card" style="${isLive ? 'border-color:var(--danger);' : ''}">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                             <span style="font-weight:800;color:var(--primary);font-size:13px;">🏛️ ${it.board} — 🎓 ${it.exam}</span>
-                            <span class="upcoming-badge">📅 ${dateStr}</span>
+                            ${isLive ? '<span class="live-dot-badge"><span class="dot"></span> LIVE NOW</span>' : `<span class="upcoming-badge">📅 ${dateStr}</span>`}
                         </div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📂 ${it.type||'Mock Tests'}${it.testCode ? ' • 🔗 Test Code: ' + it.testCode : ''}</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📂 ${subject}${it.testCode ? ' • 🔗 Test Code: ' + it.testCode : ''}</div>
                         ${it.note ? `<div style="font-size:11px;color:var(--text-main);margin-top:4px;">📝 ${it.note}</div>` : ""}
+                        <div class="live-test-meta-row" style="margin-top:6px;">
+                            <span class="badge" style="font-size:9px;">📅 ${dateStr}</span>
+                            <span class="badge" style="font-size:9px;">🕐 Start: ${startStr}</span>
+                            <span class="badge" style="font-size:9px;">🕐 End: ${endStr}</span>
+                            <span class="badge" style="font-size:9px;">⏱ ${durStr}</span>
+                            <span class="badge" style="font-size:9px;">Qs: ${qsCount}</span>
+                            <span class="badge" style="font-size:9px;">🎯 Marks: ${totalMarks}</span>
+                        </div>
+                        <div class="live-countdown live-second-tick" data-end="${countdownTarget.toISOString()}" data-prefix="${countdownPrefix}" style="margin-top:6px;${isLive ? '' : 'background:rgba(245,158,11,0.12);color:var(--warning);'}">⏳ ${countdownPrefix} ...</div>
+                        ${isLive ? `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>` : ""}
                         <div id="sch-room-area-${it.id}" style="margin-top:8px;"></div>
                     </div>
                 `;
@@ -7780,12 +7811,17 @@
             box.innerHTML = h;
             // Room area is filled in separately (needs myRoomsCache, which
             // may load slightly after this).
-            upcoming.forEach(it => window.renderScheduleRoomArea(it, false));
+            withMeta.forEach(({ it, isLive }) => window.renderScheduleRoomArea(it, isLive));
+            window.tickLiveCountdowns();
         };
 
         // Renders the Room controls (Create / Join / "your room" status) inside
-        // a schedule card. Only shown when the admin linked a real Test Code to
-        // this schedule entry — a plain text-only announcement gets no room UI.
+        // a schedule card — this is the ONLY place in the whole portal where
+        // Room/Open Room/Join Room controls appear. Only shown when the admin
+        // linked a real Test Code to this schedule entry — a plain text-only
+        // announcement gets no room UI. "Open Room" itself is only ever shown
+        // once a room actually exists for this test (myRoom found below);
+        // there is no other way to reach a room from anywhere else in the app.
         window.renderScheduleRoomArea = function(it, isLive) {
             const area = document.getElementById('sch-room-area-' + it.id);
             if (!area) return;
@@ -8158,10 +8194,10 @@
         // -in student belongs to. This is what makes room status update INSTANTLY
         // everywhere the moment the student creates a room, joins one (by Room
         // Code or by being added via Student ID by the host), or a room ends —
-        // no page refresh needed. It keeps window.myRoomsCache fresh and then
-        // re-renders both the "My Room Invites" box and the Upcoming Schedule
-        // cards (whose Create Room / Join Room buttons flip to View Room the
-        // moment myRoomsCache contains a matching room).
+        // no page refresh needed. It keeps window.myRoomsCache fresh and
+        // re-renders the Upcoming Schedule cards (whose Create Room / Join
+        // Room buttons flip to Open Room the moment myRoomsCache contains a
+        // matching room) — the only place Room controls appear in the portal.
         window._myRoomsUnsub = null;
         window.checkMyRoomInvites = function() {
             const me = window.studentInfo;
@@ -8173,35 +8209,10 @@
                     snap.forEach(doc => { const d = doc.data();
                         if (d.status !== 'ended') rooms.push({ id: doc.id, ...d }); });
                     window.myRoomsCache = rooms; // used by the schedule cards to show "your room" status
-                    window.renderMyRoomInvitesBox(rooms);
                     window.loadUpcomingScheduleForStudent(); // re-render now that we know which rooms I'm in
                     window.checkAndAutoStartMyRooms();
                     window.checkAndFinalizeMyRooms();
-                }, () => {
-                    const box = document.getElementById('my-room-invites');
-                    if (box) box.innerHTML = "";
-                });
-        };
-
-        window.renderMyRoomInvitesBox = function(rooms) {
-            const box = document.getElementById('my-room-invites');
-            const me = window.studentInfo;
-            if (!box || !me || !me.uid) return;
-            if (!rooms || rooms.length === 0) { box.innerHTML = "";
-                return; }
-            let html = "";
-            rooms.forEach(r => {
-                const amIHost = r.hostUid === me.uid;
-                html += `
-                    <div class="live-test-card" style="border-color:var(--primary);">
-                        <span class="upcoming-badge" style="background:var(--primary);color:#fff;">👥 Test Room ${r.status === 'started' ? '(Live Now)' : '(Waiting)'}</span>
-                        <div style="margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🎓 ${r.exam} — ${r.board}</div>
-                        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${amIHost ? 'You created this room' : 'Hosted by ' + r.hostName} • Room: ${r.id} • 👥 ${(r.memberUids||[]).length} joined</div>
-                        <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="window.openTestRoomModal('${r.id}', ${amIHost})">🔓 Open Room</button>
-                    </div>
-                `;
-            });
-            box.innerHTML = html;
+                }, () => {});
         };
 
 
