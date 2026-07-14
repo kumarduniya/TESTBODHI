@@ -7762,7 +7762,14 @@
                 const start = new Date(it.date);
                 const durMin = testDoc.totTime || 0;
                 const end = testDoc.liveEnd ? new Date(testDoc.liveEnd) : (durMin > 0 ? new Date(start.getTime() + durMin * 60000) : null);
-                const isLive = testDoc.testMode === 'live' || now >= start;
+                // "Live" is determined purely by the scheduled time window
+                // (now between start and end) — NOT by testDoc.testMode,
+                // which only marks a test as being of the "live" TYPE and
+                // stays 'live' the whole time regardless of the scheduled
+                // start time. Using testMode here was flipping cards into
+                // Live Mode (and blocking room creation) well before the
+                // actual scheduled start time.
+                const isLive = now >= start && (!end || now <= end);
                 return { it, testDoc, start, durMin, end, isLive };
             }).filter(x => !(x.end && now > x.end)) // fully over — drop it
                 .sort((a, b) => a.start - b.start);
