@@ -5454,29 +5454,52 @@
         const db = firebase.firestore();
 
         /* ==========================================================================
-           STUDENT ID — the student's own 10-digit registration mobile number IS
-           their Student ID. Always unique per account and the student already
-           knows it by heart — nothing to "generate" or remember separately.
+           STUDENT ID — a secure, randomly generated ID (6 random digits + 2 random
+           capital letters, e.g. 483921AB) assigned to every student. It has no
+           relation whatsoever to the student's mobile number, so phone numbers are
+           never shown or shared inside the Test Room or anywhere else in the app —
+           the phone number is used only for Login/OTP verification. This format
+           matches window.STUDENT_ID_FORMAT_RE used by the admin migration tool.
            ========================================================================== */
-        window.generateStudentId = function(phone) {
-            const digits = String(phone || "").replace(/[^0-9]/g, "");
-            return digits || null;
+        window.STUDENT_ID_FORMAT_RE = /^[0-9]{6}[A-Z]{2}$/;
+
+        window._genRandomStudentIdCandidate = function() {
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            let digits = "";
+            for (let i = 0; i < 6; i++) digits += Math.floor(Math.random() * 10);
+            let alpha = "";
+            for (let i = 0; i < 2; i++) alpha += letters[Math.floor(Math.random() * letters.length)];
+            return digits + alpha;
         };
 
-        // Backfills a studentId onto ANY already-registered user the first time
-        // they load the app after this feature shipped, and assigns one instantly
-        // to brand-new registrations. Safe to call repeatedly — no-ops if the
-        // stored studentId already matches the account's phone number. Also
-        // auto-fixes any old-format id (e.g. an earlier hashed 6-digit scheme)
-        // by replacing it with the phone number, since that's the source of
-        // truth now.
+        // Generates a fresh random Student ID and verifies it isn't already taken
+        // by checking the "users" collection (client-readable per Firestore rules).
+        // Retries a few times on the extremely rare collision before giving up and
+        // returning the last candidate anyway, so registration never gets stuck.
+        window.generateUniqueStudentId = function() {
+            const tryOnce = (attemptsLeft) => {
+                const candidate = window._genRandomStudentIdCandidate();
+                return db.collection("users").where("studentId", "==", candidate).limit(1).get().then((snap) => {
+                    if (!snap.empty && attemptsLeft > 0) return tryOnce(attemptsLeft - 1);
+                    return candidate;
+                }).catch(() => candidate);
+            };
+            return tryOnce(5);
+        };
+
+        // Backfills a secure random studentId onto ANY already-registered user who
+        // doesn't have one yet, or whose stored id is still in the old insecure
+        // phone-number-based format. Safe to call repeatedly — no-ops once a valid
+        // random-format id is already stored. Test History, Results, Profile,
+        // Purchases and Progress are all keyed by uid (not studentId), so none of
+        // that data is affected by this change — only the studentId field itself.
         window.ensureStudentId = function(uid, userData) {
             if (!uid) return Promise.resolve(userData && userData.studentId);
-            const phoneDigits = window.generateStudentId(userData && userData.phone);
-            if (!phoneDigits) return Promise.resolve(userData && userData.studentId); // no phone on file yet — nothing to set
             const existing = userData && userData.studentId;
-            if (existing && String(existing) === phoneDigits) return Promise.resolve(existing);
-            return db.collection("users").doc(uid).update({ studentId: phoneDigits }).then(() => phoneDigits).catch(() => phoneDigits);
+            if (existing && window.STUDENT_ID_FORMAT_RE.test(String(existing))) return Promise.resolve(existing);
+            return window.generateUniqueStudentId().then((sid) => {
+                return db.collection("users").doc(uid).update({ studentId: sid }).then(() => sid).catch(() => sid);
+            });
         };
 
         // Keeps the logged-in user's data (photo, premium status, name...) in
@@ -5722,7 +5745,7 @@
             document.getElementById('pm-email').innerText = user.email || "No email set";
             document.getElementById('pm-phone').innerText = user.phone || "Not set";
             const idEl = document.getElementById('pm-studentid');
-            if (idEl) idEl.innerText = user.studentId || (user.phone ? window.generateStudentId(user.phone) : "Not set — add phone number");
+            if (idEl) idEl.innerText = user.studentId || "⏳ Generating...";
             const isPremium = (user.isPremium === "TRUE" || user.isPremium === true);
             const typeEl = document.getElementById('pm-type');
             if (isPremium) {
@@ -6572,17 +6595,18 @@
             const phone = window.tempAuthData.phone || storedData.phone;
             auth.createUserWithEmailAndPassword(email, pass).then((userCredential) => {
                 const user = userCredential.user;
-                const newStudentId = window.generateStudentId(phone);
-                return db.collection("users").doc(user.uid).set({
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    isPremium: false,
-                    uid: user.uid,
-                    photoURL: "",
-                    studentId: newStudentId,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => newStudentId);
+                return window.generateUniqueStudentId().then((newStudentId) => {
+                    return db.collection("users").doc(user.uid).set({
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        isPremium: false,
+                        uid: user.uid,
+                        photoURL: "",
+                        studentId: newStudentId,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => newStudentId);
+                });
             }).then((newStudentId) => {
                 window.closeModal();
                 const userData = { name, email, phone, isPremium: false, photoURL: "", studentId: newStudentId };
@@ -6643,23 +6667,24 @@
                             finalPhone = (enteredPhone || "").trim();
                         }
                         window.showLoadingModal("Creating your account...<br>Please wait.");
-                        const newStudentId = window.generateStudentId(finalPhone);
-                        return db.collection("users").doc(user.uid).set({
-                            name: finalName,
-                            email: user.email,
-                            phone: finalPhone,
-                            isPremium: false,
-                            uid: user.uid,
-                            photoURL: user.photoURL || "",
-                            studentId: newStudentId,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        }).then(() => {
-                            const userData = { name: finalName, email: user.email, phone: finalPhone, isPremium: false, photoURL: user.photoURL || "", studentId: newStudentId };
-                            localStorage.setItem('mockSarthiUser', JSON.stringify(userData));
-                            window.studentInfo = userData;
-                            window.closeModal();
-                            window.showCustomAlert("Welcome!", `Account created successfully! 🎉<br><br>🆔 Your Student ID: <b>${newStudentId}</b>`, "🎓");
-                            setTimeout(window.checkPendingTestOrGoHome, 1200);
+                        return window.generateUniqueStudentId().then((newStudentId) => {
+                            return db.collection("users").doc(user.uid).set({
+                                name: finalName,
+                                email: user.email,
+                                phone: finalPhone,
+                                isPremium: false,
+                                uid: user.uid,
+                                photoURL: user.photoURL || "",
+                                studentId: newStudentId,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }).then(() => {
+                                const userData = { name: finalName, email: user.email, phone: finalPhone, isPremium: false, photoURL: user.photoURL || "", studentId: newStudentId };
+                                localStorage.setItem('mockSarthiUser', JSON.stringify(userData));
+                                window.studentInfo = userData;
+                                window.closeModal();
+                                window.showCustomAlert("Welcome!", `Account created successfully! 🎉<br><br>🆔 Your Student ID: <b>${newStudentId}</b>`, "🎓");
+                                setTimeout(window.checkPendingTestOrGoHome, 1200);
+                            });
                         });
                     }
                 });
@@ -7637,11 +7662,9 @@
                 // A room made for THIS test, if the logged-in student is in one
                 // (matched by testCode, since the schedule already synced its
                 // date/duration straight into this real test document).
-                // NOTE: we intentionally do NOT show an "Open Room" button here
-                // anymore. A student who has joined a room for this test gets
-                // auto-navigated straight into the exam the instant it goes
-                // live (see window.autoEnterStartedRooms) — no manual tap
-                // needed, so a stale "Open Room" button would just be noise.
+                const myRoom = (window.myRoomsCache || []).find(r => r.testCode === t.code);
+                const roomBtn = myRoom ?
+                    `<button class="btn btn-outline" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${myRoom.hostUid === (window.studentInfo && window.studentInfo.uid)})">🔓 Open Room (${(myRoom.memberUids||[]).length} joined)</button>` : "";
                 html += `
                     <div class="live-test-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -7656,6 +7679,7 @@
                         </div>
                         ${end ? `<div class="live-countdown live-second-tick" data-end="${end.toISOString()}" style="margin-top:6px;">⏳ Ends in ...</div>` : ""}
                         <button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>
+                        ${roomBtn}
                     </div>
                 `;
             });
@@ -8147,20 +8171,12 @@
                 let html = "";
                 rooms.forEach(r => {
                     const amIHost = r.hostUid === me.uid;
-                    // Once the room is "started" the student is auto-navigated
-                    // straight into the exam (see autoEnterStartedRooms) — no
-                    // button needed, so we just show a quick status line
-                    // instead of an "Open Room" button that would otherwise
-                    // sit there doing nothing useful.
-                    const actionHtml = r.status === 'started' ?
-                        `<div style="text-align:center;font-size:11px;color:var(--danger);margin-top:8px;">🔴 Test live ho chuka hai — automatically shuru ho raha hai...</div>` :
-                        `<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="window.openTestRoomModal('${r.id}', ${amIHost})">🔓 Open Room</button>`;
                     html += `
                         <div class="live-test-card" style="border-color:var(--primary);">
                             <span class="upcoming-badge" style="background:var(--primary);color:#fff;">👥 Test Room ${r.status === 'started' ? '(Live Now)' : '(Waiting)'}</span>
                             <div style="margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🎓 ${r.exam} — ${r.board}</div>
                             <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${amIHost ? 'You created this room' : 'Hosted by ' + r.hostName} • Room: ${r.id} • 👥 ${(r.memberUids||[]).length} joined</div>
-                            ${actionHtml}
+                            <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="window.openTestRoomModal('${r.id}', ${amIHost})">🔓 Open Room</button>
                         </div>
                     `;
                 });
