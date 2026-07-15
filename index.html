@@ -7718,16 +7718,109 @@
         };
         window.loadUpcomingScheduleForStudent = window.loadScheduleDataAndRender; // back-compat alias
 
+        // Shared by both render functions below: computes whether a schedule
+        // item is CURRENTLY live purely from its scheduled time window (not
+        // testDoc.testMode, which stays 'live' the whole time regardless of
+        // the scheduled start time).
+        window.computeScheduleItemMeta = function(it) {
+            const now = new Date();
+            const testDoc = (window.globalActiveTests || []).find(t => t.code === it.testCode) || {};
+            const start = new Date(it.date);
+            const durMin = testDoc.totTime || 0;
+            const end = testDoc.liveEnd ? new Date(testDoc.liveEnd) : (durMin > 0 ? new Date(start.getTime() + durMin * 60000) : null);
+            const isLive = now >= start && (!end || now <= end);
+            return { it, testDoc, start, durMin, end, isLive };
+        };
+
+        // Builds one schedule-linked test card's HTML — used by BOTH the
+        // Upcoming Schedule box (while not yet live) and the top Live Tests
+        // box (the instant it goes live), so the exact same Room-aware
+        // buttons/behaviour travel with the card wherever it's currently
+        // rendered instead of being duplicated (and drifting out of sync).
+        window.buildScheduleCardHtml = function(meta) {
+            const { it, testDoc, start, end, durMin, isLive } = meta;
+            const qsCount = testDoc.qs || (testDoc.questions ? testDoc.questions.length : 0);
+            const marksPerQ = testDoc.marks || 2;
+            const totalMarks = qsCount * marksPerQ;
+            const subject = testDoc.subject || testDoc.sub || it.type || "Mock Test";
+            const dateStr = start.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const startStr = start.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            const endStr = end ? end.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : "—";
+            const durStr = durMin > 0 ? `${durMin} Min` : "—";
+            const countdownTarget = isLive ? (end || start) : start;
+            const countdownPrefix = isLive ? "Ends in" : "Starts in";
+            const boardSafe = (it.board || "").replace(/'/g, "\\'");
+            const examSafe = (it.exam || "").replace(/'/g, "\\'");
+            const typeSafe = (it.type || "Mock Tests").replace(/'/g, "\\'");
+            // If I already submitted inside this test's CURRENT session
+            // (tracked in real time on my room's memberInfo), the card
+            // must offer ONLY "View Room" — never a way back into the
+            // test itself. The actual hard block lives in the test-load
+            // guard; this just keeps the button honest.
+            const myRoomForCard = (window.myRoomsCache || []).find(r => {
+                if (r.scheduleId !== it.id && r.testCode !== it.testCode) return false;
+                if (testDoc.liveSessionId && r.sessionId && r.sessionId !== testDoc.liveSessionId) return false;
+                return true;
+            });
+            const myInfoForCard = (myRoomForCard && myRoomForCard.memberInfo && window.studentInfo && myRoomForCard.memberInfo[window.studentInfo.uid]) || {};
+            const iHaveSubmitted = !!myInfoForCard.submitted;
+            // Once live: a student who already has a room (created or joined,
+            // by either method) gets "Open Room / Start Test" — never the
+            // generic standalone button — since their test happens FROM
+            // inside the room (the room modal auto-redirects them in once
+            // it's marked started). Only a student with NO room at all sees
+            // the plain "Start Live Test Now" standalone button.
+            const liveActionBtn = iHaveSubmitted ?
+                `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoomForCard.id}', ${myRoomForCard.hostUid === (window.studentInfo && window.studentInfo.uid)})">👁️ View Room (✅ Submitted — Score: ${myInfoForCard.score != null ? myInfoForCard.score : '—'})</button>` :
+                (myRoomForCard ?
+                    `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoomForCard.id}', ${myRoomForCard.hostUid === (window.studentInfo && window.studentInfo.uid)})">🔓 Open Room / Start Test</button>` :
+                    `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`
+                );
+            return `
+                <div class="upcoming-test-card" style="${isLive ? 'border-color:var(--danger);' : ''}">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                        <span style="font-weight:800;color:var(--primary);font-size:13px;">🏛️ ${it.board} — 🎓 ${it.exam}</span>
+                        ${isLive ? '<span class="live-dot-badge"><span class="dot"></span> LIVE NOW</span>' : `<span class="upcoming-badge">📅 ${dateStr}</span>`}
+                    </div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📂 ${subject}${it.testCode ? ' • 🔗 Test Code: ' + it.testCode : ''}</div>
+                    ${it.note ? `<div style="font-size:11px;color:var(--text-main);margin-top:4px;">📝 ${it.note}</div>` : ""}
+                    <div class="live-test-meta-row" style="margin-top:6px;">
+                        <span class="badge" style="font-size:9px;">📅 ${dateStr}</span>
+                        <span class="badge" style="font-size:9px;">🕐 Start: ${startStr}</span>
+                        <span class="badge" style="font-size:9px;">🕐 End: ${endStr}</span>
+                        <span class="badge" style="font-size:9px;">⏱ ${durStr}</span>
+                        <span class="badge" style="font-size:9px;">Qs: ${qsCount}</span>
+                        <span class="badge" style="font-size:9px;">🎯 Marks: ${totalMarks}</span>
+                    </div>
+                    <div class="live-countdown live-second-tick" data-end="${countdownTarget.toISOString()}" data-prefix="${countdownPrefix}" style="margin-top:6px;${isLive ? '' : 'background:rgba(245,158,11,0.12);color:var(--warning);'}">⏳ ${countdownPrefix} ...</div>
+                    ${isLive ? liveActionBtn : ""}
+                    <div id="sch-room-area-${it.id}" style="margin-top:8px;${(isLive && iHaveSubmitted) ? 'display:none;' : ''}"></div>
+                </div>
+            `;
+        };
+
         window.renderLiveOngoingTests = function() {
             const box = document.getElementById('live-tests-ongoing');
             if (!box) return;
+            const now = new Date();
+
+            // Schedule-linked tests that are CURRENTLY live move up here the
+            // instant their scheduled start time arrives (Update: Problem 1)
+            // — they keep their full Room-aware card (built by the SAME
+            // function used in Upcoming Schedule) rather than a stripped-down
+            // duplicate, so Room controls/behaviour never drift out of sync
+            // between the two boxes.
+            const scheduleMetas = (window._scheduledTestsCache || [])
+                .filter(it => it.date && it.testCode)
+                .map(window.computeScheduleItemMeta)
+                .filter(x => x.isLive && !(x.end && now > x.end));
+
             // Any test that came from the Upcoming Schedule (has a linked
-            // scheduledTests entry) is rendered exclusively by that schedule
-            // card below — including once it goes live — so it isn't shown
-            // twice, and so Room controls only ever appear in that one place.
+            // scheduledTests entry) — live or not — is otherwise handled
+            // above or by renderUpcomingScheduleList, never by the plain
+            // standalone path below (which has no Room controls at all).
             const scheduledCodes = new Set((window._scheduledTestsCache || []).map(s => s.testCode).filter(Boolean));
             const liveTests = window.getAllLiveTests().filter(t => !scheduledCodes.has(t.code));
-            const now = new Date();
 
             const ongoing = [];
             const notStarted = [];
@@ -7739,12 +7832,13 @@
                 else ongoing.push(t);
             });
 
-            if (ongoing.length === 0 && notStarted.length === 0) {
+            if (scheduleMetas.length === 0 && ongoing.length === 0 && notStarted.length === 0) {
                 box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:13px;padding:20px 0;'>Abhi koi Live Test available nahi hai. Neeche upcoming schedule dekhein 👇</p>";
                 return;
             }
 
             let html = "";
+            scheduleMetas.forEach(meta => { html += window.buildScheduleCardHtml(meta); });
             ongoing.forEach(t => {
                 const p = window.parseHack(t.topic);
                 const board = p.board || t.exam || "General Exam";
@@ -7794,6 +7888,9 @@
                 `;
             });
             box.innerHTML = html;
+            // Room area is filled in separately (needs myRoomsCache, which
+            // may load slightly after this) — same as in Upcoming Schedule.
+            scheduleMetas.forEach(meta => window.renderScheduleRoomArea(meta.it, true));
             window.tickLiveCountdowns();
         };
 
@@ -7864,83 +7961,25 @@
             const now = new Date();
             const items = window._scheduledTestsCache || [];
 
-            const withMeta = items.filter(it => it.date).map(it => {
-                const testDoc = (window.globalActiveTests || []).find(t => t.code === it.testCode) || {};
-                const start = new Date(it.date);
-                const durMin = testDoc.totTime || 0;
-                const end = testDoc.liveEnd ? new Date(testDoc.liveEnd) : (durMin > 0 ? new Date(start.getTime() + durMin * 60000) : null);
-                // "Live" is determined purely by the scheduled time window
-                // (now between start and end) — NOT by testDoc.testMode,
-                // which only marks a test as being of the "live" TYPE and
-                // stays 'live' the whole time regardless of the scheduled
-                // start time. Using testMode here was flipping cards into
-                // Live Mode (and blocking room creation) well before the
-                // actual scheduled start time.
-                const isLive = now >= start && (!end || now <= end);
-                return { it, testDoc, start, durMin, end, isLive };
-            }).filter(x => !(x.end && now > x.end)) // fully over — drop it
+            const withMeta = items.filter(it => it.date).map(window.computeScheduleItemMeta)
+                .filter(x => !(x.end && now > x.end)) // fully over — drop it
                 .sort((a, b) => a.start - b.start);
 
-            if (withMeta.length === 0) {
+            // The instant an item goes live it belongs ONLY to the top Live
+            // Tests box (renderLiveOngoingTests) — Problem 1: the card must
+            // actually move there, not just restyle in place here.
+            const notYetLive = withMeta.filter(x => !x.isLive);
+
+            if (notYetLive.length === 0) {
                 box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:12px;padding:10px 0;'>Koi upcoming test announcement nahi hai.</p>";
                 return;
             }
             let h = "";
-            withMeta.forEach(({ it, testDoc, start, end, durMin, isLive }) => {
-                const qsCount = testDoc.qs || (testDoc.questions ? testDoc.questions.length : 0);
-                const marksPerQ = testDoc.marks || 2;
-                const totalMarks = qsCount * marksPerQ;
-                const subject = testDoc.subject || testDoc.sub || it.type || "Mock Test";
-                const dateStr = start.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-                const startStr = start.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                const endStr = end ? end.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : "—";
-                const durStr = durMin > 0 ? `${durMin} Min` : "—";
-                const countdownTarget = isLive ? (end || start) : start;
-                const countdownPrefix = isLive ? "Ends in" : "Starts in";
-                const boardSafe = (it.board || "").replace(/'/g, "\\'");
-                const examSafe = (it.exam || "").replace(/'/g, "\\'");
-                const typeSafe = (it.type || "Mock Tests").replace(/'/g, "\\'");
-                // If I already submitted inside this test's CURRENT session
-                // (tracked in real time on my room's memberInfo), the card
-                // must offer ONLY "View Room" — never a way back into the
-                // test itself. The actual hard block lives in the test-load
-                // guard; this just keeps the button honest.
-                const myRoomForCard = (window.myRoomsCache || []).find(r => {
-                    if (r.scheduleId !== it.id && r.testCode !== it.testCode) return false;
-                    if (testDoc.liveSessionId && r.sessionId && r.sessionId !== testDoc.liveSessionId) return false;
-                    return true;
-                });
-                const myInfoForCard = (myRoomForCard && myRoomForCard.memberInfo && window.studentInfo && myRoomForCard.memberInfo[window.studentInfo.uid]) || {};
-                const iHaveSubmitted = !!myInfoForCard.submitted;
-                h += `
-                    <div class="upcoming-test-card" style="${isLive ? 'border-color:var(--danger);' : ''}">
-                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                            <span style="font-weight:800;color:var(--primary);font-size:13px;">🏛️ ${it.board} — 🎓 ${it.exam}</span>
-                            ${isLive ? '<span class="live-dot-badge"><span class="dot"></span> LIVE NOW</span>' : `<span class="upcoming-badge">📅 ${dateStr}</span>`}
-                        </div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📂 ${subject}${it.testCode ? ' • 🔗 Test Code: ' + it.testCode : ''}</div>
-                        ${it.note ? `<div style="font-size:11px;color:var(--text-main);margin-top:4px;">📝 ${it.note}</div>` : ""}
-                        <div class="live-test-meta-row" style="margin-top:6px;">
-                            <span class="badge" style="font-size:9px;">📅 ${dateStr}</span>
-                            <span class="badge" style="font-size:9px;">🕐 Start: ${startStr}</span>
-                            <span class="badge" style="font-size:9px;">🕐 End: ${endStr}</span>
-                            <span class="badge" style="font-size:9px;">⏱ ${durStr}</span>
-                            <span class="badge" style="font-size:9px;">Qs: ${qsCount}</span>
-                            <span class="badge" style="font-size:9px;">🎯 Marks: ${totalMarks}</span>
-                        </div>
-                        <div class="live-countdown live-second-tick" data-end="${countdownTarget.toISOString()}" data-prefix="${countdownPrefix}" style="margin-top:6px;${isLive ? '' : 'background:rgba(245,158,11,0.12);color:var(--warning);'}">⏳ ${countdownPrefix} ...</div>
-                        ${isLive ? (iHaveSubmitted ?
-                            `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoomForCard.id}', ${myRoomForCard.hostUid === (window.studentInfo && window.studentInfo.uid)})">👁️ View Room (✅ Submitted — Score: ${myInfoForCard.score != null ? myInfoForCard.score : '—'})</button>` :
-                            `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`
-                        ) : ""}
-                        <div id="sch-room-area-${it.id}" style="margin-top:8px;${(isLive && iHaveSubmitted) ? 'display:none;' : ''}"></div>
-                    </div>
-                `;
-            });
+            notYetLive.forEach(meta => { h += window.buildScheduleCardHtml(meta); });
             box.innerHTML = h;
             // Room area is filled in separately (needs myRoomsCache, which
             // may load slightly after this).
-            withMeta.forEach(({ it, isLive }) => window.renderScheduleRoomArea(it, isLive));
+            notYetLive.forEach(({ it }) => window.renderScheduleRoomArea(it, false));
             window.tickLiveCountdowns();
         };
 
