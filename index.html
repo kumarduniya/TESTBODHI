@@ -7765,17 +7765,13 @@
             const myInfoForCard = (myRoomForCard && myRoomForCard.memberInfo && window.studentInfo && myRoomForCard.memberInfo[window.studentInfo.uid]) || {};
             const iHaveSubmitted = !!myInfoForCard.submitted;
             // Once live: a student who already has a room (created or joined,
-            // by either method) gets "Open Room / Start Test" — never the
-            // generic standalone button — since their test happens FROM
-            // inside the room (the room modal auto-redirects them in once
-            // it's marked started). Only a student with NO room at all sees
-            // the plain "Start Live Test Now" standalone button.
-            const liveActionBtn = iHaveSubmitted ?
-                `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoomForCard.id}', ${myRoomForCard.hostUid === (window.studentInfo && window.studentInfo.uid)})">👁️ View Room (✅ Submitted — Score: ${myInfoForCard.score != null ? myInfoForCard.score : '—'})</button>` :
-                (myRoomForCard ?
-                    `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoomForCard.id}', ${myRoomForCard.hostUid === (window.studentInfo && window.studentInfo.uid)})">🔓 Open Room / Start Test</button>` :
-                    `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`
-                );
+            // by either method) gets NO button here at all — the single blue
+            // "Open Room" button below (rendered by renderScheduleRoomArea)
+            // is the one and only button for room members, and it updates
+            // its own text to "Open Room / Start Test" once live. Only a
+            // student with NO room sees this plain standalone button.
+            const liveActionBtn = myRoomForCard ? "" :
+                `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`;
             return `
                 <div class="upcoming-test-card" style="${isLive ? 'border-color:var(--danger);' : ''}">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
@@ -7794,7 +7790,7 @@
                     </div>
                     <div class="live-countdown live-second-tick" data-end="${countdownTarget.toISOString()}" data-prefix="${countdownPrefix}" style="margin-top:6px;${isLive ? '' : 'background:rgba(245,158,11,0.12);color:var(--warning);'}">⏳ ${countdownPrefix} ...</div>
                     ${isLive ? liveActionBtn : ""}
-                    <div id="sch-room-area-${it.id}" style="margin-top:8px;${(isLive && iHaveSubmitted) ? 'display:none;' : ''}"></div>
+                    <div id="sch-room-area-${it.id}" style="margin-top:8px;"></div>
                 </div>
             `;
         };
@@ -8017,11 +8013,20 @@
                 const statusLabel = myRoom.status === 'started' ? '🔴 Live Now' : (myRoom.status === 'ended' ? '🛑 Ended' : '⏳ Waiting');
                 const myInfo = (myRoom.memberInfo && window.studentInfo && myRoom.memberInfo[window.studentInfo.uid]) || {};
                 const addedNotice = (!amIHost && myInfo.addedByHost) ? `<div style="font-size:10px;color:var(--success);margin-top:2px;">🎉 Aapko ${myRoom.hostName} ne add kiya hai</div>` : "";
+                // Update 2: this is now the ONLY room button on the whole
+                // card — no separate red "Open Room / Start Test" duplicate
+                // above it. Same button, same color/position — only its
+                // label (and therefore what happens on click) changes based
+                // on whether the test has actually gone live yet.
+                const iHaveSubmittedHere = !!myInfo.submitted;
+                const btnLabel = iHaveSubmittedHere ?
+                    `👁️ View Room (✅ Submitted — Score: ${myInfo.score != null ? myInfo.score : '—'})` :
+                    (isLive ? `🔓 Open Room / Start Test` : `🔓 Open Room`);
                 area.innerHTML = `
                     <div style="background:rgba(37,99,235,0.08);border:1px dashed var(--primary);border-radius:var(--radius-sm);padding:8px 10px;">
                         <div style="font-size:11px;font-weight:700;color:var(--primary);">👥 Your Room • ${statusLabel} • ${memberCount} joined</div>
                         ${addedNotice}
-                        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${amIHost})">🔓 Open Room</button>
+                        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${amIHost})">${btnLabel}</button>
                     </div>
                 `;
                 return;
