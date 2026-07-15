@@ -5492,12 +5492,41 @@
         // random-format id is already stored. Test History, Results, Profile,
         // Purchases and Progress are all keyed by uid (not studentId), so none of
         // that data is affected by this change — only the studentId field itself.
+        // Powers "One Test = One Attempt" at the BUTTON level (not just when
+        // navigating in) — a live-session the student has already submitted
+        // is remembered here as "testCode|sessionId", so renderLiveOngoingTests
+        // and the Upcoming-Schedule live card can hide/replace the Start
+        // button immediately, for Host and Member and standalone alike (this
+        // Set is keyed purely by testCode+sessionId, with no notion of role).
+        window._submittedLiveSessions = new Set();
+        window.refreshSubmittedLiveSessions = function(onDone) {
+            const me = window.studentInfo;
+            if (!me || !me.uid) { window._submittedLiveSessions = new Set();
+                if (onDone) onDone();
+                return; }
+            db.collection("results").where("uid", "==", me.uid).get().then((snap) => {
+                const s = new Set();
+                snap.forEach(d => { const r = d.data();
+                    if (r.sessionId) s.add(r.testCode + '|' + r.sessionId); });
+                window._submittedLiveSessions = s;
+                if (typeof window.renderLiveOngoingTests === 'function') window.renderLiveOngoingTests();
+                if (typeof window.loadUpcomingScheduleForStudent === 'function') window.loadUpcomingScheduleForStudent();
+                if (onDone) onDone();
+            }).catch(() => { if (onDone) onDone(); });
+        };
+
         window.ensureStudentId = function(uid, userData) {
             if (!uid) return Promise.resolve(userData && userData.studentId);
             const existing = userData && userData.studentId;
             if (existing && window.STUDENT_ID_FORMAT_RE.test(String(existing))) return Promise.resolve(existing);
             return window.generateUniqueStudentId().then((sid) => {
-                return db.collection("users").doc(uid).update({ studentId: sid }).then(() => sid).catch(() => sid);
+                // set(...,{merge:true}) instead of update(): update() throws
+                // "no document to update" (silently swallowed below) if this
+                // account's users/{uid} doc is missing or was never fully
+                // created — a real-world cause of "Student ID never appears"
+                // for a specific account. merge:true creates the doc if
+                // needed without touching any other existing fields.
+                return db.collection("users").doc(uid).set({ studentId: sid }, { merge: true }).then(() => sid).catch(() => sid);
             });
         };
 
@@ -5540,6 +5569,8 @@
                         }
                     });
                 }
+                if (typeof window.refreshSubmittedLiveSessions === 'function') window.refreshSubmittedLiveSessions();
+                if (typeof window.flushPendingResults === 'function') window.flushPendingResults();
             }).catch(() => {});
         });
 
@@ -7691,6 +7722,12 @@
                 const end = t.liveEnd ? new Date(t.liveEnd) : null;
                 // Static "this test is live for Xh Ym" badge (total duration).
                 const durationBadge = (start && end) ? window.formatDurationBadge(end - start) : "";
+                const sessionKey = t.code + '|' + (t.liveSessionId || '');
+                const alreadySubmitted = t.liveSessionId && window._submittedLiveSessions && window._submittedLiveSessions.has(sessionKey);
+                const startBtn = alreadySubmitted ?
+                    `<div style="text-align:center;font-size:12px;background:rgba(16,185,129,0.1);color:var(--success);padding:8px;border-radius:var(--radius-sm);margin-top:6px;font-weight:700;">✅ Aap is Live Test Session mein pehle hi submit kar chuke hain (ek session mein sirf ek attempt allowed hai).</div>
+                     <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openCompleteTests()">📊 Complete Tests mein dekhein</button>` :
+                    `<button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>`;
                 html += `
                     <div class="live-test-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -7704,7 +7741,7 @@
                             <span class="badge" style="font-size:9px;">Qs: ${t.qs||(t.questions?t.questions.length:0)}</span>
                         </div>
                         ${end ? `<div class="live-countdown live-second-tick" data-end="${end.toISOString()}" style="margin-top:6px;">⏳ Ends in ...</div>` : ""}
-                        <button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>
+                        ${startBtn}
                     </div>
                 `;
             });
@@ -7847,7 +7884,8 @@
                     return true;
                 });
                 const myInfoForCard = (myRoomForCard && myRoomForCard.memberInfo && window.studentInfo && myRoomForCard.memberInfo[window.studentInfo.uid]) || {};
-                const iHaveSubmitted = !!myInfoForCard.submitted;
+                const submittedStandalone = !!(testDoc.liveSessionId && window._submittedLiveSessions && window._submittedLiveSessions.has(it.testCode + '|' + testDoc.liveSessionId));
+                const iHaveSubmitted = !!myInfoForCard.submitted || submittedStandalone;
                 h += `
                     <div class="upcoming-test-card" style="${isLive ? 'border-color:var(--danger);' : ''}">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
@@ -7866,7 +7904,11 @@
                         </div>
                         <div class="live-countdown live-second-tick" data-end="${countdownTarget.toISOString()}" data-prefix="${countdownPrefix}" style="margin-top:6px;${isLive ? '' : 'background:rgba(245,158,11,0.12);color:var(--warning);'}">⏳ ${countdownPrefix} ...</div>
                         ${isLive ? (iHaveSubmitted ?
-                            `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoomForCard.id}', ${myRoomForCard.hostUid === (window.studentInfo && window.studentInfo.uid)})">👁️ View Room (✅ Submitted — Score: ${myInfoForCard.score != null ? myInfoForCard.score : '—'})</button>` :
+                            (myRoomForCard ?
+                                `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoomForCard.id}', ${myRoomForCard.hostUid === (window.studentInfo && window.studentInfo.uid)})">👁️ View Room (✅ Submitted — Score: ${myInfoForCard.score != null ? myInfoForCard.score : '—'})</button>` :
+                                `<div style="text-align:center;font-size:11px;background:rgba(16,185,129,0.1);color:var(--success);padding:6px;border-radius:var(--radius-sm);margin-top:6px;font-weight:700;">✅ Aap is session mein pehle hi submit kar chuke hain.</div>
+                                 <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openCompleteTests()">📊 Complete Tests mein dekhein</button>`
+                            ) :
                             `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`
                         ) : ""}
                         <div id="sch-room-area-${it.id}" style="margin-top:8px;${(isLive && iHaveSubmitted) ? 'display:none;' : ''}"></div>
@@ -8468,31 +8510,113 @@
                         r.__total = null;
                         return r; });
                 })).then((finalRows) => {
-                    let html = `<div style="max-height:60vh;overflow-y:auto;">`;
-                    finalRows.forEach(r => {
-                        const pct = r.totalMarks ? ((r.score / r.totalMarks) * 100).toFixed(1) : "—";
-                        const startStr = r.liveStart ? new Date(r.liveStart).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "—";
-                        const endStr = r.liveEnd ? new Date(r.liveEnd).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : "—";
-                        const subStr = r.timestamp ? new Date(r.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : "—";
-                        html += `
-                            <div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;">
-                                <div style="font-weight:800;color:var(--primary);font-size:13px;">${r.testName || r.testCode}</div>
-                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📂 ${r.category || '—'}${r.board ? ' • 🎓 ' + r.board : ''}</div>
-                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">🗓️ Start: ${startStr} • 🏁 End: ${endStr} • ⏱️ ${r.durationMinutes || 0} min</div>
-                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📤 Submitted: ${subStr}</div>
-                                <div style="font-size:12px;margin-top:6px;">Score: <b style="color:var(--success);">${r.score}${r.totalMarks ? (' / ' + r.totalMarks) : ''}</b> (${pct}%) &nbsp;|&nbsp; Rank: <b style="color:var(--primary);">${r.__rank ? ('#' + r.__rank + ' / ' + r.__total) : '—'}</b></div>
-                                <div style="font-size:10px;color:var(--success);font-weight:700;margin-top:2px;">✅ Completed</div>
-                                <div style="display:flex;gap:6px;margin-top:8px;">
-                                    <button class="btn btn-primary btn-sm" style="flex:1;" onclick="window.openHistoricalResult('${r.id}')">📊 Result</button>
-                                    <button class="btn btn-outline btn-sm" style="flex:1;" onclick="window.viewCompleteTestLeaderboards('${r.id}')">🏆 Leaderboards</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += `</div>`;
-                    window.showCustomAlert("✅ Complete Tests", html, "✅");
+                    // Cached once here — filter/search changes below only ever
+                    // re-render from this cache, never re-hit Firestore.
+                    window._completeTestsAllRows = finalRows;
+                    const uniqueNames = [...new Set(finalRows.map(r => r.testName || r.testCode))];
+                    const testOptions = uniqueNames.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join("");
+                    const controlsHtml = `
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                            <select id="ct-filter-test" onchange="window.applyCompleteTestsFilter()" style="flex:1;min-width:160px;padding:7px;border-radius:8px;font-size:12px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);">
+                                <option value="">🔍 Select Completed Test — All</option>
+                                ${testOptions}
+                            </select>
+                            <select id="ct-filter-date" onchange="window.onCtDateFilterChange()" style="flex:1;min-width:130px;padding:7px;border-radius:8px;font-size:12px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);">
+                                <option value="all">📅 All Time</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d">Last 30 Days</option>
+                                <option value="custom">Custom Date</option>
+                            </select>
+                        </div>
+                        <input type="date" id="ct-filter-custom-date" onchange="window.applyCompleteTestsFilter()" style="display:none;width:100%;padding:7px;margin-bottom:10px;border-radius:8px;font-size:12px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);">
+                        <div id="ct-list-container"></div>
+                    `;
+                    window.showCustomAlert("✅ Complete Tests", controlsHtml, "✅");
+                    window.renderCompleteTestsList(finalRows);
                 });
             }).catch((err) => window.showCustomAlert("Error", err.message, "❌"));
+        };
+
+        // Renders just the card list into #ct-list-container — used both for
+        // the initial load and every time a filter changes, so filtering never
+        // needs another Firestore round-trip.
+        window.renderCompleteTestsList = function(rows) {
+            const container = document.getElementById('ct-list-container');
+            if (!container) return;
+            if (rows.length === 0) {
+                container.innerHTML = `<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:16px 0;">Is filter ke liye koi completed test nahi mila.</p>`;
+                return;
+            }
+            let html = `<div style="max-height:50vh;overflow-y:auto;">`;
+            rows.forEach(r => {
+                const pct = r.totalMarks ? ((r.score / r.totalMarks) * 100).toFixed(1) : "—";
+                const startStr = r.liveStart ? new Date(r.liveStart).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "—";
+                const endStr = r.liveEnd ? new Date(r.liveEnd).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : "—";
+                const subStr = r.timestamp ? new Date(r.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : "—";
+                html += `
+                    <div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;">
+                        <div style="font-weight:800;color:var(--primary);font-size:13px;">${r.testName || r.testCode}</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📂 ${r.category || '—'}${r.board ? ' • 🎓 ' + r.board : ''}</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">🗓️ Start: ${startStr} • 🏁 End: ${endStr} • ⏱️ ${r.durationMinutes || 0} min</div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📤 Submitted: ${subStr}</div>
+                        <div style="font-size:12px;margin-top:6px;">Score: <b style="color:var(--success);">${r.score}${r.totalMarks ? (' / ' + r.totalMarks) : ''}</b> (${pct}%) &nbsp;|&nbsp; Rank: <b style="color:var(--primary);">${r.__rank ? ('#' + r.__rank + ' / ' + r.__total) : '—'}</b></div>
+                        <div style="font-size:10px;color:var(--success);font-weight:700;margin-top:2px;">✅ Completed</div>
+                        <div style="display:flex;gap:6px;margin-top:8px;">
+                            <button class="btn btn-primary btn-sm" style="flex:1;" onclick="window.openHistoricalResult('${r.id}')">📊 Result</button>
+                            <button class="btn btn-outline btn-sm" style="flex:1;" onclick="window.viewCompleteTestLeaderboards('${r.id}')">🏆 Leaderboards</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        };
+
+        window.onCtDateFilterChange = function() {
+            const dateSel = document.getElementById('ct-filter-date');
+            const customEl = document.getElementById('ct-filter-custom-date');
+            if (customEl) customEl.style.display = (dateSel && dateSel.value === 'custom') ? 'block' : 'none';
+            window.applyCompleteTestsFilter();
+        };
+
+        window.applyCompleteTestsFilter = function() {
+            const rows = window._completeTestsAllRows || [];
+            const testSel = document.getElementById('ct-filter-test');
+            const dateSel = document.getElementById('ct-filter-date');
+            const customEl = document.getElementById('ct-filter-custom-date');
+            const testFilter = testSel ? testSel.value : "";
+            const dateFilter = dateSel ? dateSel.value : "all";
+            const now = new Date();
+            let rangeStart = null, rangeEnd = null;
+            if (dateFilter === 'today') {
+                rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                rangeEnd = new Date(rangeStart.getTime() + 86400000);
+            } else if (dateFilter === 'yesterday') {
+                const t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                rangeStart = new Date(t.getTime() - 86400000);
+                rangeEnd = t;
+            } else if (dateFilter === '7d') {
+                rangeEnd = new Date(now.getTime() + 1);
+                rangeStart = new Date(now.getTime() - 7 * 86400000);
+            } else if (dateFilter === '30d') {
+                rangeEnd = new Date(now.getTime() + 1);
+                rangeStart = new Date(now.getTime() - 30 * 86400000);
+            } else if (dateFilter === 'custom' && customEl && customEl.value) {
+                const d = new Date(customEl.value + 'T00:00:00');
+                rangeStart = d;
+                rangeEnd = new Date(d.getTime() + 86400000);
+            }
+            const filtered = rows.filter(r => {
+                if (testFilter && (r.testName || r.testCode) !== testFilter) return false;
+                if (rangeStart && rangeEnd) {
+                    const t = r.timestamp || 0;
+                    if (t < rangeStart.getTime() || t >= rangeEnd.getTime()) return false;
+                }
+                return true;
+            });
+            window.renderCompleteTestsList(filtered);
         };
 
         // Shows BOTH leaderboards for one completed Live Test occurrence:
@@ -10794,7 +10918,37 @@
                 liveMarks: isLiveAttempt ? window.examData.marks : null,
                 liveNeg: isLiveAttempt ? window.examData.neg : null
             };
-            db.collection("results").add(resData).then(() => {
+            // Local backup FIRST, before ever touching the network — if the
+            // Firestore write below fails for any reason (flaky connection,
+            // a transient rules/auth hiccup, etc.), the attempt is never
+            // silently lost. This directly targets "submit ho gaya lekin
+            // Complete Tests mein save nahi hua" — previously a failed write
+            // here was swallowed with zero warning to the student.
+            const pendingKey = 'pendingResult_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+            try { localStorage.setItem(pendingKey, JSON.stringify(resData)); } catch (e) {}
+
+            window._submitResultWithRetry = function(data, key, attemptsLeft) {
+                return db.collection("results").add(data).then((docRef) => {
+                    try { localStorage.removeItem(key); } catch (e) {}
+                    // Instantly hide the "Start Live Test Now" button for this
+                    // session everywhere in the UI — no waiting for a refresh
+                    // or the next 30s sweep (Update: One Test = One Attempt).
+                    if (data.sessionId) {
+                        window._submittedLiveSessions = window._submittedLiveSessions || new Set();
+                        window._submittedLiveSessions.add(data.testCode + '|' + data.sessionId);
+                        if (typeof window.renderLiveOngoingTests === 'function') window.renderLiveOngoingTests();
+                        if (typeof window.loadUpcomingScheduleForStudent === 'function') window.loadUpcomingScheduleForStudent();
+                    }
+                    return docRef;
+                }).catch((err) => {
+                    if (attemptsLeft > 0) {
+                        return new Promise(resolve => setTimeout(resolve, 1500)).then(() => window._submitResultWithRetry(data, key, attemptsLeft - 1));
+                    }
+                    throw err;
+                });
+            };
+
+            window._submitResultWithRetry(resData, pendingKey, 2).then(() => {
                 // If this attempt was taken inside a friend Test Room, mark this
                 // student as "submitted" on the room doc too — this is what
                 // powers the ✅ Submitted badge next to their name for
@@ -10824,11 +10978,64 @@
                     if (rankLoader) rankLoader.style.display = 'none';
                     document.getElementById('cert-rank').innerText = '#' + rank + ' / ' + scores.length;
                 });
-            }).catch(() => {
+            }).catch((err) => {
                 if (rankLoader) rankLoader.style.display = 'none';
                 document.getElementById('cert-rank').innerText = '#N/A / N/A';
                 window.fetchLeaderboardWithPhotos(window.examData.code);
+                // The local backup (pendingKey) is still sitting in localStorage
+                // at this point — window.flushPendingResults() will auto-retry
+                // it on the next login, and the button below lets the student
+                // retry right now without leaving this screen.
+                window.showCustomAlert("⚠️ Save Failed",
+                    `Aapka result score-wise theek se calculate ho gaya hai, lekin server par SAVE nahi ho paaya (${err.message}).<br><br>` +
+                    `Ye Complete Tests mein tab tak nahi dikhega jab tak save na ho jaye. Aapka data safe hai — ` +
+                    `neeche button se turant dobara try karein, ya app agli baar login karte hi khud retry karega.<br><br>` +
+                    `<button class="btn btn-danger" style="width:100%;" onclick="window.closeModal();window.retryFailedResultSave('${pendingKey}')">🔄 Retry Save Now</button>`,
+                    "⚠️");
             });
+        };
+
+        // Manual retry for a specific failed submission, and the auto-flush
+        // that runs at login to sweep up ANY still-pending saves (covers the
+        // case where the student closed the app after a failed save instead
+        // of retrying immediately) — together these make sure a completed
+        // Live Test can never permanently go missing from Complete Tests.
+        window.retryFailedResultSave = function(pendingKey) {
+            let data;
+            try { data = JSON.parse(localStorage.getItem(pendingKey) || "null"); } catch (e) { data = null; }
+            if (!data) return window.showCustomAlert("Not Found", "Ye pending result ab nahi mila (shayad already save ho chuka hai).", "ℹ️");
+            window.showLoadingModal("Retrying save...<br>Please wait.");
+            window._submitResultWithRetry(data, pendingKey, 2).then(() => {
+                window.closeModal();
+                window.showCustomAlert("✅ Saved", "Result ab successfully save ho gaya hai — 'Complete Tests' mein check kar sakte hain.", "✅");
+            }).catch((err) => {
+                window.closeModal();
+                window.showCustomAlert("Still Failing", `Abhi bhi save nahi ho paya: ${err.message}. Thodi der baad phir try karein, ya apna internet connection check karein.<br><br><button class="btn btn-danger" style="width:100%;" onclick="window.closeModal();window.retryFailedResultSave('${pendingKey}')">🔄 Try Again</button>`, "⚠️");
+            });
+        };
+
+        // Runs once at login: sweeps localStorage for any results that got
+        // saved locally but never made it to Firestore (a failed submission
+        // from a previous session), and silently retries each one — this is
+        // what guarantees "kisi bhi student ka completed test history missing
+        // nahi honi chahiye" even if they closed the app right after a failure.
+        window.flushPendingResults = function() {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (!key || key.indexOf('pendingResult_') !== 0) continue;
+                let data;
+                try { data = JSON.parse(localStorage.getItem(key)); } catch (e) { data = null; }
+                if (!data) { localStorage.removeItem(key); continue; }
+                if (typeof window._submitResultWithRetry === 'function') {
+                    window._submitResultWithRetry(data, key, 2).catch(() => {}); // best-effort, stays in localStorage to retry again next login if it fails again
+                } else {
+                    // _submitResultWithRetry is defined lazily inside
+                    // calculateScoreAndSubmit; this runs before any test has
+                    // ever been submitted this session, so fall back to a
+                    // direct write.
+                    db.collection("results").add(data).then(() => { try { localStorage.removeItem(key); } catch (e) {} }).catch(() => {});
+                }
+            }
         };
 
         /* ==========================================================================
