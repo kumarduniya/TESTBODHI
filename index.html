@@ -196,15 +196,32 @@
         .q-text img,
         .opt-label img,
         .q-passage-box img,
-        .analysis-box img,
-        .q-text svg,
-        .opt-label svg,
-        .q-passage-box svg,
-        .analysis-box svg {
+        .analysis-box img {
             border-radius: 8px;
             max-height: 250px;
             width: auto;
             object-fit: contain;
+        }
+        /* SVG question images: always a uniform standard box (regardless of
+           the pasted SVG's own width/height/viewBox) and always LEFT aligned
+           directly under the question text — overriding any centering or
+           inconsistent sizing baked into individual admin-pasted SVG code.
+           object-fit:contain keeps the vector fully visible with no
+           cropping/distortion/blur, just fit uniformly into the same box. */
+        .q-text svg,
+        .opt-label svg,
+        .q-passage-box svg,
+        .analysis-box svg {
+            display: block !important;
+            margin: 10px auto 10px 0 !important;
+            text-align: left !important;
+            width: 340px !important;
+            height: 220px !important;
+            max-width: 100% !important;
+            max-height: none !important;
+            object-fit: contain !important;
+            object-position: left top !important;
+            border-radius: 8px;
         }
         .MathJax {
             font-size: 1.15em !important;
@@ -3511,16 +3528,34 @@
             }
             .print-q img,
             .print-exp img,
-            .print-passage img,
-            .print-q svg,
-            .print-exp svg,
-            .print-passage svg {
+            .print-passage img {
                 max-width: 100% !important;
                 max-height: 100px !important;
                 object-fit: contain !important;
                 page-break-inside: avoid !important;
                 display: block !important;
                 margin: 3px 0 !important;
+            }
+            /* SVG question images in the PDF: bigger and uniform across every
+               question (regardless of the pasted SVG's own width/height/
+               viewBox), always left-aligned right under the question text.
+               object-fit:contain preserves full vector sharpness — nothing is
+               rasterised, compressed, or blurred — it's just fit into the
+               same standard box on every question for a consistent,
+               professional, print-friendly look. */
+            .print-q svg,
+            .print-exp svg,
+            .print-passage svg {
+                width: 300px !important;
+                height: 200px !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                object-fit: contain !important;
+                object-position: left top !important;
+                page-break-inside: avoid !important;
+                display: block !important;
+                margin: 6px auto 6px 0 !important;
+                text-align: left !important;
             }
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -5590,6 +5625,12 @@
                         }
                     });
                 }
+                if (typeof window.refreshMySubmittedLiveSessions === 'function') {
+                    window.refreshMySubmittedLiveSessions(() => {
+                        if (typeof window.renderUpcomingScheduleList === 'function') window.renderUpcomingScheduleList();
+                        if (typeof window.renderLiveOngoingTests === 'function') window.renderLiveOngoingTests();
+                    });
+                }
             }).catch(() => {});
         });
 
@@ -5648,6 +5689,29 @@
         window.portalLogoURL = "";
         window.portalLogoShape = "round";
         window.attemptedTestsCache = {};
+
+        // Tracks this student's OWN completed Live Test attempts as
+        // "testCode|sessionId" pairs — this is what lets a card correctly
+        // hide/replace its "Start Live Test Now" button even when the
+        // student took the test DIRECTLY (no Room at all). Unlike the
+        // permanent per-testCode attemptedTestsCache above, this is scoped
+        // to the exact Live Session, so a genuinely NEW go-live (fresh
+        // sessionId) is never mistaken for an already-done attempt.
+        window.mySubmittedLiveSessions = new Set();
+        window.refreshMySubmittedLiveSessions = function(cb) {
+            const me = window.studentInfo;
+            if (!me || !me.uid) { if (cb) cb();
+                return; }
+            db.collection("results").where("uid", "==", me.uid).get().then((snap) => {
+                const s = new Set();
+                snap.forEach(d => {
+                    const rd = d.data();
+                    if (rd.isLiveAttempt && rd.testCode && rd.sessionId) s.add(rd.testCode + '|' + rd.sessionId);
+                });
+                window.mySubmittedLiveSessions = s;
+                if (cb) cb();
+            }).catch(() => { if (cb) cb(); });
+        };
 
         // Attempted-tests data is namespaced per logged-in user (uid), never
         // shared globally on the device. This is what guarantees a brand
@@ -7683,6 +7747,7 @@
             window._liveCountdownInterval = setInterval(() => {
                 const liveSec = document.getElementById('st-live-section');
                 if (liveSec && liveSec.style.display !== 'none') {
+                    if (typeof window.refreshMySubmittedLiveSessions === 'function') window.refreshMySubmittedLiveSessions();
                     window.renderLiveOngoingTests();
                     window.checkAndAutoStartMyRooms();
                     window.checkAndFinalizeMyRooms();
@@ -7752,26 +7817,32 @@
             const boardSafe = (it.board || "").replace(/'/g, "\\'");
             const examSafe = (it.exam || "").replace(/'/g, "\\'");
             const typeSafe = (it.type || "Mock Tests").replace(/'/g, "\\'");
-            // If I already submitted inside this test's CURRENT session
-            // (tracked in real time on my room's memberInfo), the card
-            // must offer ONLY "View Room" — never a way back into the
-            // test itself. The actual hard block lives in the test-load
-            // guard; this just keeps the button honest.
+            // If I already submitted inside this test's CURRENT session —
+            // whether that was via a Room (tracked on memberInfo) OR as a
+            // completely DIRECT attempt with no room at all (tracked in
+            // mySubmittedLiveSessions) — this card must never offer a way
+            // back into the test. The actual hard block lives in the
+            // test-load guard; this just keeps the button honest either way.
             const myRoomForCard = (window.myRoomsCache || []).find(r => {
                 if (r.scheduleId !== it.id && r.testCode !== it.testCode) return false;
                 if (testDoc.liveSessionId && r.sessionId && r.sessionId !== testDoc.liveSessionId) return false;
                 return true;
             });
             const myInfoForCard = (myRoomForCard && myRoomForCard.memberInfo && window.studentInfo && myRoomForCard.memberInfo[window.studentInfo.uid]) || {};
-            const iHaveSubmitted = !!myInfoForCard.submitted;
+            const iSubmittedDirect = !!(testDoc.liveSessionId && window.mySubmittedLiveSessions && window.mySubmittedLiveSessions.has(it.testCode + '|' + testDoc.liveSessionId));
+            const iHaveSubmitted = !!myInfoForCard.submitted || iSubmittedDirect;
             // Once live: a student who already has a room (created or joined,
             // by either method) gets NO button here at all — the single blue
             // "Open Room" button below (rendered by renderScheduleRoomArea)
             // is the one and only button for room members, and it updates
-            // its own text to "Open Room / Start Test" once live. Only a
-            // student with NO room sees this plain standalone button.
+            // its own text to "Open Room / Start Test" once live. A student
+            // with NO room sees this plain standalone button UNLESS they've
+            // already submitted directly, in which case it's replaced with a
+            // locked "Submitted" state — never a way to restart the test.
             const liveActionBtn = myRoomForCard ? "" :
-                `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`;
+                (iSubmittedDirect ?
+                    `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openCompleteTests()">✅ Test Submitted — View Result</button>` :
+                    `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`);
             return `
                 <div class="upcoming-test-card" style="${isLive ? 'border-color:var(--danger);' : ''}">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
@@ -7845,6 +7916,10 @@
                 const end = t.liveEnd ? new Date(t.liveEnd) : null;
                 // Static "this test is live for Xh Ym" badge (total duration).
                 const durationBadge = (start && end) ? window.formatDurationBadge(end - start) : "";
+                const iSubmittedDirect = !!(t.liveSessionId && window.mySubmittedLiveSessions && window.mySubmittedLiveSessions.has(t.code + '|' + t.liveSessionId));
+                const actionBtn = iSubmittedDirect ?
+                    `<button class="btn btn-outline" style="width:100%;margin-top:6px;" onclick="window.openCompleteTests()">✅ Test Submitted — View Result</button>` :
+                    `<button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>`;
                 html += `
                     <div class="live-test-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -7858,7 +7933,7 @@
                             <span class="badge" style="font-size:9px;">Qs: ${t.qs||(t.questions?t.questions.length:0)}</span>
                         </div>
                         ${end ? `<div class="live-countdown live-second-tick" data-end="${end.toISOString()}" style="margin-top:6px;">⏳ Ends in ...</div>` : ""}
-                        <button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>
+                        ${actionBtn}
                     </div>
                 `;
             });
@@ -11027,6 +11102,10 @@
         // record still lands in Complete Tests.
         window._queuePendingResultAndRetry = function(resData, activeRoomId, attempt) {
             attempt = attempt || 1;
+            if (resData && resData.isLiveAttempt && resData.testCode && resData.sessionId) {
+                if (!window.mySubmittedLiveSessions) window.mySubmittedLiveSessions = new Set();
+                window.mySubmittedLiveSessions.add(resData.testCode + '|' + resData.sessionId);
+            }
             let queue = [];
             try { queue = JSON.parse(localStorage.getItem('pendingResultSubmissions') || '[]'); } catch (e) { queue = []; }
             const already = queue.some(q => q.resData && q.resData.testCode === resData.testCode && q.resData.timestamp === resData.timestamp && q.resData.uid === resData.uid);
@@ -11089,6 +11168,14 @@
         // first-try path and the retry-queue path above, so behaviour is
         // identical either way.
         window._afterResultSaved = function(resData, activeRoomId) {
+                // Instantly reflect this submission for the "hide Start button"
+                // check — works for a direct (no Room) attempt exactly the same
+                // as a Room-based one, since it's keyed off testCode+sessionId,
+                // not room membership.
+                if (resData && resData.isLiveAttempt && resData.testCode && resData.sessionId) {
+                    if (!window.mySubmittedLiveSessions) window.mySubmittedLiveSessions = new Set();
+                    window.mySubmittedLiveSessions.add(resData.testCode + '|' + resData.sessionId);
+                }
                 // If this attempt was taken inside a friend Test Room, mark this
                 // student as "submitted" on the room doc too — this is what
                 // powers the ✅ Submitted badge next to their name for
