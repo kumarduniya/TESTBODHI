@@ -2295,6 +2295,18 @@
             font-weight: 600;
             width: 100%;
             position: relative;
+            /* Newspaper/book-style justified text, matching the PDF's
+               already-professional rendering — both sides properly aligned
+               for multi-line questions and passages, in Hindi and English
+               alike. text-align-last:left stops the final (often short)
+               line of a paragraph from being awkwardly stretched, and
+               text-justify:inter-word gives a cleaner, more even justify
+               than the browser default. Single-line questions are
+               completely unaffected — justify only kicks in once a
+               paragraph actually wraps. */
+            text-align: justify;
+            text-align-last: left;
+            text-justify: inter-word;
         }
         .q-text .q-watermark {
             position: absolute;
@@ -2333,6 +2345,12 @@
             color: var(--text-main);
             position: relative;
             z-index: 1;
+            /* Same justified, book-style rendering as .q-text above — long
+               comprehension passages read cleanly with both edges aligned,
+               instead of the previous ragged-right default. */
+            text-align: justify;
+            text-align-last: left;
+            text-justify: inter-word;
         }
 
         .breadcrumb-nav {
@@ -10102,10 +10120,65 @@
             const pA = document.getElementById('print-area');
             if (!pA) return;
 
+            const rawLogoUrl = window.portalLogoURL || document.getElementById('header-logo-img')?.src || '';
+            // The watermark logo is position:fixed, which browsers repeat on
+            // EVERY printed page — and it's also used a second time in the
+            // header strip. If the source logo file is an oversized upload
+            // (easily happens — admins just pick an image, with no resizing
+            // step), that gets re-embedded at full size on every single page
+            // of a multi-page test, which is what was ballooning the PDF to
+            // ~50MB. It's only ever actually DISPLAYED at ~180px either way,
+            // so downscaling it once, up front, costs nothing visually.
+            window.getOptimizedPDFLogo(rawLogoUrl, function(logoUrl) {
+                window._continueExecutePDFPrintWithMathFix(studentName, mode, pA, logoUrl);
+            });
+        };
+
+        // One-time (cached) resize+re-encode of the portal logo specifically
+        // for use inside a generated PDF — see the size-vs-display-size note
+        // above. Falls back to the original URL untouched on any failure
+        // (CORS-tainted canvas, load error, etc.) so a PDF is never broken
+        // or left blank for the sake of an optimization.
+        window._pdfLogoCache = {};
+        window.getOptimizedPDFLogo = function(url, callback) {
+            if (!url) return callback('');
+            if (window._pdfLogoCache[url]) return callback(window._pdfLogoCache[url]);
+            try {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    try {
+                        const targetSize = 220; // headroom above the ~180px display size, still tiny in bytes
+                        let w = img.naturalWidth || targetSize;
+                        let h = img.naturalHeight || targetSize;
+                        if (w > targetSize || h > targetSize) {
+                            if (w >= h) { h = Math.round(h * (targetSize / w));
+                                w = targetSize; } else { w = Math.round(w * (targetSize / h));
+                                h = targetSize; }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const optimized = canvas.toDataURL('image/png');
+                        const result = (optimized && optimized.length < url.length) ? optimized : url;
+                        window._pdfLogoCache[url] = result;
+                        callback(result);
+                    } catch (e) {
+                        window._pdfLogoCache[url] = url; // CORS-tainted canvas etc. — keep the original, never break the PDF
+                        callback(url);
+                    }
+                };
+                img.onerror = function() { callback(url); };
+                img.src = url;
+            } catch (e) { callback(url); }
+        };
+
+        window._continueExecutePDFPrintWithMathFix = function(studentName, mode, pA, logoUrl) {
             const sU = BASE_URL + "?test=" + window.examData.code;
             const p = window.parseHack(window.examData.topic);
             const dT = p.topic || "";
-            const logoUrl = window.portalLogoURL || document.getElementById('header-logo-img')?.src || '';
             const logoShape = window.portalLogoShape || 'round';
             const logoStyle = logoShape === 'round' ? 'border-radius:50%;' : 'border-radius:8px;';
 
