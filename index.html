@@ -6,7 +6,7 @@
     <title>TEST BODHI – Online Test Portal</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Utsaah&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
@@ -71,6 +71,7 @@
             --radius-xl: 28px;
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --font-sans: 'Inter', 'Poppins', system-ui, sans-serif;
+            --font-hindi: 'Utsaah', 'Noto Sans Devanagari', 'Nirmala UI', 'Poppins', 'Inter', sans-serif;
             --sidebar-width: 240px;
             --header-logo-height: 38px;
             --card-bg: rgba(255, 255, 255, 0.85);
@@ -754,6 +755,13 @@
             position: relative;
             scroll-behavior: smooth;
         }
+        /* Light Theme only: clean, soft blue-white question display
+           background instead of the plain white/cream-ish default —
+           easier on the eyes for long study sessions. Dark Theme keeps
+           its original var(--bg-container) untouched. */
+        body:not(.dark-mode) .exam-left {
+            background: #F0FCFF;
+        }
         .exam-left::before {
             content: '';
             position: fixed;
@@ -793,7 +801,10 @@
             cursor: pointer;
             background: var(--bg-card);
             transition: var(--transition);
+            font-family: var(--font-hindi);
             font-size: 14px;
+            line-height: 1.7;
+            letter-spacing: 0.1px;
             font-weight: 500;
             gap: 10px;
             color: var(--text-main);
@@ -2288,8 +2299,10 @@
             border: 1px solid rgba(220, 53, 69, 0.20);
         }
         .q-text {
+            font-family: var(--font-hindi);
             font-size: 15px;
-            line-height: 1.7;
+            line-height: 1.85;
+            letter-spacing: 0.1px;
             color: var(--text-main);
             margin-bottom: 14px;
             font-weight: 600;
@@ -2340,8 +2353,10 @@
             margin-bottom: 14px;
             border-left: 5px solid var(--accent);
             border-radius: var(--radius);
+            font-family: var(--font-hindi);
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.8;
+            letter-spacing: 0.1px;
             color: var(--text-main);
             position: relative;
             z-index: 1;
