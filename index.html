@@ -210,7 +210,6 @@
            object-fit:contain keeps the vector fully visible with no
            cropping/distortion/blur, just fit uniformly into the same box. */
         .q-text svg,
-        .opt-label svg,
         .q-passage-box svg,
         .analysis-box svg {
             display: block !important;
@@ -218,6 +217,20 @@
             text-align: left !important;
             width: 340px !important;
             height: 220px !important;
+            max-width: 100% !important;
+            max-height: none !important;
+            object-fit: contain !important;
+            object-position: left top !important;
+            border-radius: 8px;
+        }
+        /* Option images are always rendered smaller than the question
+           image so the question visual stays the clear focal point. */
+        .opt-label svg {
+            display: block !important;
+            margin: 6px auto 6px 0 !important;
+            text-align: left !important;
+            width: 170px !important;
+            height: 110px !important;
             max-width: 100% !important;
             max-height: none !important;
             object-fit: contain !important;
@@ -3601,6 +3614,20 @@
                 page-break-inside: avoid !important;
                 display: block !important;
                 margin: 6px auto 6px 0 !important;
+                text-align: left !important;
+            }
+            /* Option SVG images: always smaller than the question SVG image
+               above, so the question's own image stays the visual focus. */
+            .opt-item svg {
+                width: 150px !important;
+                height: 100px !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                object-fit: contain !important;
+                object-position: left top !important;
+                page-break-inside: avoid !important;
+                display: block !important;
+                margin: 4px auto 4px 0 !important;
                 text-align: left !important;
             }
             * {
