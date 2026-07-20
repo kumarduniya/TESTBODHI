@@ -6,7 +6,7 @@
     <title>TEST BODHI – Online Test Portal</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Utsaah&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
@@ -71,7 +71,6 @@
             --radius-xl: 28px;
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --font-sans: 'Inter', 'Poppins', system-ui, sans-serif;
-            --font-hindi: 'Utsaah', 'Noto Sans Devanagari', 'Nirmala UI', 'Poppins', 'Inter', sans-serif;
             --sidebar-width: 240px;
             --header-logo-height: 38px;
             --card-bg: rgba(255, 255, 255, 0.85);
@@ -197,45 +196,15 @@
         .q-text img,
         .opt-label img,
         .q-passage-box img,
-        .analysis-box img {
+        .analysis-box img,
+        .q-text svg,
+        .opt-label svg,
+        .q-passage-box svg,
+        .analysis-box svg {
             border-radius: 8px;
             max-height: 250px;
             width: auto;
             object-fit: contain;
-        }
-        /* SVG question images: always a uniform standard box (regardless of
-           the pasted SVG's own width/height/viewBox) and always LEFT aligned
-           directly under the question text — overriding any centering or
-           inconsistent sizing baked into individual admin-pasted SVG code.
-           object-fit:contain keeps the vector fully visible with no
-           cropping/distortion/blur, just fit uniformly into the same box. */
-        .q-text svg,
-        .q-passage-box svg,
-        .analysis-box svg {
-            display: block !important;
-            margin: 10px auto 10px 0 !important;
-            text-align: left !important;
-            width: 340px !important;
-            height: 220px !important;
-            max-width: 100% !important;
-            max-height: none !important;
-            object-fit: contain !important;
-            object-position: left top !important;
-            border-radius: 8px;
-        }
-        /* Option images are always rendered smaller than the question
-           image so the question visual stays the clear focal point. */
-        .opt-label svg {
-            display: block !important;
-            margin: 6px auto 6px 0 !important;
-            text-align: left !important;
-            width: 170px !important;
-            height: 110px !important;
-            max-width: 100% !important;
-            max-height: none !important;
-            object-fit: contain !important;
-            object-position: left top !important;
-            border-radius: 8px;
         }
         .MathJax {
             font-size: 1.15em !important;
@@ -768,13 +737,6 @@
             position: relative;
             scroll-behavior: smooth;
         }
-        /* Light Theme only: clean, soft blue-white question display
-           background instead of the plain white/cream-ish default —
-           easier on the eyes for long study sessions. Dark Theme keeps
-           its original var(--bg-container) untouched. */
-        body:not(.dark-mode) .exam-left {
-            background: #F0FCFF;
-        }
         .exam-left::before {
             content: '';
             position: fixed;
@@ -814,11 +776,7 @@
             cursor: pointer;
             background: var(--bg-card);
             transition: var(--transition);
-            font-family: var(--font-hindi);
-            font-size: 16px;
-            line-height: 1.3;
-            letter-spacing: normal;
-            word-spacing: -1px;
+            font-size: 14px;
             font-weight: 500;
             gap: 10px;
             color: var(--text-main);
@@ -2313,28 +2271,13 @@
             border: 1px solid rgba(220, 53, 69, 0.20);
         }
         .q-text {
-            font-family: var(--font-hindi);
-            font-size: 17px;
-            line-height: 1.4;
-            letter-spacing: normal;
-            word-spacing: -1px;
+            font-size: 15px;
+            line-height: 1.7;
             color: var(--text-main);
             margin-bottom: 14px;
             font-weight: 600;
             width: 100%;
             position: relative;
-            /* Newspaper/book-style justified text, matching the PDF's
-               already-professional rendering — both sides properly aligned
-               for multi-line questions and passages, in Hindi and English
-               alike. text-align-last:left stops the final (often short)
-               line of a paragraph from being awkwardly stretched, and
-               text-justify:inter-word gives a cleaner, more even justify
-               than the browser default. Single-line questions are
-               completely unaffected — justify only kicks in once a
-               paragraph actually wraps. */
-            text-align: justify;
-            text-align-last: left;
-            text-justify: inter-word;
         }
         .q-text .q-watermark {
             position: absolute;
@@ -2368,20 +2311,11 @@
             margin-bottom: 14px;
             border-left: 5px solid var(--accent);
             border-radius: var(--radius);
-            font-family: var(--font-hindi);
-            font-size: 16px;
-            line-height: 1.4;
-            letter-spacing: normal;
-            word-spacing: -1px;
+            font-size: 14px;
+            line-height: 1.6;
             color: var(--text-main);
             position: relative;
             z-index: 1;
-            /* Same justified, book-style rendering as .q-text above — long
-               comprehension passages read cleanly with both edges aligned,
-               instead of the previous ragged-right default. */
-            text-align: justify;
-            text-align-last: left;
-            text-justify: inter-word;
         }
 
         .breadcrumb-nav {
@@ -3362,14 +3296,6 @@
         body.print-pdf #print-area {
             display: block !important;
             width: 100% !important;
-            /* Kept fully off-screen while content is being built/typeset —
-               it's still rendered (so layout/MathJax measurements are real)
-               but the user never sees the raw, unsized, full-resolution
-               flash. @media print below puts it back in normal flow only
-               for the actual print/PDF output. */
-            position: fixed !important;
-            top: 0 !important;
-            left: -99999px !important;
         }
 
         @media print {
@@ -3400,11 +3326,6 @@
                 position: static !important;
                 width: 100% !important;
                 font-family: Arial, sans-serif !important;
-            }
-            body.print-pdf #print-area {
-                position: static !important;
-                left: 0 !important;
-                top: 0 !important;
             }
             #print-area * {
                 visibility: visible !important;
@@ -3527,16 +3448,15 @@
                 column-gap: 24px !important;
                 column-rule: 1px solid #ccc !important;
                 width: 100% !important;
-                margin-top: 6px !important;
+                margin-top: 4px !important;
                 display: block !important;
             }
             .print-q {
-                margin-bottom: 10px !important;
+                margin-bottom: 6px !important;
                 border-bottom: 1px dashed #ccc !important;
-                padding-bottom: 8px !important;
-                font-size: 16.5px !important;
+                padding-bottom: 5px !important;
+                font-size: 12.5px !important;
                 line-height: 1.3 !important;
-                word-spacing: -0.5px !important;
                 color: #000 !important;
                 display: block !important;
                 width: 100% !important;
@@ -3548,47 +3468,65 @@
             .opt-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 4px 8px !important;
-                margin: 4px 0 !important;
+                gap: 2px 6px !important;
+                margin: 2px 0 !important;
                 page-break-inside: auto !important;
                 break-inside: auto !important;
             }
             .opt-item {
-                font-size: 16px !important;
-                line-height: 1.3 !important;
-                word-spacing: -0.5px !important;
+                font-size: 12px !important;
                 color: #000 !important;
-                padding: 2px 0 !important;
+                padding: 1px 0 !important;
                 text-align: left !important;
             }
             .print-ans {
                 font-weight: 700 !important;
                 font-size: 11.5px !important;
                 color: #000 !important;
-                margin-top: 3px !important;
+                margin-top: 2px !important;
                 display: block !important;
             }
             .print-exp {
                 color: #222 !important;
-                font-size: 15.5px !important;
-                margin-top: 4px !important;
-                padding: 5px 8px !important;
+                font-size: 11.5px !important;
+                margin-top: 3px !important;
+                padding: 4px 6px !important;
                 background: #f5f5f5 !important;
                 border-left: 3px solid #0f2b5c !important;
-                line-height: 1.25 !important;
-                word-spacing: -0.5px !important;
+                line-height: 1.2 !important;
                 page-break-inside: auto !important;
                 break-inside: auto !important;
                 text-align: justify !important;
             }
+            /* Solution/Explanation text and Predicted-Question text often
+               come from a rich-text editor that wraps every line in its own
+               <p> or <div>, each carrying the browser's default ~1em
+               top/bottom margin — that stacked-up margin is the "unnecessary
+               gap between lines" being fixed here. Only the spacing of these
+               inner text elements is touched; the surrounding column layout,
+               page breaks, image sizing/position, fonts, and headings are
+               completely untouched. */
+            .print-exp p,
+            .print-exp div,
+            .pdf-pred-content p,
+            .pdf-pred-content div {
+                margin: 0 !important;
+                padding: 0 !important;
+                line-height: 1.25 !important;
+            }
+            .print-exp br,
+            .pdf-pred-content br {
+                line-height: 1.25 !important;
+            }
+            .pdf-pred-content {
+                line-height: 1.25 !important;
+            }
             .print-passage {
-                padding: 4px !important;
-                margin-bottom: 4px !important;
+                padding: 3px !important;
+                margin-bottom: 3px !important;
                 font-style: italic;
                 border-left: 4px solid #333;
-                font-size: 16px !important;
-                line-height: 1.3 !important;
-                word-spacing: -0.5px !important;
+                font-size: 12px !important;
                 background: transparent !important;
                 page-break-inside: auto !important;
                 break-inside: auto !important;
@@ -3596,48 +3534,16 @@
             }
             .print-q img,
             .print-exp img,
-            .print-passage img {
+            .print-passage img,
+            .print-q svg,
+            .print-exp svg,
+            .print-passage svg {
                 max-width: 100% !important;
                 max-height: 100px !important;
                 object-fit: contain !important;
                 page-break-inside: avoid !important;
                 display: block !important;
                 margin: 3px 0 !important;
-            }
-            /* SVG question images in the PDF: bigger and uniform across every
-               question (regardless of the pasted SVG's own width/height/
-               viewBox), always left-aligned right under the question text.
-               object-fit:contain preserves full vector sharpness — nothing is
-               rasterised, compressed, or blurred — it's just fit into the
-               same standard box on every question for a consistent,
-               professional, print-friendly look. */
-            .print-q svg,
-            .print-exp svg,
-            .print-passage svg {
-                width: 300px !important;
-                height: 200px !important;
-                max-width: 100% !important;
-                max-height: none !important;
-                object-fit: contain !important;
-                object-position: left top !important;
-                page-break-inside: avoid !important;
-                display: block !important;
-                margin: 6px auto 6px 0 !important;
-                text-align: left !important;
-            }
-            /* Option SVG images: always smaller than the question SVG image
-               above, so the question's own image stays the visual focus. */
-            .opt-item svg {
-                width: 150px !important;
-                height: 100px !important;
-                max-width: 100% !important;
-                max-height: none !important;
-                object-fit: contain !important;
-                object-position: left top !important;
-                page-break-inside: avoid !important;
-                display: block !important;
-                margin: 4px auto 4px 0 !important;
-                text-align: left !important;
             }
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -4326,7 +4232,7 @@
             padding: 2px 10px;
             border-radius: 50px;
             letter-spacing: 0.3px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             border: 1px solid #d4a843;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -5215,12 +5121,13 @@
             <div id="st-live-section" style="display:none;">
                 <div style="background:var(--bg-card);border:2px solid var(--danger);padding:16px;border-radius:var(--radius-lg);margin-bottom:16px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                     <h4 style="margin:0;color:var(--danger);font-size:15px;">🔴 Live Tests</h4>
-                    <button class="btn btn-outline btn-sm" onclick="window.openCompleteTests()">✅ Complete Tests</button>
+                    <button class="btn btn-outline btn-sm" onclick="window.openLiveTestHistory()">🏆 Live Test History</button>
                 </div>
                 <div id="live-tests-loader" style="text-align:center;display:none;padding:20px;">
                     <div class="loader-mini" style="width:28px; height:28px;"></div> <br />
                     <span style="color:var(--text-muted); margin-top:8px; display:inline-block; font-size:13px;">Loading live tests...</span>
                 </div>
+                <div id="my-room-invites"></div>
                 <div id="live-tests-ongoing"></div>
 
                 <div style="margin-top:22px;">
@@ -5244,6 +5151,7 @@
                 <div id="subject-filter-section-top" style="margin:0 0 16px 0; border:2px solid var(--accent); border-radius:var(--radius); padding:12px 14px; background:var(--bg-subtle);">
                     <h3 style="color:var(--primary); font-size:14px; margin:0 0 8px 0;">📂 Filter by Subject</h3>
                     <div class="subject-filter-bar" id="subject-filter-bar-top" style="margin:0; border:none; padding:0; background:transparent;"></div>
+                    <div class="subject-filter-bar" id="chapter-filter-bar-top" style="display:none; margin:8px 0 0 0; border:none; padding:0; background:transparent;"></div>
                     <div id="subject-questions-container-top" class="subject-questions-container" style="margin-top:8px;">
                         <p style="color:var(--text-muted); font-size:13px; padding:8px 0;">Select a subject above to see all questions.</p>
                     </div>
@@ -5440,6 +5348,7 @@
                         <div class="result-buttons-row">
                             <button id="btn-img-down" class="btn btn-primary" onclick="window.downloadCertificateImage()">🖼️ Download</button>
                             <button id="btn-pdf-down-res" class="btn btn-danger" onclick="window.handleResultPDFClick()">📄 Q&A PDF</button>
+                            <button id="btn-predicted-pdf" class="btn btn-success" onclick="window.handlePredictedPDFClick()">🔥 Predictive PDF</button>
                             <button id="btn-reattempt" class="btn btn-warning" onclick="window.startReattempt()">🔄 Reattempt</button>
                         </div>
 
@@ -5464,7 +5373,7 @@
 
                         <!-- Close button -->
                         <div style="text-align:center;margin:6px 0 12px 0;">
-                            <button class="btn btn-primary" style="max-width:280px;margin:0 auto;font-size:12px;padding:8px 20px;" onclick="window.closeAndRedirect()">🏠 Close & Go Home</button>
+                            <button id="result-close-btn" class="btn btn-primary" style="max-width:280px;margin:0 auto;font-size:12px;padding:8px 20px;" onclick="window.closeAndRedirect()">🏠 Close & Go Home</button>
                         </div>
 
                     </div>
@@ -5508,6 +5417,9 @@
                                     <button class="topic-table-more-btn" id="result-topic-more-btn" onclick="window.toggleResultTopicTable()" style="font-size:11px;padding:4px 16px;">📋 Show More Topics</button>
                                 </div>
                             </div>
+
+                            <!-- CHAPTER-WISE PERFORMANCE (built from !T topicTag data, per-subject chapter breakdown) -->
+                            <div id="chapter-graphs-container" style="margin-top:12px;"></div>
                         </div>
 
                     </div>
@@ -5570,68 +5482,29 @@
         const db = firebase.firestore();
 
         /* ==========================================================================
-           STUDENT ID — a secure, randomly generated ID (6 random digits + 2 random
-           capital letters, e.g. 483921AB) assigned to every student. It has no
-           relation whatsoever to the student's mobile number, so phone numbers are
-           never shown or shared inside the Test Room or anywhere else in the app —
-           the phone number is used only for Login/OTP verification. This format
-           matches window.STUDENT_ID_FORMAT_RE used by the admin migration tool.
+           STUDENT ID — the student's own 10-digit registration mobile number IS
+           their Student ID. Always unique per account and the student already
+           knows it by heart — nothing to "generate" or remember separately.
            ========================================================================== */
-        window.STUDENT_ID_FORMAT_RE = /^[0-9]{6}[A-Z]{2}$/;
-
-        window._genRandomStudentIdCandidate = function() {
-            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            let digits = "";
-            for (let i = 0; i < 6; i++) digits += Math.floor(Math.random() * 10);
-            let alpha = "";
-            for (let i = 0; i < 2; i++) alpha += letters[Math.floor(Math.random() * letters.length)];
-            return digits + alpha;
+        window.generateStudentId = function(phone) {
+            const digits = String(phone || "").replace(/[^0-9]/g, "");
+            return digits || null;
         };
 
-        // Generates a fresh random Student ID and verifies it isn't already taken
-        // by checking the "users" collection (client-readable per Firestore rules).
-        // Retries a few times on the extremely rare collision before giving up and
-        // returning the last candidate anyway, so registration never gets stuck.
-        window.generateUniqueStudentId = function() {
-            const tryOnce = (attemptsLeft) => {
-                const candidate = window._genRandomStudentIdCandidate();
-                return db.collection("users").where("studentId", "==", candidate).limit(1).get().then((snap) => {
-                    if (!snap.empty && attemptsLeft > 0) return tryOnce(attemptsLeft - 1);
-                    return candidate;
-                }).catch(() => candidate);
-            };
-            return tryOnce(5);
-        };
-
-        // Backfills a secure random studentId onto ANY already-registered user who
-        // doesn't have one yet, or whose stored id is still in the old insecure
-        // phone-number-based format. Safe to call repeatedly — no-ops once a valid
-        // random-format id is already stored. Test History, Results, Profile,
-        // Purchases and Progress are all keyed by uid (not studentId), so none of
-        // that data is affected by this change — only the studentId field itself.
+        // Backfills a studentId onto ANY already-registered user the first time
+        // they load the app after this feature shipped, and assigns one instantly
+        // to brand-new registrations. Safe to call repeatedly — no-ops if the
+        // stored studentId already matches the account's phone number. Also
+        // auto-fixes any old-format id (e.g. an earlier hashed 6-digit scheme)
+        // by replacing it with the phone number, since that's the source of
+        // truth now.
         window.ensureStudentId = function(uid, userData) {
             if (!uid) return Promise.resolve(userData && userData.studentId);
+            const phoneDigits = window.generateStudentId(userData && userData.phone);
+            if (!phoneDigits) return Promise.resolve(userData && userData.studentId); // no phone on file yet — nothing to set
             const existing = userData && userData.studentId;
-            if (existing && window.STUDENT_ID_FORMAT_RE.test(String(existing))) return Promise.resolve(existing);
-            return window.generateUniqueStudentId().then((sid) => {
-                return db.collection("users").doc(uid).update({ studentId: sid }).then(() => sid).catch(() => sid);
-            });
-        };
-
-        // Writes a brand-new user's profile doc at registration time, retrying
-        // on a transient failure instead of leaving the Firebase Auth account
-        // created with NO matching Firestore profile (which is what silently
-        // broke Student ID generation — and everything downstream — for at
-        // least one known account). Even if all retries fail, the self-heal
-        // logic in onAuthStateChanged (above) will recreate this profile the
-        // very next time this account logs in, so it can never be lost for good.
-        window._writeUserProfileWithRetry = function(uid, data, attempt) {
-            attempt = attempt || 1;
-            return db.collection("users").doc(uid).set(data).catch((err) => {
-                if (attempt >= 3) throw err;
-                return new Promise((resolve) => setTimeout(resolve, 1000 * attempt))
-                    .then(() => window._writeUserProfileWithRetry(uid, data, attempt + 1));
-            });
+            if (existing && String(existing) === phoneDigits) return Promise.resolve(existing);
+            return db.collection("users").doc(uid).update({ studentId: phoneDigits }).then(() => phoneDigits).catch(() => phoneDigits);
         };
 
         // Keeps the logged-in user's data (photo, premium status, name...) in
@@ -5663,40 +5536,6 @@
                             localStorage.setItem('mockSarthiUser', JSON.stringify(window.studentInfo));
                         }
                     });
-                } else {
-                    // SELF-HEAL: this account is logged in (Firebase Auth knows
-                    // about it) but its "users/{uid}" profile document is
-                    // missing entirely — almost always because the very first
-                    // write at registration time silently failed (the same
-                    // class of flaky-connection bug fixed for result
-                    // submission). Previously this branch did NOTHING, which
-                    // is exactly why an affected account could never get a
-                    // Student ID (ensureStudentId only ever ran inside the
-                    // doc.exists branch above) and could look broken in all
-                    // sorts of downstream ways. Recreate a minimal profile
-                    // from the Auth record itself so the account heals on its
-                    // very next login, with no manual intervention needed.
-                    const recovered = {
-                        name: user.displayName || "Student",
-                        email: user.email || "",
-                        phone: user.phoneNumber || "",
-                        isPremium: false,
-                        uid: user.uid,
-                        photoURL: user.photoURL || "",
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        recoveredMissingProfile: true // flags this doc for support/debugging visibility
-                    };
-                    db.collection("users").doc(user.uid).set(recovered, { merge: true }).then(() => {
-                        return window.generateUniqueStudentId();
-                    }).then((sid) => {
-                        return db.collection("users").doc(user.uid).update({ studentId: sid }).then(() => sid);
-                    }).then((sid) => {
-                        window.studentInfo = Object.assign({}, window.studentInfo, recovered, { studentId: sid, uid: user.uid });
-                        localStorage.setItem('mockSarthiUser', JSON.stringify(window.studentInfo));
-                        if (typeof window.updateProfileUI === 'function') window.updateProfileUI();
-                    }).catch((err) => {
-                        console.error('Profile self-heal failed, will retry on next login:', err);
-                    });
                 }
                 // Always resync attempted-tests from the server for THIS uid,
                 // so a fresh account never shows stale/borrowed progress.
@@ -5705,12 +5544,6 @@
                         if (typeof window.rerenderCurrentTestListIfVisible === 'function') {
                             window.rerenderCurrentTestListIfVisible();
                         }
-                    });
-                }
-                if (typeof window.refreshMySubmittedLiveSessions === 'function') {
-                    window.refreshMySubmittedLiveSessions(() => {
-                        if (typeof window.renderUpcomingScheduleList === 'function') window.renderUpcomingScheduleList();
-                        if (typeof window.renderLiveOngoingTests === 'function') window.renderLiveOngoingTests();
                     });
                 }
             }).catch(() => {});
@@ -5771,29 +5604,6 @@
         window.portalLogoURL = "";
         window.portalLogoShape = "round";
         window.attemptedTestsCache = {};
-
-        // Tracks this student's OWN completed Live Test attempts as
-        // "testCode|sessionId" pairs — this is what lets a card correctly
-        // hide/replace its "Start Live Test Now" button even when the
-        // student took the test DIRECTLY (no Room at all). Unlike the
-        // permanent per-testCode attemptedTestsCache above, this is scoped
-        // to the exact Live Session, so a genuinely NEW go-live (fresh
-        // sessionId) is never mistaken for an already-done attempt.
-        window.mySubmittedLiveSessions = new Set();
-        window.refreshMySubmittedLiveSessions = function(cb) {
-            const me = window.studentInfo;
-            if (!me || !me.uid) { if (cb) cb();
-                return; }
-            db.collection("results").where("uid", "==", me.uid).get().then((snap) => {
-                const s = new Set();
-                snap.forEach(d => {
-                    const rd = d.data();
-                    if (rd.isLiveAttempt && rd.testCode && rd.sessionId) s.add(rd.testCode + '|' + rd.sessionId);
-                });
-                window.mySubmittedLiveSessions = s;
-                if (cb) cb();
-            }).catch(() => { if (cb) cb(); });
-        };
 
         // Attempted-tests data is namespaced per logged-in user (uid), never
         // shared globally on the device. This is what guarantees a brand
@@ -5940,7 +5750,7 @@
             document.getElementById('pm-email').innerText = user.email || "No email set";
             document.getElementById('pm-phone').innerText = user.phone || "Not set";
             const idEl = document.getElementById('pm-studentid');
-            if (idEl) idEl.innerText = user.studentId || "⏳ Generating...";
+            if (idEl) idEl.innerText = user.studentId || (user.phone ? window.generateStudentId(user.phone) : "Not set — add phone number");
             const isPremium = (user.isPremium === "TRUE" || user.isPremium === true);
             const typeEl = document.getElementById('pm-type');
             if (isPremium) {
@@ -6491,6 +6301,45 @@
             return str;
         };
 
+        // Root-cause fix for "too much gap between lines" in the Q+A PDF:
+        // question/solution content often arrives with a literal double
+        // line-break (<br><br>) hard-coded in the raw text wherever the
+        // original author wanted a paragraph gap (e.g. between "सही उत्तर..."
+        // and "विस्तृत व्याख्या:"). A <br> forces a full blank line at the
+        // element's line-height, so two in a row render as one extra empty
+        // line — that compounds inside the already-tight PDF columns and
+        // reads as a much bigger gap than intended. Collapsing any run of
+        // 2+ <br> tags down to exactly one <br> right before we drop the
+        // text into the PDF fixes this without touching the parser, the
+        // stored data, or single line breaks (which stay untouched).
+        window.tightenPdfBreaks = function(str) {
+            if (!str) return str;
+            return String(str).replace(/(?:<br\s*\/?>\s*){2,}/gi, '<br>');
+        };
+
+        // Single shared tag-badge builder used by BOTH the Q+A/Full PDF
+        // (executePDFPrintWithMathFix) and the Predictive Master PDF
+        // (executePredictedPDFPrint), so the topic tag above each question
+        // is always identical between the two PDF types. Prefers the new
+        // !T topicTag ("Subject :: Chapter :: Sub-topic") when present,
+        // falling back to the older single-level q.tag / examData.tags.
+        window.buildTopicBadge = function(q, i) {
+            const topicTag = (q.topicTag && q.topicTag.trim()) ? q.topicTag.trim() : "";
+            const rawTag = topicTag || q.tag || window.examData.tags?.[i] || "General";
+            if (topicTag && topicTag.includes('::')) {
+                const parts = topicTag.split('::').map(s => s.trim()).filter(Boolean);
+                return `<span class="pdf-tag-badge" style="background:#7c3aed !important;">${parts.map(x => x.toUpperCase()).join(' → ')}</span>`;
+            }
+            if (rawTag && rawTag !== "General") {
+                const parts = rawTag.split(':');
+                if (parts.length >= 2) {
+                    return `<span class="pdf-tag-badge">${parts[0].trim().toUpperCase()} → ${parts.slice(1).join(':').trim().toUpperCase()}</span>`;
+                }
+                return `<span class="pdf-tag-badge">📌 ${rawTag.toUpperCase()}</span>`;
+            }
+            return `<span class="pdf-tag-badge">📌 GENERAL</span>`;
+        };
+
         window.sanitizeQuestions = function(questionsArray) {
             if (!questionsArray || !Array.isArray(questionsArray)) return [];
             return questionsArray.map(q => {
@@ -6500,6 +6349,13 @@
                 if (safeQ.passage) safeQ.passage = window.sanitizeMath(safeQ.passage);
                 if (safeQ.opts) {
                     safeQ.opts = safeQ.opts.map(o => ({ ...o, text: window.sanitizeMath(o.text) }));
+                }
+                if (safeQ.predicted && Array.isArray(safeQ.predicted)) {
+                    safeQ.predicted = safeQ.predicted.map(p => ({
+                        ...p,
+                        q: p.q ? window.sanitizeMath(p.q) : p.q,
+                        s: p.s ? window.sanitizeMath(p.s) : p.s
+                    }));
                 }
                 return safeQ;
             });
@@ -6522,12 +6378,17 @@
                 .replace(/(\n|^)\s*(![A-D]\s)/gi, '\n$2')
                 .replace(/(\n|^)\s*(!!!\s*[A-D])/gi, '\n$2')
                 .replace(/(\n|^)\s*(!!!!)/g, '\n$2')
-                .replace(/(\n|^)\s*(!P\s)/gi, '\n$1!P ');
+                .replace(/(\n|^)\s*(!P\s)/gi, '\n$1!P ')
+                .replace(/(\n|^)\s*(!T\s)/gi, '\n$1!T ')
+                .replace(/(\n|^)\s*(!PQ\d+\s)/gi, '\n$2')
+                .replace(/(\n|^)\s*(!PS\d+\s)/gi, '\n$2');
             const parsedQs = [];
             let tempQ = null;
             let cPass = "";
             let cMode = "";
             let pendingTag = "";
+            let pendingTopicTag = "";
+            let predictIdx = -1;
             const lines = rawText.split('\n');
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
@@ -6537,6 +6398,34 @@
                 const tagLineMatch = line.match(/^!tag\(([^)]+)\)/i);
                 if (tagLineMatch) {
                     pendingTag = tagLineMatch[1].trim();
+                    continue;
+                }
+
+                const topicTagLineMatch = line.match(/^!T\s+(.+)/i);
+                if (topicTagLineMatch) {
+                    pendingTopicTag = topicTagLineMatch[1].trim();
+                    continue;
+                }
+
+                const pqMatch = line.match(/^!PQ(\d+)\s*(.*)$/i);
+                if (pqMatch && tempQ) {
+                    const n = parseInt(pqMatch[1], 10);
+                    if (!tempQ.predicted) tempQ.predicted = [];
+                    while (tempQ.predicted.length < n) tempQ.predicted.push({ q: "", s: "" });
+                    predictIdx = n - 1;
+                    tempQ.predicted[predictIdx].q = pqMatch[2].trim();
+                    cMode = "predicted_q";
+                    continue;
+                }
+
+                const psMatch = line.match(/^!PS(\d+)\s*(.*)$/i);
+                if (psMatch && tempQ) {
+                    const n = parseInt(psMatch[1], 10);
+                    if (!tempQ.predicted) tempQ.predicted = [];
+                    while (tempQ.predicted.length < n) tempQ.predicted.push({ q: "", s: "" });
+                    predictIdx = n - 1;
+                    tempQ.predicted[predictIdx].s = psMatch[2].trim();
+                    cMode = "predicted_s";
                     continue;
                 }
 
@@ -6565,7 +6454,12 @@
                         tag = pendingTag;
                     }
                     qLine = qLine.replace(/!tag\([^)]*\)/g, '').trim();
-                    tempQ = { q: qLine, opts: [], ans: "", exp: "", passage: cPass || "", tag: tag || "" };
+                    tempQ = {
+                        q: qLine, opts: [], ans: "", exp: "", passage: cPass || "", tag: tag || "",
+                        topicTag: pendingTopicTag || "", predicted: []
+                    };
+                    pendingTopicTag = "";
+                    predictIdx = -1;
                     cMode = "q";
                 } else if (line.match(/^![A-D]/i)) {
                     if (tempQ) {
@@ -6593,6 +6487,10 @@
                             tempQ.exp = (tempQ.exp || "") + (tempQ.exp ? "<br>" : "") + line;
                         } else if (cMode === "q") {
                             tempQ.q = (tempQ.q || "") + (tempQ.q ? "<br>" : "") + line;
+                        } else if (cMode === "predicted_q" && tempQ.predicted && predictIdx >= 0) {
+                            tempQ.predicted[predictIdx].q = (tempQ.predicted[predictIdx].q || "") + (tempQ.predicted[predictIdx].q ? "<br>" : "") + line;
+                        } else if (cMode === "predicted_s" && tempQ.predicted && predictIdx >= 0) {
+                            tempQ.predicted[predictIdx].s = (tempQ.predicted[predictIdx].s || "") + (tempQ.predicted[predictIdx].s ? "<br>" : "") + line;
                         } else if (cMode === "P" && cPass) {
                             cPass = (cPass || "") + (cPass ? "<br>" : "") + line;
                             if (tempQ) tempQ.passage = cPass;
@@ -6790,18 +6688,17 @@
             const phone = window.tempAuthData.phone || storedData.phone;
             auth.createUserWithEmailAndPassword(email, pass).then((userCredential) => {
                 const user = userCredential.user;
-                return window.generateUniqueStudentId().then((newStudentId) => {
-                    return window._writeUserProfileWithRetry(user.uid, {
-                        name: name,
-                        email: email,
-                        phone: phone,
-                        isPremium: false,
-                        uid: user.uid,
-                        photoURL: "",
-                        studentId: newStudentId,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }).then(() => newStudentId);
-                });
+                const newStudentId = window.generateStudentId(phone);
+                return db.collection("users").doc(user.uid).set({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    isPremium: false,
+                    uid: user.uid,
+                    photoURL: "",
+                    studentId: newStudentId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => newStudentId);
             }).then((newStudentId) => {
                 window.closeModal();
                 const userData = { name, email, phone, isPremium: false, photoURL: "", studentId: newStudentId };
@@ -6862,24 +6759,23 @@
                             finalPhone = (enteredPhone || "").trim();
                         }
                         window.showLoadingModal("Creating your account...<br>Please wait.");
-                        return window.generateUniqueStudentId().then((newStudentId) => {
-                            return window._writeUserProfileWithRetry(user.uid, {
-                                name: finalName,
-                                email: user.email,
-                                phone: finalPhone,
-                                isPremium: false,
-                                uid: user.uid,
-                                photoURL: user.photoURL || "",
-                                studentId: newStudentId,
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                            }).then(() => {
-                                const userData = { name: finalName, email: user.email, phone: finalPhone, isPremium: false, photoURL: user.photoURL || "", studentId: newStudentId };
-                                localStorage.setItem('mockSarthiUser', JSON.stringify(userData));
-                                window.studentInfo = userData;
-                                window.closeModal();
-                                window.showCustomAlert("Welcome!", `Account created successfully! 🎉<br><br>🆔 Your Student ID: <b>${newStudentId}</b>`, "🎓");
-                                setTimeout(window.checkPendingTestOrGoHome, 1200);
-                            });
+                        const newStudentId = window.generateStudentId(finalPhone);
+                        return db.collection("users").doc(user.uid).set({
+                            name: finalName,
+                            email: user.email,
+                            phone: finalPhone,
+                            isPremium: false,
+                            uid: user.uid,
+                            photoURL: user.photoURL || "",
+                            studentId: newStudentId,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }).then(() => {
+                            const userData = { name: finalName, email: user.email, phone: finalPhone, isPremium: false, photoURL: user.photoURL || "", studentId: newStudentId };
+                            localStorage.setItem('mockSarthiUser', JSON.stringify(userData));
+                            window.studentInfo = userData;
+                            window.closeModal();
+                            window.showCustomAlert("Welcome!", `Account created successfully! 🎉<br><br>🆔 Your Student ID: <b>${newStudentId}</b>`, "🎓");
+                            setTimeout(window.checkPendingTestOrGoHome, 1200);
                         });
                     }
                 });
@@ -7493,48 +7389,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const testCode = urlParams.get('test');
 
-            // Update 10: a student who has already submitted inside a test's
-            // CURRENT Live Session must never be able to open/re-take it again
-            // during that same session — checked with a fresh Firestore read
-            // (not the local cache) since this runs right at page boot, before
-            // any real-time listeners have had a chance to populate anything.
-            // A brand-new Live Session (fresh liveSessionId, per Update 8) is
-            // completely unaffected — this only blocks a repeat within the
-            // SAME session.
-            window._blockIfAlreadySubmittedInLiveSession = function(testData, onAllowed) {
-                const me = window.studentInfo;
-                if (!(testData && testData.testMode === 'live' && testData.liveSessionId && me && me.uid)) {
-                    return onAllowed(); // not a live-session test right now — nothing to check
-                }
-                // Check the local pending-submission queue FIRST (synchronous,
-                // instant) — a result that already got graded but hasn't
-                // reached Firestore yet (connection hiccup) must still block
-                // a second attempt, not just ones already confirmed on server.
-                try {
-                    const pending = JSON.parse(localStorage.getItem('pendingResultSubmissions') || '[]');
-                    const pendingMatch = pending.some(q => q.resData && q.resData.uid === me.uid && q.resData.testCode === testData.code && q.resData.sessionId === testData.liveSessionId);
-                    if (pendingMatch) {
-                        const loadingV = document.getElementById('loading-view');
-                        if (loadingV) loadingV.classList.remove('active-view');
-                        window.showErrorView("✅ Aap is Live Test Session mein pehle hi apna test submit kar chuke hain (result sync ho raha hai).<br><br>Ek Live Session mein sirf ek hi valid attempt allowed hai.");
-                        return;
-                    }
-                } catch (e) {}
-                db.collection("results").where("testCode", "==", testData.code).get().then((snap) => {
-                    const already = snap.docs.some(d => {
-                        const rd = d.data();
-                        return rd.uid === me.uid && rd.sessionId === testData.liveSessionId;
-                    });
-                    if (already) {
-                        const loadingV = document.getElementById('loading-view');
-                        if (loadingV) loadingV.classList.remove('active-view');
-                        window.showErrorView("✅ Aap is Live Test Session mein pehle hi apna test submit kar chuke hain.<br><br>Ek Live Session mein sirf ek hi valid attempt allowed hai. Live ranking dekhne ke liye 'Upcoming Schedule' card ke andar 👁️ View Room button use karein.");
-                        return;
-                    }
-                    onAllowed();
-                }).catch(() => onAllowed()); // fail-open on a network hiccup rather than blocking a legit first attempt
-            };
-
             if (testCode) {
                 if (!isLoggedIn) {
                     localStorage.setItem('pendingTestCode', testCode);
@@ -7549,7 +7403,7 @@
                     const localTestInfo = localTests.find(t => t.code === testCode);
                     if (localTestInfo) {
                         localTestInfo.questions = window.sanitizeQuestions(localTestInfo.questions);
-                        window._blockIfAlreadySubmittedInLiveSession(localTestInfo, () => window.handleTestLoad(localTestInfo));
+                        window.handleTestLoad(localTestInfo);
                     } else {
                         const testRef = db.collection("tests").doc(testCode);
                         testRef.get().then((doc) => {
@@ -7573,7 +7427,7 @@
                                     }
                                 }
                                 fData.questions = window.sanitizeQuestions(fData.questions);
-                                window._blockIfAlreadySubmittedInLiveSession(fData, () => window.handleTestLoad(fData));
+                                window.handleTestLoad(fData);
                             }).catch(() => {
                                 // Not authorized to read the answer key yet (e.g. this
                                 // is a paid test and the student isn't premium). Load
@@ -7583,7 +7437,7 @@
                                 // key sitting in memory for an unauthorized user to
                                 // read out of the console.
                                 fData.questions = window.sanitizeQuestions(fData.questions);
-                                window._blockIfAlreadySubmittedInLiveSession(fData, () => window.handleTestLoad(fData));
+                                window.handleTestLoad(fData);
                             });
                         }).catch((error) => {
                             const loadingV = document.getElementById('loading-view');
@@ -7829,7 +7683,6 @@
             window._liveCountdownInterval = setInterval(() => {
                 const liveSec = document.getElementById('st-live-section');
                 if (liveSec && liveSec.style.display !== 'none') {
-                    if (typeof window.refreshMySubmittedLiveSessions === 'function') window.refreshMySubmittedLiveSessions();
                     window.renderLiveOngoingTests();
                     window.checkAndAutoStartMyRooms();
                     window.checkAndFinalizeMyRooms();
@@ -7865,111 +7718,11 @@
         };
         window.loadUpcomingScheduleForStudent = window.loadScheduleDataAndRender; // back-compat alias
 
-        // Shared by both render functions below: computes whether a schedule
-        // item is CURRENTLY live purely from its scheduled time window (not
-        // testDoc.testMode, which stays 'live' the whole time regardless of
-        // the scheduled start time).
-        window.computeScheduleItemMeta = function(it) {
-            const now = new Date();
-            const testDoc = (window.globalActiveTests || []).find(t => t.code === it.testCode) || {};
-            const start = new Date(it.date);
-            const durMin = testDoc.totTime || 0;
-            const end = testDoc.liveEnd ? new Date(testDoc.liveEnd) : (durMin > 0 ? new Date(start.getTime() + durMin * 60000) : null);
-            const isLive = now >= start && (!end || now <= end);
-            return { it, testDoc, start, durMin, end, isLive };
-        };
-
-        // Builds one schedule-linked test card's HTML — used by BOTH the
-        // Upcoming Schedule box (while not yet live) and the top Live Tests
-        // box (the instant it goes live), so the exact same Room-aware
-        // buttons/behaviour travel with the card wherever it's currently
-        // rendered instead of being duplicated (and drifting out of sync).
-        window.buildScheduleCardHtml = function(meta) {
-            const { it, testDoc, start, end, durMin, isLive } = meta;
-            const qsCount = testDoc.qs || (testDoc.questions ? testDoc.questions.length : 0);
-            const marksPerQ = testDoc.marks || 2;
-            const totalMarks = qsCount * marksPerQ;
-            const subject = testDoc.subject || testDoc.sub || it.type || "Mock Test";
-            const dateStr = start.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-            const startStr = start.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            const endStr = end ? end.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : "—";
-            const durStr = durMin > 0 ? `${durMin} Min` : "—";
-            const countdownTarget = isLive ? (end || start) : start;
-            const countdownPrefix = isLive ? "Ends in" : "Starts in";
-            const boardSafe = (it.board || "").replace(/'/g, "\\'");
-            const examSafe = (it.exam || "").replace(/'/g, "\\'");
-            const typeSafe = (it.type || "Mock Tests").replace(/'/g, "\\'");
-            // If I already submitted inside this test's CURRENT session —
-            // whether that was via a Room (tracked on memberInfo) OR as a
-            // completely DIRECT attempt with no room at all (tracked in
-            // mySubmittedLiveSessions) — this card must never offer a way
-            // back into the test. The actual hard block lives in the
-            // test-load guard; this just keeps the button honest either way.
-            const myRoomForCard = (window.myRoomsCache || []).find(r => {
-                if (r.scheduleId !== it.id && r.testCode !== it.testCode) return false;
-                if (testDoc.liveSessionId && r.sessionId && r.sessionId !== testDoc.liveSessionId) return false;
-                return true;
-            });
-            const myInfoForCard = (myRoomForCard && myRoomForCard.memberInfo && window.studentInfo && myRoomForCard.memberInfo[window.studentInfo.uid]) || {};
-            const iSubmittedDirect = !!(testDoc.liveSessionId && window.mySubmittedLiveSessions && window.mySubmittedLiveSessions.has(it.testCode + '|' + testDoc.liveSessionId));
-            const iHaveSubmitted = !!myInfoForCard.submitted || iSubmittedDirect;
-            // Once live: a student who already has a room (created or joined,
-            // by either method) gets NO button here at all — the single blue
-            // "Open Room" button below (rendered by renderScheduleRoomArea)
-            // is the one and only button for room members, and it updates
-            // its own text to "Open Room / Start Test" once live. A student
-            // with NO room sees this plain standalone button UNLESS they've
-            // already submitted directly, in which case it's replaced with a
-            // locked "Submitted" state — never a way to restart the test.
-            const liveActionBtn = myRoomForCard ? "" :
-                (iSubmittedDirect ?
-                    `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.openCompleteTests()">✅ Test Submitted — View Result</button>` :
-                    `<button class="btn btn-danger btn-sm" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${it.testCode}','${boardSafe}','${examSafe}','${typeSafe}','')">🚀 Start Live Test Now</button>`);
-            return `
-                <div class="upcoming-test-card" style="${isLive ? 'border-color:var(--danger);' : ''}">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                        <span style="font-weight:800;color:var(--primary);font-size:13px;">🏛️ ${it.board} — 🎓 ${it.exam}</span>
-                        ${isLive ? '<span class="live-dot-badge"><span class="dot"></span> LIVE NOW</span>' : `<span class="upcoming-badge">📅 ${dateStr}</span>`}
-                    </div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📂 ${subject}${it.testCode ? ' • 🔗 Test Code: ' + it.testCode : ''}</div>
-                    ${it.note ? `<div style="font-size:11px;color:var(--text-main);margin-top:4px;">📝 ${it.note}</div>` : ""}
-                    <div class="live-test-meta-row" style="margin-top:6px;">
-                        <span class="badge" style="font-size:9px;">📅 ${dateStr}</span>
-                        <span class="badge" style="font-size:9px;">🕐 Start: ${startStr}</span>
-                        <span class="badge" style="font-size:9px;">🕐 End: ${endStr}</span>
-                        <span class="badge" style="font-size:9px;">⏱ ${durStr}</span>
-                        <span class="badge" style="font-size:9px;">Qs: ${qsCount}</span>
-                        <span class="badge" style="font-size:9px;">🎯 Marks: ${totalMarks}</span>
-                    </div>
-                    <div class="live-countdown live-second-tick" data-end="${countdownTarget.toISOString()}" data-prefix="${countdownPrefix}" style="margin-top:6px;${isLive ? '' : 'background:rgba(245,158,11,0.12);color:var(--warning);'}">⏳ ${countdownPrefix} ...</div>
-                    ${isLive ? liveActionBtn : ""}
-                    <div id="sch-room-area-${it.id}" style="margin-top:8px;"></div>
-                </div>
-            `;
-        };
-
         window.renderLiveOngoingTests = function() {
             const box = document.getElementById('live-tests-ongoing');
             if (!box) return;
+            const liveTests = window.getAllLiveTests();
             const now = new Date();
-
-            // Schedule-linked tests that are CURRENTLY live move up here the
-            // instant their scheduled start time arrives (Update: Problem 1)
-            // — they keep their full Room-aware card (built by the SAME
-            // function used in Upcoming Schedule) rather than a stripped-down
-            // duplicate, so Room controls/behaviour never drift out of sync
-            // between the two boxes.
-            const scheduleMetas = (window._scheduledTestsCache || [])
-                .filter(it => it.date && it.testCode)
-                .map(window.computeScheduleItemMeta)
-                .filter(x => x.isLive && !(x.end && now > x.end));
-
-            // Any test that came from the Upcoming Schedule (has a linked
-            // scheduledTests entry) — live or not — is otherwise handled
-            // above or by renderUpcomingScheduleList, never by the plain
-            // standalone path below (which has no Room controls at all).
-            const scheduledCodes = new Set((window._scheduledTestsCache || []).map(s => s.testCode).filter(Boolean));
-            const liveTests = window.getAllLiveTests().filter(t => !scheduledCodes.has(t.code));
 
             const ongoing = [];
             const notStarted = [];
@@ -7981,13 +7734,12 @@
                 else ongoing.push(t);
             });
 
-            if (scheduleMetas.length === 0 && ongoing.length === 0 && notStarted.length === 0) {
+            if (ongoing.length === 0 && notStarted.length === 0) {
                 box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:13px;padding:20px 0;'>Abhi koi Live Test available nahi hai. Neeche upcoming schedule dekhein 👇</p>";
                 return;
             }
 
             let html = "";
-            scheduleMetas.forEach(meta => { html += window.buildScheduleCardHtml(meta); });
             ongoing.forEach(t => {
                 const p = window.parseHack(t.topic);
                 const board = p.board || t.exam || "General Exam";
@@ -7998,10 +7750,12 @@
                 const end = t.liveEnd ? new Date(t.liveEnd) : null;
                 // Static "this test is live for Xh Ym" badge (total duration).
                 const durationBadge = (start && end) ? window.formatDurationBadge(end - start) : "";
-                const iSubmittedDirect = !!(t.liveSessionId && window.mySubmittedLiveSessions && window.mySubmittedLiveSessions.has(t.code + '|' + t.liveSessionId));
-                const actionBtn = iSubmittedDirect ?
-                    `<button class="btn btn-outline" style="width:100%;margin-top:6px;" onclick="window.openCompleteTests()">✅ Test Submitted — View Result</button>` :
-                    `<button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>`;
+                // A room made for THIS test, if the logged-in student is in one
+                // (matched by testCode, since the schedule already synced its
+                // date/duration straight into this real test document).
+                const myRoom = (window.myRoomsCache || []).find(r => r.testCode === t.code);
+                const roomBtn = myRoom ?
+                    `<button class="btn btn-outline" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${myRoom.hostUid === (window.studentInfo && window.studentInfo.uid)})">🔓 Open Room (${(myRoom.memberUids||[]).length} joined)</button>` : "";
                 html += `
                     <div class="live-test-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -8015,7 +7769,8 @@
                             <span class="badge" style="font-size:9px;">Qs: ${t.qs||(t.questions?t.questions.length:0)}</span>
                         </div>
                         ${end ? `<div class="live-countdown live-second-tick" data-end="${end.toISOString()}" style="margin-top:6px;">⏳ Ends in ...</div>` : ""}
-                        ${actionBtn}
+                        <button class="btn btn-danger" style="width:100%;margin-top:6px;" onclick="window.navigateToTestEntry('${t.code}','${board.replace(/'/g,"\\'")}','${exam.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}','${sub.replace(/'/g,"\\'")}')">🚀 Start Live Test Now</button>
+                        ${roomBtn}
                     </div>
                 `;
             });
@@ -8041,9 +7796,6 @@
                 `;
             });
             box.innerHTML = html;
-            // Room area is filled in separately (needs myRoomsCache, which
-            // may load slightly after this) — same as in Upcoming Schedule.
-            scheduleMetas.forEach(meta => window.renderScheduleRoomArea(meta.it, true));
             window.tickLiveCountdowns();
         };
 
@@ -8051,32 +7803,17 @@
         // badge currently on screen (both "Ends in" on live cards and "Starts
         // in" on not-yet-started ones) — shows seconds, not just minutes.
         window.tickLiveCountdowns = function() {
-            let anyJustHitZero = false;
             document.querySelectorAll('.live-second-tick').forEach(el => {
                 const end = new Date(el.getAttribute('data-end'));
                 const prefix = el.getAttribute('data-prefix') || 'Ends in';
                 const diff = end - new Date();
-                if (diff <= 0) {
-                    el.innerText = prefix === 'Starts in' ? "⏳ Starting..." : "⏳ Ending...";
-                    // First moment this specific countdown crossed zero —
-                    // flip the card into Live Mode (or drop it if it just
-                    // ended) right now instead of waiting for the next
-                    // periodic sweep.
-                    if (el.getAttribute('data-zero-handled') !== '1') {
-                        el.setAttribute('data-zero-handled', '1');
-                        anyJustHitZero = true;
-                    }
-                    return;
-                }
+                if (diff <= 0) { el.innerText = prefix === 'Starts in' ? "⏳ Starting..." : "⏳ Ending...";
+                    return; }
                 const h = Math.floor(diff / 3600000);
                 const m = Math.floor((diff % 3600000) / 60000);
                 const s = Math.floor((diff % 60000) / 1000);
                 el.innerText = `⏳ ${prefix} ${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
             });
-            if (anyJustHitZero) {
-                window.renderUpcomingScheduleList();
-                window.renderLiveOngoingTests();
-            }
         };
 
         // Static (non-ticking) "Live for Xh Ym" badge showing the test's TOTAL
@@ -8102,64 +7839,51 @@
             return s.trim();
         };
 
-        // Renders the Upcoming Schedule list — the SINGLE control center for
-        // every Live Test Room action. Each card stays visible from "Starts
-        // In..." countdown all the way through to the test actually ending;
-        // it flips into Live Mode IN PLACE the moment its time arrives
-        // (no disappearing from here and reappearing somewhere else), and is
-        // only dropped once the test is genuinely over.
+        // Renders only the STILL-UPCOMING (not yet live) schedule entries —
+        // once an entry's time arrives it's shown up in renderLiveOngoingTests
+        // instead, so it isn't duplicated in both places.
         window.renderUpcomingScheduleList = function() {
             const box = document.getElementById('live-tests-upcoming');
             if (!box) return;
             const now = new Date();
             const items = window._scheduledTestsCache || [];
-
-            const withMeta = items.filter(it => it.date).map(window.computeScheduleItemMeta)
-                .filter(x => !(x.end && now > x.end)) // fully over — drop it
-                .sort((a, b) => a.start - b.start);
-
-            // The instant an item goes live it belongs ONLY to the top Live
-            // Tests box (renderLiveOngoingTests) — Problem 1: the card must
-            // actually move there, not just restyle in place here.
-            const notYetLive = withMeta.filter(x => !x.isLive);
-
-            if (notYetLive.length === 0) {
+            const upcoming = items.filter(it => it.date && new Date(it.date) > now)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            if (upcoming.length === 0) {
                 box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:12px;padding:10px 0;'>Koi upcoming test announcement nahi hai.</p>";
                 return;
             }
             let h = "";
-            notYetLive.forEach(meta => { h += window.buildScheduleCardHtml(meta); });
+            upcoming.forEach(it => {
+                const dateStr = new Date(it.date).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                h += `
+                    <div class="upcoming-test-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                            <span style="font-weight:800;color:var(--primary);font-size:13px;">🏛️ ${it.board} — 🎓 ${it.exam}</span>
+                            <span class="upcoming-badge">📅 ${dateStr}</span>
+                        </div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📂 ${it.type||'Mock Tests'}${it.testCode ? ' • 🔗 Test Code: ' + it.testCode : ''}</div>
+                        ${it.note ? `<div style="font-size:11px;color:var(--text-main);margin-top:4px;">📝 ${it.note}</div>` : ""}
+                        <div id="sch-room-area-${it.id}" style="margin-top:8px;"></div>
+                    </div>
+                `;
+            });
             box.innerHTML = h;
             // Room area is filled in separately (needs myRoomsCache, which
             // may load slightly after this).
-            notYetLive.forEach(({ it }) => window.renderScheduleRoomArea(it, false));
-            window.tickLiveCountdowns();
+            upcoming.forEach(it => window.renderScheduleRoomArea(it, false));
         };
 
         // Renders the Room controls (Create / Join / "your room" status) inside
-        // a schedule card — this is the ONLY place in the whole portal where
-        // Room/Open Room/Join Room controls appear. Only shown when the admin
-        // linked a real Test Code to this schedule entry — a plain text-only
-        // announcement gets no room UI. "Open Room" itself is only ever shown
-        // once a room actually exists for this test (myRoom found below);
-        // there is no other way to reach a room from anywhere else in the app.
+        // a schedule card. Only shown when the admin linked a real Test Code to
+        // this schedule entry — a plain text-only announcement gets no room UI.
         window.renderScheduleRoomArea = function(it, isLive) {
             const area = document.getElementById('sch-room-area-' + it.id);
             if (!area) return;
             if (!it.testCode) { area.innerHTML = "";
                 return; }
 
-            const testDoc = (window.globalActiveTests || []).find(t => t.code === it.testCode) || {};
-            const currentSessionId = testDoc.liveSessionId || null;
-            const myRoom = (window.myRoomsCache || []).find(r => {
-                if (r.scheduleId !== it.id && r.testCode !== it.testCode) return false;
-                // If the test has a known CURRENT session, only a room stamped
-                // with that same session counts as "mine" — a room left over
-                // from a previous Live Session (before a repeat go-live) must
-                // never resurface, however long it lingers in the database.
-                if (currentSessionId && r.sessionId && r.sessionId !== currentSessionId) return false;
-                return true;
-            });
+            const myRoom = (window.myRoomsCache || []).find(r => r.scheduleId === it.id || (it.testCode && r.testCode === it.testCode));
             const boardSafe = (it.board || "").replace(/'/g, "\\'");
             const examSafe = (it.exam || "").replace(/'/g, "\\'");
             const typeSafe = (it.type || "Mock Tests").replace(/'/g, "\\'");
@@ -8170,20 +7894,11 @@
                 const statusLabel = myRoom.status === 'started' ? '🔴 Live Now' : (myRoom.status === 'ended' ? '🛑 Ended' : '⏳ Waiting');
                 const myInfo = (myRoom.memberInfo && window.studentInfo && myRoom.memberInfo[window.studentInfo.uid]) || {};
                 const addedNotice = (!amIHost && myInfo.addedByHost) ? `<div style="font-size:10px;color:var(--success);margin-top:2px;">🎉 Aapko ${myRoom.hostName} ne add kiya hai</div>` : "";
-                // Update 2: this is now the ONLY room button on the whole
-                // card — no separate red "Open Room / Start Test" duplicate
-                // above it. Same button, same color/position — only its
-                // label (and therefore what happens on click) changes based
-                // on whether the test has actually gone live yet.
-                const iHaveSubmittedHere = !!myInfo.submitted;
-                const btnLabel = iHaveSubmittedHere ?
-                    `👁️ View Room (✅ Submitted — Score: ${myInfo.score != null ? myInfo.score : '—'})` :
-                    (isLive ? `🔓 Open Room / Start Test` : `🔓 Open Room`);
                 area.innerHTML = `
                     <div style="background:rgba(37,99,235,0.08);border:1px dashed var(--primary);border-radius:var(--radius-sm);padding:8px 10px;">
                         <div style="font-size:11px;font-weight:700;color:var(--primary);">👥 Your Room • ${statusLabel} • ${memberCount} joined</div>
                         ${addedNotice}
-                        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${amIHost})">${btnLabel}</button>
+                        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${amIHost})">🔓 Open Room</button>
                     </div>
                 `;
                 return;
@@ -8251,12 +7966,6 @@
                         maxMembers: 20,
                         status: "waiting",
                         createdAt: new Date().toISOString(),
-                        // Ties this room to the test's CURRENT Live Session — the
-                        // moment admin puts the test live again later, a new
-                        // session id is stamped on the test, and this room (from
-                        // the OLD session) simply stops being recognised as
-                        // "mine" anywhere in the app, however long it lingers.
-                        sessionId: testData.liveSessionId || null,
                         memberUids: [me.uid],
                         memberInfo: {
                             [me.uid]: { name: me.name || "Host", studentId: me.studentId || "", submitted: false, score: null }
@@ -8271,17 +7980,10 @@
             };
 
             // Gentle nudge in case they already have a room for this exact
-            // schedule/session (e.g. accidentally tapped Create instead of
-            // Join) — they can still proceed and delete the extra one later
-            // from inside the room if it really was a mistake. A room from a
-            // PREVIOUS Live Session never counts here.
-            const testDocForCreate = (window.globalActiveTests || []).find(t => t.code === testCode) || {};
-            const currentSessionIdForCreate = testDocForCreate.liveSessionId || null;
-            const existing = (window.myRoomsCache || []).find(r => {
-                if (r.scheduleId !== scheduleId && !(testCode && r.testCode === testCode)) return false;
-                if (currentSessionIdForCreate && r.sessionId && r.sessionId !== currentSessionIdForCreate) return false;
-                return true;
-            });
+            // schedule (e.g. accidentally tapped Create instead of Join) —
+            // they can still proceed and delete the extra one later from
+            // inside the room if it really was a mistake.
+            const existing = (window.myRoomsCache || []).find(r => r.scheduleId === scheduleId || (testCode && r.testCode === testCode));
             if (existing) {
                 return window.showCustomConfirm(
                     "Already Have A Room",
@@ -8313,14 +8015,6 @@
                 }
                 if (scheduleId && room.scheduleId && room.scheduleId !== scheduleId) {
                     return window.showCustomAlert("Wrong Test", `Ye Room Code kisi doosre test ke liye hai (Test Code: ${room.testCode}). Sahi schedule card se "Join Room" try karein.`, "⚠️");
-                }
-                // A room code shared from a PREVIOUS Live Session (test was
-                // put live again since, stamping a new session id) must be
-                // treated as expired — never let it be joined into.
-                const testDocForJoin = (window.globalActiveTests || []).find(t => t.code === room.testCode) || {};
-                const currentSessionIdForJoin = testDocForJoin.liveSessionId || null;
-                if (currentSessionIdForJoin && room.sessionId && room.sessionId !== currentSessionIdForJoin) {
-                    return window.showCustomAlert("Code Expired", "Ye Room Code ek purane Live Session ka hai jo ab expire ho chuka hai. Naya room banayein ya host se naya Room Code lein.", "⏰");
                 }
                 if (room.status !== 'waiting') {
                     return window.showCustomAlert("Can't Join", "Ye room ab join nahi ho sakta — test already start/end ho chuka hai.", "⚠️");
@@ -8371,20 +8065,14 @@
             const amIHost = room.hostUid === (me && me.uid);
             const members = room.memberUids || [];
             const isLive = room.liveAt ? (new Date(room.liveAt) <= new Date()) : false;
-            const myInfoForNotice = (room.memberInfo && me && room.memberInfo[me.uid]) || {};
-            const iHaveSubmitted = !!myInfoForNotice.submitted;
 
             if (room.status === 'ended') {
-                body.innerHTML = `<p style="text-align:center;font-size:13px;color:var(--danger);padding:20px 0;">🛑 Ye Live Test Room complete ho chuka hai.<br>Iska final result "✅ Complete Tests" mein dekh sakte hain.</p>`;
+                body.innerHTML = `<p style="text-align:center;font-size:13px;color:var(--danger);padding:20px 0;">🛑 Ye Live Test Room complete ho chuka hai.<br>Iska final result "🏆 Live Test History" mein dekh sakte hain.</p>`;
                 return;
             }
 
-            // Member who is NOT the host: auto-redirect the instant the host starts
-            // — but NEVER if I've already submitted in this session (e.g. I closed
-            // the app and reopened "View Room" later via a fresh page load, which
-            // resets the one-time _roomAutoStarted flag; without this check that
-            // would silently send an already-submitted student back into the test).
-            if (!amIHost && room.status === 'started' && !window._roomAutoStarted && !iHaveSubmitted) {
+            // Member who is NOT the host: auto-redirect the instant the host starts.
+            if (!amIHost && room.status === 'started' && !window._roomAutoStarted) {
                 window._roomAutoStarted = true;
                 window.currentRoomId = roomId;
                 localStorage.setItem('activeRoomId', roomId); // survives the full-page navigation below
@@ -8392,7 +8080,7 @@
                 window.navigateToTestEntry(room.testCode, room.board, room.exam, room.category, room.subject);
                 return;
             }
-            if (amIHost && room.status === 'started' && !window._roomAutoStarted && !iHaveSubmitted) {
+            if (amIHost && room.status === 'started' && !window._roomAutoStarted) {
                 window._roomAutoStarted = true;
                 window.currentRoomId = roomId;
                 localStorage.setItem('activeRoomId', roomId);
@@ -8401,41 +8089,25 @@
                 return;
             }
 
-            const submittedCount = members.filter(uid => room.memberInfo && room.memberInfo[uid] && room.memberInfo[uid].submitted).length;
-            const stillAttemptingCount = room.status === 'started' ? Math.max(0, members.length - submittedCount) : 0;
-
             let membersHtml = members.map(uid => {
                 const info = (room.memberInfo && room.memberInfo[uid]) || {};
                 const isHostBadge = uid === room.hostUid ? ' <span class="badge" style="background:var(--primary);color:#fff;font-size:8px;">HOST</span>' : '';
-                const isMeBadge = me && uid === me.uid ? ' <span class="badge" style="background:var(--warning);color:#fff;font-size:8px;">YOU</span>' : '';
-                const statusBadge = info.submitted ?
-                    ` <span class="badge" style="background:var(--success);color:#fff;font-size:8px;">✅ Submitted (${info.score||0})</span>` :
-                    (room.status === 'started' ? ` <span class="badge" style="background:var(--warning);color:#fff;font-size:8px;">📝 Attempting</span>` : "");
-                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg-subtle);border-radius:var(--radius-sm);margin-bottom:6px;font-size:12px;"><span><b>${info.name||'Student'}</b> ${info.studentId ? '(ID: '+info.studentId+')' : ''}${isHostBadge}${isMeBadge}</span>${statusBadge}</div>`;
+                const submittedBadge = info.submitted ? ` <span class="badge" style="background:var(--success);color:#fff;font-size:8px;">✅ Submitted (${info.score||0})</span>` : '';
+                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg-subtle);border-radius:var(--radius-sm);margin-bottom:6px;font-size:12px;"><span><b>${info.name||'Student'}</b> ${info.studentId ? '(ID: '+info.studentId+')' : ''}${isHostBadge}</span>${submittedBadge}</div>`;
             }).join('');
 
+            const myInfoForNotice = (room.memberInfo && me && room.memberInfo[me.uid]) || {};
             const addedByFriendNotice = (!amIHost && myInfoForNotice.addedByHost) ?
                 `<p style="text-align:center;font-size:12px;background:rgba(16,185,129,0.1);color:var(--success);padding:8px;border-radius:var(--radius-sm);margin:0 0 10px 0;">🎉 Aapko <b>${room.hostName}</b> ne is Live Test ke liye add kiya hai!</p>` : "";
-            const myStatusBanner = iHaveSubmitted ?
-                `<div style="text-align:center;font-size:12px;background:rgba(16,185,129,0.1);color:var(--success);padding:8px;border-radius:var(--radius-sm);margin:0 0 10px 0;font-weight:700;">✅ Aapne submit kar diya hai — Aapka Score: ${myInfoForNotice.score != null ? myInfoForNotice.score : '—'}. Neeche apni current rank live dekhein 👇</div>` :
-                (room.status === 'started' ? `<div style="text-align:center;font-size:12px;background:rgba(245,158,11,0.1);color:var(--warning);padding:8px;border-radius:var(--radius-sm);margin:0 0 10px 0;">📝 Aap abhi is test ko attempt kar rahe hain.</div>` : "");
-            const liveStatsRow = room.status === 'started' ?
-                `<div class="live-test-meta-row" style="margin:8px 0;">
-                    <span class="badge" style="font-size:9px;">👥 ${members.length} Joined</span>
-                    <span class="badge" style="font-size:9px;background:rgba(245,158,11,0.15);color:var(--warning);">📝 ${stillAttemptingCount} Attempting</span>
-                    <span class="badge" style="font-size:9px;background:rgba(16,185,129,0.15);color:var(--success);">✅ ${submittedCount} Submitted</span>
-                </div>` : "";
             let html = `
                 <p style="font-size:12px;color:var(--text-muted);margin:0 0 8px 0;">🎓 ${room.board} — ${room.exam} | 📂 ${room.category}</p>
                 ${addedByFriendNotice}
-                ${myStatusBanner}
                 <div style="background:rgba(37,99,235,0.08);border:1px dashed var(--primary);border-radius:var(--radius);padding:10px;text-align:center;margin-bottom:12px;">
                     <div style="font-size:10px;color:var(--text-muted);">Room Code (share with friends)</div>
                     <div style="font-size:20px;font-weight:800;letter-spacing:2px;color:var(--primary);">${roomId}</div>
                     <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="window.copyRoomShareText('${roomId}','${(room.board||'').replace(/'/g,"\\'")}','${(room.exam||'').replace(/'/g,"\\'")}','${(room.category||'').replace(/'/g,"\\'")}','${room.testCode||''}')">📋 Copy to share (WhatsApp etc.)</button>
                 </div>
                 <h4 style="font-size:12px;margin:0 0 6px 0;color:var(--text-main);">👥 Members (${members.length})</h4>
-                ${liveStatsRow}
                 ${membersHtml}
             `;
 
@@ -8445,7 +8117,7 @@
                 } else {
                     html += `
                         <div style="display:flex;gap:6px;margin-top:12px;">
-                            <input type="text" id="trm-friend-id" placeholder="Friend's Student ID (e.g. 483921AB)" style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border-color);" />
+                            <input type="text" id="trm-friend-id" placeholder="Friend's Student ID (phone number)" style="flex:1;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border-color);" />
                             <button class="btn btn-primary btn-sm" onclick="window.addFriendToRoom('${roomId}')">➕ Add</button>
                         </div>
                     `;
@@ -8456,16 +8128,14 @@
                 html += `<p style="text-align:center;font-size:12px;color:var(--warning);margin-top:12px;">⏳ Waiting for host to start the test... (this will auto-open when they do)</p>`;
             }
 
-            html += `<div id="trm-leaderboard" style="margin-top:14px;"><h4 style="font-size:12px;margin:0 0 6px 0;color:var(--text-main);">🏆 Room Leaderboard <span style="font-weight:400;color:var(--text-muted);font-size:10px;">(live — jitne submit kar chuke hain unka score/rank turant yahin dikhega)</span></h4><div id="trm-leaderboard-body" style="font-size:12px;color:var(--text-muted);">Loading...</div></div>`;
+            html += `<div id="trm-leaderboard" style="margin-top:14px;"><h4 style="font-size:12px;margin:0 0 6px 0;color:var(--text-main);">🏆 Room Leaderboard <span style="font-weight:400;color:var(--text-muted);font-size:10px;">(live — jitne submit kar chuke hain unka score turant yahin dikhega)</span></h4><div id="trm-leaderboard-body" style="font-size:12px;color:var(--text-muted);">Loading...</div></div>`;
             body.innerHTML = html;
             window.attachRoomLeaderboardListener(roomId);
         };
 
         // Live-updating leaderboard embedded inside the room modal — shows
         // whoever has ALREADY submitted, even if the test's full duration
-        // hasn't finished yet for others. Updates in real time via onSnapshot,
-        // and highlights the logged-in student's own row/rank so they can see
-        // exactly where they stand without hunting through the list.
+        // hasn't finished yet for others. Updates in real time via onSnapshot.
         window._roomLeaderboardUnsub = null;
         window.attachRoomLeaderboardListener = function(roomId) {
             if (window._roomLeaderboardUnsub) { window._roomLeaderboardUnsub();
@@ -8473,7 +8143,6 @@
             window._roomLeaderboardUnsub = db.collection("results").where("roomId", "==", roomId).onSnapshot((snap) => {
                 const box = document.getElementById('trm-leaderboard-body');
                 if (!box) return;
-                const me = window.studentInfo;
                 const scores = [];
                 snap.forEach(d => scores.push(d.data()));
                 scores.sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -8481,13 +8150,9 @@
                     box.innerHTML = `<p style="text-align:center;padding:8px 0;">Abhi tak kisi ne submit nahi kiya.</p>`;
                     return;
                 }
-                const myRank = me ? (scores.findIndex(s => s.uid === me.uid) + 1) : 0;
-                const myRankNote = myRank > 0 ?
-                    `<div style="text-align:center;font-size:11px;font-weight:700;color:var(--primary);background:rgba(37,99,235,0.08);padding:6px;border-radius:var(--radius-sm);margin-bottom:8px;">📍 Aapki current Rank: #${myRank} / ${scores.length}</div>` : "";
-                box.innerHTML = myRankNote + scores.map((s, idx) => {
+                box.innerHTML = scores.map((s, idx) => {
                     const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : (idx + 1) + '.'));
-                    const isMe = me && s.uid === me.uid;
-                    return `<div style="display:flex;justify-content:space-between;padding:6px 10px;background:${isMe ? 'rgba(37,99,235,0.12)' : 'var(--bg-subtle)'};border:${isMe ? '1px solid var(--primary)' : 'none'};border-radius:var(--radius-sm);margin-bottom:6px;"><span>${medal} <b>${s.name||'Student'}</b>${isMe ? ' <span class="badge" style="background:var(--primary);color:#fff;font-size:8px;">YOU</span>' : ''}</span><b style="color:var(--success);">${s.score||0}</b></div>`;
+                    return `<div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg-subtle);border-radius:var(--radius-sm);margin-bottom:6px;"><span>${medal} <b>${s.name||'Student'}</b></span><b style="color:var(--success);">${s.score||0}</b></div>`;
                 }).join('');
             }, (err) => {
                 const box = document.getElementById('trm-leaderboard-body');
@@ -8544,8 +8209,8 @@
 
         window.addFriendToRoom = function(roomId) {
             const input = document.getElementById('trm-friend-id');
-            const sid = input ? input.value.trim().toUpperCase() : "";
-            if (!sid || !window.STUDENT_ID_FORMAT_RE.test(sid)) return window.showCustomAlert("Invalid ID", "Friend ka valid Student ID daalein (format: 6 digits + 2 letters, e.g. 483921AB).", "⚠️");
+            const sid = input ? input.value.trim().replace(/[^0-9]/g, "") : "";
+            if (!sid || sid.length < 6) return window.showCustomAlert("Invalid ID", "Friend ka valid Student ID (unka registered phone number) daalein.", "⚠️");
             db.collection("testRooms").doc(roomId).get().then((roomSnap) => {
                 const room = roomSnap.exists ? roomSnap.data() : {};
                 if ((room.memberUids || []).length >= (room.maxMembers || 20)) {
@@ -8580,31 +8245,35 @@
             }, "🚀");
         };
 
-        // Real-time listener (not a one-time fetch) on every testRoom the logged
-        // -in student belongs to. This is what makes room status update INSTANTLY
-        // everywhere the moment the student creates a room, joins one (by Room
-        // Code or by being added via Student ID by the host), or a room ends —
-        // no page refresh needed. It keeps window.myRoomsCache fresh and
-        // re-renders the Upcoming Schedule cards (whose Create Room / Join
-        // Room buttons flip to Open Room the moment myRoomsCache contains a
-        // matching room) — the only place Room controls appear in the portal.
-        window._myRoomsUnsub = null;
         window.checkMyRoomInvites = function() {
+            const box = document.getElementById('my-room-invites');
             const me = window.studentInfo;
-            if (!me || !me.uid) return;
-            if (window._myRoomsUnsub) return; // listener already attached for this session
-            window._myRoomsUnsub = db.collection("testRooms").where("memberUids", "array-contains", me.uid)
-                .onSnapshot((snap) => {
-                    const rooms = [];
-                    snap.forEach(doc => { const d = doc.data();
-                        if (d.status !== 'ended') rooms.push({ id: doc.id, ...d }); });
-                    window.myRoomsCache = rooms; // used by the schedule cards to show "your room" status
-                    window.loadUpcomingScheduleForStudent(); // re-render now that we know which rooms I'm in
-                    window.checkAndAutoStartMyRooms();
-                    window.checkAndFinalizeMyRooms();
-                }, () => {});
+            if (!box || !me || !me.uid) return;
+            db.collection("testRooms").where("memberUids", "array-contains", me.uid).get().then((snap) => {
+                const rooms = [];
+                snap.forEach(doc => { const d = doc.data();
+                    if (d.status !== 'ended') rooms.push({ id: doc.id, ...d }); });
+                window.myRoomsCache = rooms; // used by the schedule cards to show "your room" status
+                window.loadUpcomingScheduleForStudent(); // re-render now that we know which rooms I'm in
+                window.checkAndAutoStartMyRooms();
+                window.checkAndFinalizeMyRooms();
+                if (rooms.length === 0) { box.innerHTML = "";
+                    return; }
+                let html = "";
+                rooms.forEach(r => {
+                    const amIHost = r.hostUid === me.uid;
+                    html += `
+                        <div class="live-test-card" style="border-color:var(--primary);">
+                            <span class="upcoming-badge" style="background:var(--primary);color:#fff;">👥 Test Room ${r.status === 'started' ? '(Live Now)' : '(Waiting)'}</span>
+                            <div style="margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🎓 ${r.exam} — ${r.board}</div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${amIHost ? 'You created this room' : 'Hosted by ' + r.hostName} • Room: ${r.id} • 👥 ${(r.memberUids||[]).length} joined</div>
+                            <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="window.openTestRoomModal('${r.id}', ${amIHost})">🔓 Open Room</button>
+                        </div>
+                    `;
+                });
+                box.innerHTML = html;
+            }).catch(() => { box.innerHTML = ""; });
         };
-
 
         // Best-effort auto-start: while any client (host or member) has the Live
         // Tests tab open, this checks every room the logged-in student belongs
@@ -8697,256 +8366,39 @@
             });
         };
 
-        // "✅ Complete Tests" — every Live Test this student has ever completed,
-        // whether taken solo or inside a "Play with Friends" room. Replaces the
-        // old room-only "Live Test History" (which missed standalone attempts
-        // entirely). Each card offers the original Result dashboard AND both
-        // leaderboards for that specific occurrence.
-        window.openCompleteTests = function() {
+        // "🏆 Live Test History" — lets a student look back at every Play-with-
+        // Friends room they've ever taken part in: who hosted it, who else
+        // played, their final rank/score, and when it happened.
+        window.openLiveTestHistory = function() {
             const me = window.studentInfo;
             if (!me || !me.uid) return window.showCustomAlert("Error", "Please log in again.", "⚠️");
-            window.showCustomAlert("Complete Tests", `<div style="text-align:center;padding:10px 0;"><div class="loader-mini" style="width:24px;height:24px;margin:0 auto;"></div><p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Loading...</p></div>`, "✅");
-            db.collection("results").where("uid", "==", me.uid).get().then((snap) => {
+            window.showCustomAlert("Live Test History", `<div style="text-align:center;padding:10px 0;"><div class="loader-mini" style="width:24px;height:24px;margin:0 auto;"></div><p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Loading...</p></div>`, "🏆");
+            db.collection("roomHistory").where("memberUids", "array-contains", me.uid).get().then((snap) => {
                 const rows = [];
-                snap.forEach(d => { const data = d.data();
-                    if (data.isLiveAttempt) rows.push(Object.assign({ id: d.id }, data)); });
-                rows.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                snap.forEach(d => rows.push(d.data()));
+                rows.sort((a, b) => new Date(b.endedAt || 0) - new Date(a.endedAt || 0));
                 if (rows.length === 0) {
-                    return window.showCustomAlert("Complete Tests", `<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:16px 0;">Aapne abhi tak koi Live Test complete nahi kiya hai.</p>`, "✅");
+                    return window.showCustomAlert("Live Test History", `<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:16px 0;">Aapne abhi tak koi Live Test Room complete nahi kiya hai.</p>`, "🏆");
                 }
-                // Rank is scoped to this specific live occurrence (sessionId) so
-                // it never mixes scores from a different day the same test was
-                // run live — falls back to all-time-for-this-code for older
-                // rows saved before sessionId existed.
-                Promise.all(rows.map(r => {
-                    const q = r.sessionId ?
-                        db.collection("results").where("testCode", "==", r.testCode).where("sessionId", "==", r.sessionId).get() :
-                        db.collection("results").where("testCode", "==", r.testCode).get();
-                    return q.then(snap2 => {
-                        const scores = [];
-                        snap2.forEach(d => scores.push(d.data().score));
-                        scores.sort((a, b) => b - a);
-                        r.__rank = scores.indexOf(r.score) + 1;
-                        r.__total = scores.length;
-                        return r;
-                    }).catch(() => { r.__rank = null;
-                        r.__total = null;
-                        return r; });
-                })).then((finalRows) => {
-                    // Cache the full unfiltered set — Filter by Date and the Test
-                    // search dropdown below both operate on this in memory, no
-                    // re-fetch needed for every filter change.
-                    window._completeTestsAllRows = finalRows;
-                    window._completeTestsDateFilter = 'all';
-                    window._completeTestsCustomDate = '';
-                    window._completeTestsSearchCode = '';
-
-                    // Test dropdown is generated purely from tests this student
-                    // has actually attended — never manually maintained.
-                    const seenCodes = new Set();
-                    const testOptions = [];
-                    finalRows.forEach(r => {
-                        const key = r.testCode || r.testName;
-                        if (seenCodes.has(key)) return;
-                        seenCodes.add(key);
-                        testOptions.push({ code: r.testCode || '', name: r.testName || r.testCode || 'Test' });
-                    });
-                    let datalistHtml = testOptions.map(t => `<option value="${(t.name || '').replace(/"/g, '&quot;')}">`).join('');
-
-                    const filterBarHtml = `
-                        <div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border-color);">
-                            <div class="subject-filter-bar" style="margin:0 0 8px 0;">
-                                <span class="filter-label">📅 Filter:</span>
-                                <button class="filter-btn active" data-datefilter="all" onclick="window.setCompleteTestsDateFilter('all', this)">All</button>
-                                <button class="filter-btn" data-datefilter="today" onclick="window.setCompleteTestsDateFilter('today', this)">Today</button>
-                                <button class="filter-btn" data-datefilter="yesterday" onclick="window.setCompleteTestsDateFilter('yesterday', this)">Yesterday</button>
-                                <button class="filter-btn" data-datefilter="7days" onclick="window.setCompleteTestsDateFilter('7days', this)">Last 7 Days</button>
-                                <button class="filter-btn" data-datefilter="30days" onclick="window.setCompleteTestsDateFilter('30days', this)">Last 30 Days</button>
-                                <input type="date" id="ct-custom-date" onchange="window.setCompleteTestsDateFilter('custom', null)" style="font-size:11px;padding:3px 6px;border-radius:50px;border:2px solid var(--border-color);background:var(--bg-card);color:var(--text-main);" />
-                            </div>
-                            <input type="text" id="ct-search-test" list="ct-test-datalist" placeholder="🔍 Select Completed Test — type to search..." oninput="window.filterCompleteTestsBySearch(this.value)" style="width:100%;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);font-size:12px;box-sizing:border-box;" />
-                            <datalist id="ct-test-datalist">${datalistHtml}</datalist>
+                let html = `<div style="max-height:60vh;overflow-y:auto;">`;
+                rows.forEach(r => {
+                    const mine = (r.finalLeaderboard || []).find(x => x.uid === me.uid) || {};
+                    const dateStr = r.endedAt ? new Date(r.endedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "";
+                    html += `
+                        <div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;">
+                            <div style="font-weight:800;color:var(--primary);font-size:13px;">🎓 ${r.exam} — ${r.board}</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📂 ${r.category} • Host: ${r.hostName} • ${dateStr}</div>
+                            <div style="font-size:12px;margin-top:6px;">Your Rank: <b style="color:var(--primary);">#${mine.rank || '-'} / ${(r.finalLeaderboard||[]).length}</b> &nbsp;|&nbsp; Score: <b style="color:var(--success);">${mine.score || 0}</b></div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">👥 ${(r.memberUids||[]).length} members played together</div>
+                            <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.showRoomHistoryLeaderboard('${r.roomId}')">📊 Full Leaderboard</button>
                         </div>
-                        <div id="ct-results-list"></div>
                     `;
-                    window.showCustomAlert("✅ Complete Tests", filterBarHtml, "✅");
-                    window.renderCompleteTestsList();
                 });
+                html += `</div>`;
+                window.showCustomAlert("🏆 Live Test History", html, "🏆");
             }).catch((err) => window.showCustomAlert("Error", err.message, "❌"));
         };
 
-        // Applies the current date-filter + search-text (both cached on
-        // window) against window._completeTestsAllRows and re-renders just
-        // the list — instant, no Firestore round-trip per filter change.
-        window.renderCompleteTestsList = function() {
-            const list = document.getElementById('ct-results-list');
-            if (!list) return;
-            const all = window._completeTestsAllRows || [];
-            const dateFilter = window._completeTestsDateFilter || 'all';
-            const customDate = window._completeTestsCustomDate || '';
-            const searchText = (window._completeTestsSearchCode || '').trim().toLowerCase();
-
-            const now = new Date();
-            const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-            const todayStart = startOfDay(now);
-
-            let filtered = all.filter(r => {
-                if (searchText) {
-                    const name = (r.testName || r.testCode || '').toLowerCase();
-                    if (!name.includes(searchText)) return false;
-                }
-                if (dateFilter === 'all' || !r.timestamp) return true;
-                const ts = r.timestamp;
-                if (dateFilter === 'today') return ts >= todayStart;
-                if (dateFilter === 'yesterday') return ts >= (todayStart - 86400000) && ts < todayStart;
-                if (dateFilter === '7days') return ts >= (todayStart - 7 * 86400000);
-                if (dateFilter === '30days') return ts >= (todayStart - 30 * 86400000);
-                if (dateFilter === 'custom' && customDate) {
-                    const picked = startOfDay(new Date(customDate + 'T00:00:00'));
-                    return ts >= picked && ts < (picked + 86400000);
-                }
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                list.innerHTML = `<p style="text-align:center;color:var(--text-muted);font-size:12px;padding:16px 0;">Is filter ke liye koi test nahi mila.</p>`;
-                return;
-            }
-
-            let html = `<div style="max-height:52vh;overflow-y:auto;">`;
-            filtered.forEach(r => {
-                const pct = r.totalMarks ? ((r.score / r.totalMarks) * 100).toFixed(1) : "—";
-                const startStr = r.liveStart ? new Date(r.liveStart).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "—";
-                const endStr = r.liveEnd ? new Date(r.liveEnd).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : "—";
-                const subStr = r.timestamp ? new Date(r.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : "—";
-                html += `
-                    <div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;">
-                        <div style="font-weight:800;color:var(--primary);font-size:13px;">${r.testName || r.testCode}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📂 ${r.category || '—'}${r.board ? ' • 🎓 ' + r.board : ''}</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">🗓️ Start: ${startStr} • 🏁 End: ${endStr} • ⏱️ ${r.durationMinutes || 0} min</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📤 Submitted: ${subStr}</div>
-                        <div style="font-size:12px;margin-top:6px;">Score: <b style="color:var(--success);">${r.score}${r.totalMarks ? (' / ' + r.totalMarks) : ''}</b> (${pct}%) &nbsp;|&nbsp; Rank: <b style="color:var(--primary);">${r.__rank ? ('#' + r.__rank + ' / ' + r.__total) : '—'}</b></div>
-                        <div style="font-size:10px;color:var(--success);font-weight:700;margin-top:2px;">✅ Completed</div>
-                        <div style="display:flex;gap:6px;margin-top:8px;">
-                            <button class="btn btn-primary btn-sm" style="flex:1;" onclick="window.openHistoricalResult('${r.id}')">📊 Result</button>
-                            <button class="btn btn-outline btn-sm" style="flex:1;" onclick="window.viewCompleteTestLeaderboards('${r.id}')">🏆 Leaderboards</button>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            list.innerHTML = html;
-        };
-
-        window.setCompleteTestsDateFilter = function(filter, btnEl) {
-            window._completeTestsDateFilter = filter;
-            if (filter === 'custom') {
-                const dateInput = document.getElementById('ct-custom-date');
-                window._completeTestsCustomDate = dateInput ? dateInput.value : '';
-            }
-            document.querySelectorAll('#modal-desc .filter-btn').forEach(b => b.classList.remove('active'));
-            if (btnEl) btnEl.classList.add('active');
-            window.renderCompleteTestsList();
-        };
-
-        window.filterCompleteTestsBySearch = function(text) {
-            window._completeTestsSearchCode = text;
-            window.renderCompleteTestsList();
-        };
-
-        // Shows BOTH leaderboards for one completed Live Test occurrence:
-        // the Room Leaderboard (only this student's room, if they were in one)
-        // and the Overall Leaderboard (everyone who attempted this exact live
-        // occurrence, room-based or standalone).
-        window.viewCompleteTestLeaderboards = function(resultId) {
-            db.collection("results").doc(resultId).get().then((doc) => {
-                if (!doc.exists) return;
-                const r = doc.data();
-                const overallQuery = r.sessionId ?
-                    db.collection("results").where("testCode", "==", r.testCode).where("sessionId", "==", r.sessionId).get() :
-                    db.collection("results").where("testCode", "==", r.testCode).get();
-                overallQuery.then((snap) => {
-                    const all = [];
-                    snap.forEach(d => all.push(d.data()));
-                    all.sort((a, b) => (b.score || 0) - (a.score || 0));
-                    const buildRows = (list) => list.map((s, idx) => {
-                        const c = s.right || 0, w = s.wrong || 0, b = s.blank || 0;
-                        const acc = (c + w) > 0 ? ((c / (c + w)) * 100).toFixed(1) : "0.0";
-                        const pct = r.totalMarks ? ((s.score || 0) / r.totalMarks * 100).toFixed(1) : "—";
-                        const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : (idx + 1) + '.'));
-                        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-subtle);border-radius:var(--radius-sm);margin-bottom:6px;font-size:12px;">
-                            <span>${medal} <b>${s.name || 'Student'}</b> <span style="color:var(--text-muted);font-size:10px;">(${s.studentId || '—'})</span></span>
-                            <span style="text-align:right;"><b style="color:var(--success);">${s.score || 0}</b> (${pct}%)<br><span style="font-size:9px;color:var(--text-muted);">✅${c} ❌${w} ⬜${b} • Acc ${acc}%</span></span>
-                        </div>`;
-                    }).join("");
-                    let html = `<h4 style="color:var(--primary);font-size:13px;margin-bottom:8px;">🌐 Overall Leaderboard</h4>` +
-                        `<div style="max-height:30vh;overflow-y:auto;margin-bottom:14px;">${buildRows(all)}</div>`;
-                    if (r.roomId) {
-                        const roomList = all.filter(s => s.roomId === r.roomId);
-                        html += `<h4 style="color:var(--danger);font-size:13px;margin-bottom:8px;">👥 Room Leaderboard</h4>` +
-                            `<div style="max-height:30vh;overflow-y:auto;">${buildRows(roomList)}</div>`;
-                    } else {
-                        html += `<p style="font-size:11px;color:var(--text-muted);text-align:center;">Aapne bina kisi Room ke ye test attempt kiya tha, isliye Room Leaderboard available nahi hai.</p>`;
-                    }
-                    window.showCustomAlert("Leaderboards", html, "🏆");
-                }).catch((err) => window.showCustomAlert("Error", err.message, "❌"));
-            }).catch((err) => window.showCustomAlert("Error", err.message, "❌"));
-        };
-
-        // "📊 Result" — reopens the EXACT original Result dashboard (graphs,
-        // subject/chapter analysis, question-wise review, PDF download) for a
-        // past Live Test attempt, using the full answer snapshot saved at
-        // submission time. Never re-writes to Firestore — pure playback.
-        window.openHistoricalResult = function(resultId) {
-            window.showLoadingModal("Result load ho raha hai...<br>Please wait.");
-            db.collection("results").doc(resultId).get().then((resDoc) => {
-                if (!resDoc.exists) { window.closeModal();
-                    return window.showCustomAlert("Not Found", "Ye result nahi mila.", "❌"); }
-                const r = resDoc.data();
-                if (!r.liveReplayAnswers) {
-                    window.closeModal();
-                    return window.showCustomAlert("Not Available", "Is purane attempt ka detailed review available nahi hai (ye feature launch hone se pehle ka attempt hai).", "ℹ️");
-                }
-                const baseCode = String(r.testCode || "").replace(/-RE$/, "");
-                db.collection("tests").doc(baseCode).get().then((testDoc) => {
-                    const testData = testDoc.exists ? testDoc.data() : null;
-                    if (!testData || !testData.questions) {
-                        window.closeModal();
-                        return window.showCustomAlert("Not Available", "Original test data ab available nahi hai (delete ho chuka hai), isliye detailed review nahi khul sakta.", "⚠️");
-                    }
-                    window.examData = Object.assign({}, testData, {
-                        code: r.testCode,
-                        exam: r.testName || testData.exam,
-                        marks: (r.liveMarks !== undefined && r.liveMarks !== null) ? r.liveMarks : (testData.marks || 2),
-                        neg: (r.liveNeg !== undefined && r.liveNeg !== null) ? r.liveNeg : (testData.neg || 0)
-                    });
-                    window.userAnswers = r.liveReplayAnswers.slice();
-                    window.totalTimeSpent = r.timeSpent || 0;
-                    window.isReattemptMode = false;
-                    document.querySelectorAll('.view-section').forEach(v => { v.classList.remove('active-view'); v.style.display = ''; });
-                    const rankQuery = r.sessionId ?
-                        db.collection("results").where("testCode", "==", r.testCode).where("sessionId", "==", r.sessionId).get() :
-                        db.collection("results").where("testCode", "==", r.testCode).get();
-                    rankQuery.then((snap) => {
-                        const scores = [];
-                        snap.forEach(d => scores.push(d.data().score));
-                        scores.sort((a, b) => b - a);
-                        window._replayRankInfo = { rank: scores.indexOf(r.score) + 1, total: scores.length };
-                        window.closeModal();
-                        window.calculateScoreAndSubmit(true);
-                    }).catch(() => {
-                        window._replayRankInfo = null;
-                        window.closeModal();
-                        window.calculateScoreAndSubmit(true);
-                    });
-                }).catch((err) => { window.closeModal();
-                    window.showCustomAlert("Error", err.message, "❌"); });
-            }).catch((err) => { window.closeModal();
-                window.showCustomAlert("Error", err.message, "❌"); });
-        };
-
-        // Kept for the room-modal's internal "Leaderboard" button (still used
-        // while a room is live/waiting) — unrelated to Complete Tests above.
         window._roomHistoryCache = {};
         window.showRoomHistoryLeaderboard = function(roomId) {
             db.collection("roomHistory").doc(roomId).get().then((doc) => {
@@ -10183,67 +9635,11 @@
         window.executePDFPrintWithMathFix = function(studentName, mode) {
             const pA = document.getElementById('print-area');
             if (!pA) return;
-            window.showLoadingModal("Preparing your PDF...<br><i>This only takes a moment</i>");
 
-            const rawLogoUrl = window.portalLogoURL || document.getElementById('header-logo-img')?.src || '';
-            // The watermark logo is position:fixed, which browsers repeat on
-            // EVERY printed page — and it's also used a second time in the
-            // header strip. If the source logo file is an oversized upload
-            // (easily happens — admins just pick an image, with no resizing
-            // step), that gets re-embedded at full size on every single page
-            // of a multi-page test, which is what was ballooning the PDF to
-            // ~50MB. It's only ever actually DISPLAYED at ~180px either way,
-            // so downscaling it once, up front, costs nothing visually.
-            window.getOptimizedPDFLogo(rawLogoUrl, function(logoUrl) {
-                window._continueExecutePDFPrintWithMathFix(studentName, mode, pA, logoUrl);
-            });
-        };
-
-        // One-time (cached) resize+re-encode of the portal logo specifically
-        // for use inside a generated PDF — see the size-vs-display-size note
-        // above. Falls back to the original URL untouched on any failure
-        // (CORS-tainted canvas, load error, etc.) so a PDF is never broken
-        // or left blank for the sake of an optimization.
-        window._pdfLogoCache = {};
-        window.getOptimizedPDFLogo = function(url, callback) {
-            if (!url) return callback('');
-            if (window._pdfLogoCache[url]) return callback(window._pdfLogoCache[url]);
-            try {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = function() {
-                    try {
-                        const targetSize = 220; // headroom above the ~180px display size, still tiny in bytes
-                        let w = img.naturalWidth || targetSize;
-                        let h = img.naturalHeight || targetSize;
-                        if (w > targetSize || h > targetSize) {
-                            if (w >= h) { h = Math.round(h * (targetSize / w));
-                                w = targetSize; } else { w = Math.round(w * (targetSize / h));
-                                h = targetSize; }
-                        }
-                        const canvas = document.createElement('canvas');
-                        canvas.width = w;
-                        canvas.height = h;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
-                        const optimized = canvas.toDataURL('image/png');
-                        const result = (optimized && optimized.length < url.length) ? optimized : url;
-                        window._pdfLogoCache[url] = result;
-                        callback(result);
-                    } catch (e) {
-                        window._pdfLogoCache[url] = url; // CORS-tainted canvas etc. — keep the original, never break the PDF
-                        callback(url);
-                    }
-                };
-                img.onerror = function() { callback(url); };
-                img.src = url;
-            } catch (e) { callback(url); }
-        };
-
-        window._continueExecutePDFPrintWithMathFix = function(studentName, mode, pA, logoUrl) {
             const sU = BASE_URL + "?test=" + window.examData.code;
             const p = window.parseHack(window.examData.topic);
             const dT = p.topic || "";
+            const logoUrl = window.portalLogoURL || document.getElementById('header-logo-img')?.src || '';
             const logoShape = window.portalLogoShape || 'round';
             const logoStyle = logoShape === 'round' ? 'border-radius:50%;' : 'border-radius:8px;';
 
@@ -10296,9 +9692,9 @@
                 <tbody>
                     <tr>
                         <td style="padding:10px 20px;position:relative;z-index:10;">
-                            <div class="print-header" style="text-align:center; border-bottom:2px solid #1a56db; padding-bottom:8px; margin-bottom:16px;">
-                                <h2 style="color:#1a56db; margin:0 0 4px 0;font-size:18px;">${window.examData.exam.toUpperCase()} ${mode==='q_only'?"(Questions Only)":(mode==='q_ans'?"(Questions + Answer Key)":"(Full Solution)")}</h2>
-                                <h3 style="color:#333; margin:0 0 4px 0;font-size:15px;">${window.examData.subject||window.examData.sub||"Subject"} ${dT ? " - "+dT : ""}</h3>
+                            <div class="print-header" style="text-align:center; border-bottom:2px solid #1a56db; padding-bottom:6px; margin-bottom:8px;">
+                                <h2 style="color:#1a56db; margin:0 0 2px 0;font-size:18px;">${window.examData.exam.toUpperCase()} ${mode==='q_only'?"(Questions Only)":(mode==='q_ans'?"(Questions + Answer Key)":"(Full Solution)")}</h2>
+                                <h3 style="color:#333; margin:0 0 2px 0;font-size:15px;">${window.examData.subject||window.examData.sub||"Subject"} ${dT ? " - "+dT : ""}</h3>
                                 <p style="margin:0; font-size:13px; color:#555;"><b>Student Name:</b> ${studentName} | <b>Test Code:</b> ${window.examData.code}</p>
                             </div>
                             <div class="pdf-questions-container">`;
@@ -10312,26 +9708,13 @@
                 const wM = (isW && mode === 'full') ?
                     '<span style="color:red;font-size:16px;margin-right:4px;">❌</span>' : "";
 
-                let tagDisplay = '';
-                const rawTag = q.tag || window.examData.tags?.[i] || "General";
-                if (rawTag && rawTag !== "General") {
-                    const parts = rawTag.split(':');
-                    if (parts.length >= 2) {
-                        const subject = parts[0].trim().toUpperCase();
-                        const topic = parts.slice(1).join(':').trim().toUpperCase();
-                        tagDisplay = `<span class="pdf-tag-badge">${subject} → ${topic}</span>`;
-                    } else {
-                        tagDisplay = `<span class="pdf-tag-badge">📌 ${rawTag.toUpperCase()}</span>`;
-                    }
-                } else {
-                    tagDisplay = `<span class="pdf-tag-badge">📌 GENERAL</span>`;
-                }
+                const tagDisplay = window.buildTopicBadge(q, i);
 
                 h +=
                     `<div class="print-q" style="display:block !important; break-inside:auto !important; page-break-inside:auto !important;">`;
-                if (q.passage) h += `<div class="print-passage">${q.passage}</div>`;
+                if (q.passage) h += `<div class="print-passage">${window.tightenPdfBreaks(q.passage)}</div>`;
                 h += `${tagDisplay}<br>`;
-                h += `<b>${wM}Q${i+1}. ${q.q}</b><div class="opt-grid">`;
+                h += `<b>${wM}Q${i+1}. ${window.tightenPdfBreaks(q.q)}</b><div class="opt-grid">`;
 
                 (q.opts || []).forEach(o => {
                     let inS = "padding:2px 0;color:#000;";
@@ -10340,7 +9723,7 @@
                         inS =
                             "background-color:#065f46 !important; color:#fff !important; font-weight:bold; padding:4px 8px; border-radius:4px; display:inline-block; -webkit-print-color-adjust:exact; print-color-adjust:exact;";
                     }
-                    h += `<div class="opt-item"><span style="${inS}">${o.id}. ${o.text}</span></div>`;
+                    h += `<div class="opt-item"><span style="${inS}">${o.id}. ${window.tightenPdfBreaks(o.text)}</span></div>`;
                 });
                 h += '</div>';
 
@@ -10352,15 +9735,15 @@
                         const aC = (gA === cA) ? "color:green;" : "color:red;";
                         const uD = (gA && uA !== "N/A") ? gA : "Skipped";
                         h +=
-                            `<div style="margin-top:4px;"><span class="print-ans">Correct Option: ${cA||q.ans||"N/A"}</span> <span style="margin-left:12px;font-weight:bold;font-size:14px;${aC}">Your Ans: ${uD}</span></div>`;
+                            `<div style="margin-top:2px;"><span class="print-ans">Correct Option: ${cA||q.ans||"N/A"}</span> <span style="margin-left:12px;font-weight:bold;font-size:14px;${aC}">Your Ans: ${uD}</span></div>`;
                     } else {
                         h +=
-                            `<div style="margin-top:4px;"><span class="print-ans">Correct Option: ${cA||q.ans||"N/A"}</span></div>`;
+                            `<div style="margin-top:2px;"><span class="print-ans">Correct Option: ${cA||q.ans||"N/A"}</span></div>`;
                     }
                     if (mode === 'full' && q.exp && q.exp.trim() !== "") {
-                        h += `<div class="print-exp"><b>Explanation:</b><br>${q.exp}</div>`;
+                        h += `<div class="print-exp"><b>Explanation:</b><br>${window.tightenPdfBreaks(q.exp)}</div>`;
                     } else if (mode === 'q_ans' && q.exp && q.exp.trim() !== "") {
-                        h += `<div class="print-exp" style="background:#f9f9f9;border-left-color:#888;"><b>Solution:</b><br>${q.exp}</div>`;
+                        h += `<div class="print-exp" style="background:#f9f9f9;border-left-color:#888;"><b>Solution:</b><br>${window.tightenPdfBreaks(q.exp)}</div>`;
                     }
                 }
                 h += '</div>';
@@ -10370,29 +9753,19 @@
             const summ = window.examData.summary || "";
             if (summ.trim() !== "") {
                 h +=
-                    `<div style="margin-top:16px; padding:12px 16px; border:2px solid #1a56db; border-radius:8px; background:#f0f4fa; page-break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact;"><h3 style="color:#1a56db; margin-top:0; margin-bottom:6px;font-size:15px;">📑 Test Summary (Topics Covered)</h3><p style="font-size:14px; color:#333; line-height:1.5; margin-bottom:0;">${summ.replace(/\n/g,'<br>')}</p></div>`;
+                    `<div style="margin-top:8px; padding:8px 12px; border:2px solid #1a56db; border-radius:8px; background:#f0f4fa; page-break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact;"><h3 style="color:#1a56db; margin-top:0; margin-bottom:4px;font-size:15px;">📑 Test Summary (Topics Covered)</h3><p style="font-size:14px; color:#333; line-height:1.5; margin-bottom:0;">${summ.replace(/\n/g,'<br>')}</p></div>`;
             }
             pA.innerHTML = h + '</td></tr></tbody></table>';
 
             document.body.classList.add('print-pdf');
 
             const triggerPrint = () => {
-                // Two animation-frame ticks is the standard, reliable way to
-                // wait for "the browser has actually painted this DOM
-                // update" — it's normally just 1-2 frames (~16-32ms) instead
-                // of a blind 600ms guess, so Print Preview now opens almost
-                // instantly once MathJax is done, with no visible flash
-                // (print-area is kept off-screen — see CSS) and no
-                // unnecessary wait tacked on afterwards.
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        window.closeModal();
-                        window.print();
-                        setTimeout(() => {
-                            document.body.classList.remove('print-pdf');
-                        }, 1000);
-                    });
-                });
+                setTimeout(() => {
+                    window.print();
+                    setTimeout(() => {
+                        document.body.classList.remove('print-pdf');
+                    }, 1000);
+                }, 600);
             };
 
             if (window.MathJax) {
@@ -10420,6 +9793,150 @@
                 window.executePDFPrintWithMathFix(customName, 'full');
             } else {
                 window.showPremiumModal();
+            }
+        };
+
+        window.handlePredictedPDFClick = function() {
+            const isFreeStatus = (window.examData.isFree === true || String(window.examData.isFree).toLowerCase() ===
+                "true");
+            const isPremiumUser = (window.studentInfo && (window.studentInfo.isPremium === "TRUE" || window.studentInfo
+                .isPremium === true));
+            if (isFreeStatus || isPremiumUser) {
+                const customName = window.studentInfo.name || "Student";
+                window.executePredictedPDFPrint(customName);
+            } else {
+                window.showPremiumModal();
+            }
+        };
+
+        window.executePredictedPDFPrint = function(watermark) {
+            const pA = document.getElementById('print-area');
+            if (!pA || !window.examData || !window.examData.questions) return;
+
+            const studentName = watermark || window.studentInfo?.name || "Student";
+            const sU = BASE_URL + "?test=" + window.examData.code;
+            const p = window.parseHack(window.examData.topic);
+            const dT = p.topic || "";
+            const logoUrl = window.portalLogoURL || document.getElementById('header-logo-img')?.src || '';
+            const logoShape = window.portalLogoShape || 'round';
+            const logoStyle = logoShape === 'round' ? 'border-radius:50%;' : 'border-radius:8px;';
+
+            let h = `
+            <div class="pdf-watermark-wrapper">
+                <div class="wm-content">
+                    ${logoUrl ? `<img src="${logoUrl}" alt="TEST BODHI Logo" style="${logoStyle}" />` : ''}
+                    <div class="wm-text">TEST BODHI</div>
+                    <div style="font-size:14px;font-weight:700;color:#0f2b5c;">${studentName}</div>
+                    <div style="font-size:16px;font-weight:600;color:#0f2b5c;letter-spacing:3px;">testbodi.com</div>
+                </div>
+            </div>
+            <table class="pdf-main-table">
+                <thead style="display:table-header-group;">
+                    <tr>
+                        <td style="padding:0;border:none;">
+                            <div class="pdf-header-strip">
+                                <table style="width:100%;border:none;">
+                                    <tr>
+                                        <td style="text-align:left;border:none;padding:0;">
+                                            <div class="hdr-brand">
+                                                ${logoUrl ? `<img src="${logoUrl}" alt="TEST BODHI Logo" style="${logoStyle}" />` : ''}
+                                                <span class="hdr-name">TEST <span>BODHI</span></span>
+                                            </div>
+                                        </td>
+                                        <td style="text-align:right;border:none;padding:0;">
+                                            <a href="${sU}" style="color:#f0d68a;font-weight:bold;font-size:14px;text-decoration:none;">📝 Give Online Test</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </thead>
+                <tfoot style="display:table-footer-group;">
+                    <tr>
+                        <td style="padding:0;border:none;">
+                            <div class="pdf-footer-strip">
+                                <div class="ftr-text">
+                                    <a href="tel:+918273684939">📞 +91-8273684939</a> |
+                                    <a href="${BASE_URL}">🌐 Website</a> |
+                                    <a href="https://t.me/ankushonlinetest">📢 Telegram</a> |
+                                    <a href="https://whatsapp.com/channel/0029VbDQwhM1yT268t0oVm3k">💬 WhatsApp</a> |
+                                    <a href="https://www.youtube.com/@ankushonlinetest">▶️ YouTube</a>
+                                    <span style="margin-left:16px;color:#f0d68a;">testbodi.com</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    <tr>
+                        <td style="padding:10px 20px;position:relative;z-index:10;">
+                            <div class="print-header" style="text-align:center; border-bottom:2px solid #7c3aed; padding-bottom:6px; margin-bottom:8px;">
+                                <h2 style="color:#7c3aed; margin:0 0 2px 0;font-size:18px;">${window.examData.exam.toUpperCase()} (Predictive Master PDF)</h2>
+                                <h3 style="color:#333; margin:0 0 2px 0;font-size:15px;">${window.examData.subject||window.examData.sub||"Subject"} ${dT ? " - "+dT : ""}</h3>
+                                <p style="margin:0; font-size:13px; color:#555;"><b>Student Name:</b> ${studentName} | <b>Test Code:</b> ${window.examData.code}</p>
+                            </div>
+                            <div class="pdf-questions-container">`;
+
+            const totalQ = window.examData.questions.length;
+            window.examData.questions.forEach((q, i) => {
+                const cA = window.getCleanAns(q.ans);
+                h += `<div class="print-q" style="display:block !important; break-inside:auto !important; page-break-inside:auto !important;">`;
+                if (q.passage) h += `<div class="print-passage">${window.tightenPdfBreaks(q.passage)}</div>`;
+                h += `${window.buildTopicBadge(q, i)}<br>`;
+                h += `<b>Q${i+1}. ${window.tightenPdfBreaks(q.q)}</b><div class="opt-grid">`;
+                (q.opts || []).forEach(o => {
+                    const oC = window.getCleanAns(o.id);
+                    let inS = "padding:2px 0;color:#000;";
+                    if (oC === cA) {
+                        inS = "background-color:#065f46 !important; color:#fff !important; font-weight:bold; padding:4px 8px; border-radius:4px; display:inline-block; -webkit-print-color-adjust:exact; print-color-adjust:exact;";
+                    }
+                    h += `<div class="opt-item"><span style="${inS}">${o.id}. ${window.tightenPdfBreaks(o.text)}</span></div>`;
+                });
+                h += '</div>';
+                h += `<div style="margin-top:2px;"><span class="print-ans">Correct Option: ${cA||q.ans||"N/A"}</span></div>`;
+                if (q.exp && q.exp.trim() !== "") {
+                    h += `<div class="print-exp"><b>Explanation:</b><br>${window.tightenPdfBreaks(q.exp)}</div>`;
+                }
+                const predicted = (q.predicted || []).filter(p => (p.q && p.q.trim()) || (p.s && p.s.trim()));
+                if (predicted.length > 0) {
+                    h += `<div style="margin-top:6px;padding:8px 10px;border:2px solid #f59e0b;border-radius:8px;background:#fffbeb;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+                        <div style="font-weight:800;color:#b45309;font-size:14px;margin-bottom:4px;">🔥 Exam Prediction: 5 Expected Questions</div>`;
+                    predicted.forEach((pred, pi) => {
+                        if (pi > 0) h += `<hr style="margin:6px 0;border:none;border-top:2px dashed #d97706;" />`;
+                        h += `<div style="margin-bottom:2px;">
+                            <div style="font-weight:700;color:#92400e;margin-bottom:2px;">Predicted Q${pi + 1}</div>
+                            <div class="pdf-pred-content" style="font-size:13px;color:#111;margin-bottom:3px;">${window.tightenPdfBreaks(pred.q || "")}</div>`;
+                        if (pred.s && pred.s.trim()) {
+                            h += `<div style="font-weight:700;color:#065f46;margin-bottom:2px;">Solution</div>
+                            <div class="pdf-pred-content" style="font-size:13px;color:#333;">${window.tightenPdfBreaks(pred.s)}</div>`;
+                        }
+                        h += `</div>`;
+                    });
+                    h += `</div>`;
+                }
+                h += '</div>';
+                if (i < totalQ - 1) h += `<hr style="margin:10px 0;border:none;border-top:2px dashed #cbd5e1;" />`;
+            });
+
+            h += `</div></td></tr></tbody></table>`;
+            pA.innerHTML = h;
+
+            document.body.classList.add('print-pdf');
+            const triggerPrint = () => {
+                setTimeout(() => {
+                    window.print();
+                    setTimeout(() => { document.body.classList.remove('print-pdf'); }, 1000);
+                }, 600);
+            };
+            if (window.MathJax) {
+                window.MathJax.typesetPromise([pA]).then(triggerPrint).catch(() => {
+                    setTimeout(() => {
+                        window.MathJax.typesetPromise([pA]).then(triggerPrint).catch(triggerPrint);
+                    }, 500);
+                });
+            } else {
+                triggerPrint();
             }
         };
 
@@ -10855,16 +10372,6 @@
         };
 
         window.startReattempt = function() {
-            // "Reattempt" is only ever meant for ordinary practice/mock tests.
-            // A Live Test attempt (testMode 'live' + a liveSessionId) must NEVER
-            // be reattempt-able within the same Live Session — no exception for
-            // Room Host or Room Member. This button used to skip the normal
-            // page-load submission check entirely (it restarts the exam purely
-            // in-memory), which was the actual hole letting an already-submitted
-            // student take a Live Test again.
-            if (window.examData && window.examData.testMode === 'live' && window.examData.liveSessionId) {
-                return window.showCustomAlert("Not Allowed", "🔒 Ye ek Live Test hai — aap ise pehle hi submit kar chuke hain. Ek Live Session mein sirf ek hi valid attempt allowed hai. Live ranking dekhne ke liye Upcoming Schedule card ke 👁️ View Room button ka use karein.", "🔒");
-            }
             window.showCustomConfirm("Reattempt", "Reattempt this test?", () => window.startExam(true), "🔄");
         };
 
@@ -11068,7 +10575,7 @@
            CALCULATE SCORE & SUBMIT – with Enhanced Analytics (Main Graph + Sub-Graphs)
            + WEAK QUESTIONS STORAGE
            ========================================================================== */
-        window.calculateScoreAndSubmit = function(isReplay) {
+        window.calculateScoreAndSubmit = function() {
             clearInterval(window.globalTimer);
             clearInterval(window.qTimer);
             clearInterval(window.autoSaveTimer);
@@ -11167,40 +10674,19 @@
             // RENDER ENHANCED ANALYTICS
             window.renderEnhancedAnalytics(tagPerformance, allTags);
 
+            // RENDER CHAPTER-WISE PERFORMANCE (Subject -> Chapter breakdown from !T topicTag)
+            window.renderChapterPerformance(window.examData.questions);
+
             const rankLoader = document.getElementById('rank-loader');
             if (rankLoader) rankLoader.style.display = 'block';
             window.toggleAdminLock(true);
 
-            if (isReplay) {
-                // Reviewing a PAST Live Test from "✅ Complete Tests" — everything
-                // above this point (grading loop, analytics render, view switch)
-                // already ran against the historical snapshot we loaded, so all
-                // that's left is showing the rank (precomputed by
-                // openHistoricalResult before calling us) and never touching
-                // Firestore again.
-                if (rankLoader) rankLoader.style.display = 'none';
-                const rInfo = window._replayRankInfo || null;
-                const rankEl = document.getElementById('cert-rank');
-                if (rankEl) rankEl.innerText = rInfo ? ('#' + rInfo.rank + ' / ' + rInfo.total) : '#— / —';
-                return;
-            }
-
             const sC = window.isReattemptMode ? (window.examData.code + "-RE") : window.examData.code;
             const activeRoomId = window.currentRoomId || localStorage.getItem('activeRoomId') || null;
-            // A "Live Test" attempt is one taken while the test's testMode was
-            // 'live' AND it belongs to a specific live occurrence (liveSessionId)
-            // — this is what lets the new "✅ Complete Tests" history correctly
-            // separate live attempts from ordinary practice-test attempts, and
-            // group all attempts (room-based AND standalone) of the SAME live
-            // occurrence together for the Overall Leaderboard.
-            const isLiveAttempt = !!(window.examData && window.examData.testMode === 'live' && window.examData.liveSessionId);
-            const reattemptBtn = document.getElementById('btn-reattempt');
-            if (reattemptBtn) reattemptBtn.style.display = isLiveAttempt ? 'none' : '';
             const resData = {
                 uid: (window.studentInfo && window.studentInfo.uid) || "",
                 name: window.studentInfo.name || "Student",
                 phone: window.studentInfo.phone || "",
-                sessionId: (window.examData && window.examData.testMode === 'live' && window.examData.liveSessionId) || null,
                 score: window.studentInfo.score,
                 testCode: sC,
                 testName: window.examData.exam || window.examData.code || "Test",
@@ -11210,120 +10696,9 @@
                 timeSpent: window.totalTimeSpent,
                 timestamp: Date.now(),
                 weakQuestions: weakQs,   // <-- NEW: store weak questions
-                roomId: activeRoomId, // links this attempt to a "Play with Friends" room, if any
-                // --- "✅ Complete Tests" history snapshot (live attempts only) ---
-                // These are captured NOW because the live test's own liveStart/
-                // liveEnd/sessionId get overwritten the next time admin re-runs
-                // it live — without this snapshot, historical cards would show
-                // whatever the test's CURRENT live schedule happens to be.
-                isLiveAttempt: isLiveAttempt,
-                board: isLiveAttempt ? (window.examData.board || "") : null,
-                category: isLiveAttempt ? (window.examData.category || "") : null,
-                liveStart: isLiveAttempt ? (window.examData.liveStart || null) : null,
-                liveEnd: isLiveAttempt ? (window.examData.liveEnd || null) : null,
-                durationMinutes: isLiveAttempt ? (window.examData.totTime || 0) : null,
-                totalQuestions: isLiveAttempt ? (window.examData.questions.length || 0) : null,
-                totalMarks: isLiveAttempt ? mS : null,
-                // Full answer replay data — lets "📊 Result" reopen the EXACT
-                // original result dashboard (graphs, question review, PDF)
-                // for this specific attempt, any time in the future.
-                liveReplayAnswers: isLiveAttempt ? window.userAnswers : null,
-                liveMarks: isLiveAttempt ? window.examData.marks : null,
-                liveNeg: isLiveAttempt ? window.examData.neg : null
+                roomId: activeRoomId // links this attempt to a "Play with Friends" room, if any
             };
             db.collection("results").add(resData).then(() => {
-                window._afterResultSaved(resData, activeRoomId);
-            }).catch((err) => {
-                console.error('Result submit failed, queuing for retry:', err);
-                window._queuePendingResultAndRetry(resData, activeRoomId);
-            });
-        };
-
-        // A submission that fails to reach Firestore (flaky connection, brief
-        // offline moment, etc.) must NEVER just silently vanish — that's what
-        // was causing "submit nahi ho raha" / "Complete Tests me save nahi ho
-        // raha" for some students. The graded result is safely queued in
-        // localStorage the instant grading finishes, and is only removed from
-        // that queue once Firestore actually confirms the write — so even if
-        // the tab is closed right after a failed attempt, the NEXT time the
-        // app loads (this device, this account) it auto-retries and the
-        // record still lands in Complete Tests.
-        window._queuePendingResultAndRetry = function(resData, activeRoomId, attempt) {
-            attempt = attempt || 1;
-            if (resData && resData.isLiveAttempt && resData.testCode && resData.sessionId) {
-                if (!window.mySubmittedLiveSessions) window.mySubmittedLiveSessions = new Set();
-                window.mySubmittedLiveSessions.add(resData.testCode + '|' + resData.sessionId);
-            }
-            let queue = [];
-            try { queue = JSON.parse(localStorage.getItem('pendingResultSubmissions') || '[]'); } catch (e) { queue = []; }
-            const already = queue.some(q => q.resData && q.resData.testCode === resData.testCode && q.resData.timestamp === resData.timestamp && q.resData.uid === resData.uid);
-            if (!already) {
-                queue.push({ resData, activeRoomId, queuedAt: Date.now() });
-                localStorage.setItem('pendingResultSubmissions', JSON.stringify(queue));
-            }
-            if (attempt <= 4) {
-                const delay = Math.min(2000 * attempt, 8000);
-                setTimeout(() => {
-                    db.collection("results").add(resData).then(() => {
-                        window._removeFromPendingQueue(resData);
-                        window._afterResultSaved(resData, activeRoomId);
-                    }).catch(() => window._queuePendingResultAndRetry(resData, activeRoomId, attempt + 1));
-                }, delay);
-            } else {
-                // Out of automatic retries for now — it's safely in
-                // localStorage and will keep trying on every future app
-                // load (see window.flushPendingResultSubmissions), so the
-                // score is never lost even though it isn't on the server yet.
-                const rankLoader = document.getElementById('rank-loader');
-                if (rankLoader) rankLoader.style.display = 'none';
-                const rankEl = document.getElementById('cert-rank');
-                if (rankEl) rankEl.innerText = '⏳ Syncing...';
-                window.showCustomAlert("Connection Issue", "⚠️ Aapka test grade ho chuka hai aur score safe save ho gaya hai is device par, lekin server tak abhi pahunch nahi paaya (internet issue). Jaise hi connection theek hoga, ye apne aap 'Complete Tests' mein save ho jayega — app dobara kholte hi retry hoga. Result yahin bhi dikh raha hai.", "⚠️");
-                window.fetchLeaderboardWithPhotos(window.examData.code);
-            }
-        };
-
-        window._removeFromPendingQueue = function(resData) {
-            try {
-                let queue = JSON.parse(localStorage.getItem('pendingResultSubmissions') || '[]');
-                queue = queue.filter(q => !(q.resData && q.resData.testCode === resData.testCode && q.resData.timestamp === resData.timestamp && q.resData.uid === resData.uid));
-                localStorage.setItem('pendingResultSubmissions', JSON.stringify(queue));
-            } catch (e) {}
-        };
-
-        // Runs once at app boot (and is safe to call any time) — flushes any
-        // result that got graded but never made it to Firestore in a
-        // previous session, so a past connection hiccup can't leave a
-        // permanent hole in this student's Complete Tests history.
-        window.flushPendingResultSubmissions = function() {
-            let queue = [];
-            try { queue = JSON.parse(localStorage.getItem('pendingResultSubmissions') || '[]'); } catch (e) { return; }
-            if (!queue.length) return;
-            queue.forEach(item => {
-                db.collection("results").add(item.resData).then(() => {
-                    window._removeFromPendingQueue(item.resData);
-                    if (item.activeRoomId && item.resData.uid) {
-                        db.collection("testRooms").doc(item.activeRoomId).update({
-                            [`memberInfo.${item.resData.uid}.submitted`]: true,
-                            [`memberInfo.${item.resData.uid}.score`]: item.resData.score
-                        }).then(() => window.finalizeRoomIfDone(item.activeRoomId)).catch(() => {});
-                    }
-                }).catch(() => {}); // still offline — stays queued, will retry again next load
-            });
-        };
-
-        // Shared "submission confirmed" follow-up — used by both the normal
-        // first-try path and the retry-queue path above, so behaviour is
-        // identical either way.
-        window._afterResultSaved = function(resData, activeRoomId) {
-                // Instantly reflect this submission for the "hide Start button"
-                // check — works for a direct (no Room) attempt exactly the same
-                // as a Room-based one, since it's keyed off testCode+sessionId,
-                // not room membership.
-                if (resData && resData.isLiveAttempt && resData.testCode && resData.sessionId) {
-                    if (!window.mySubmittedLiveSessions) window.mySubmittedLiveSessions = new Set();
-                    window.mySubmittedLiveSessions.add(resData.testCode + '|' + resData.sessionId);
-                }
                 // If this attempt was taken inside a friend Test Room, mark this
                 // student as "submitted" on the room doc too — this is what
                 // powers the ✅ Submitted badge next to their name for
@@ -11345,21 +10720,182 @@
                 window.attemptedTestsCache = attemptedRecords;
                 localStorage.setItem(window.getAttemptedStorageKey(), JSON.stringify(attemptedRecords));
                 window.fetchLeaderboardWithPhotos(window.examData.code);
-                const rankLoader = document.getElementById('rank-loader');
-                const sC = resData.testCode;
                 db.collection("results").where("testCode", "==", sC).get().then(snap => {
                     const scores = [];
                     snap.forEach(d => scores.push(d.data().score));
                     scores.sort((a, b) => b - a);
                     const rank = scores.indexOf(window.studentInfo.score) + 1;
                     if (rankLoader) rankLoader.style.display = 'none';
-                    const rankEl = document.getElementById('cert-rank');
-                    if (rankEl) rankEl.innerText = '#' + rank + ' / ' + scores.length;
-                }).catch(() => {
-                    if (rankLoader) rankLoader.style.display = 'none';
-                    const rankEl = document.getElementById('cert-rank');
-                    if (rankEl) rankEl.innerText = '#N/A / N/A';
+                    document.getElementById('cert-rank').innerText = '#' + rank + ' / ' + scores.length;
                 });
+            }).catch(() => {
+                if (rankLoader) rankLoader.style.display = 'none';
+                document.getElementById('cert-rank').innerText = '#N/A / N/A';
+                window.fetchLeaderboardWithPhotos(window.examData.code);
+            });
+        };
+
+        /* ==========================================================================
+           CHAPTER-WISE PERFORMANCE (NEW, additive): Subject -> Chapter breakdown
+           built from each question's !T topicTag ("Subject :: Chapter" or
+           "Subject :: Topic :: Chapter"). Independent of the existing tag-based
+           Subject/Topic analytics above — does not modify that data or flow.
+           ========================================================================== */
+        window.renderChapterPerformance = function(questions) {
+            const container = document.getElementById('chapter-graphs-container');
+            if (!container) return;
+            container.innerHTML = '';
+            (window.chapterChartInstances || []).forEach(c => c && c.destroy());
+            window.chapterChartInstances = [];
+            if (!questions || questions.length === 0) return;
+
+            // Group by Subject -> Chapter using topicTag
+            const subjectChapterMap = {};
+            questions.forEach((q, i) => {
+                const tt = (q.topicTag || '').trim();
+                if (!tt) return;
+                const parts = tt.split('::').map(s => s.trim()).filter(Boolean);
+                if (parts.length < 2) return;
+                const subject = parts[0];
+                const chapter = parts[1];
+                if (!subjectChapterMap[subject]) subjectChapterMap[subject] = {};
+                if (!subjectChapterMap[subject][chapter]) {
+                    subjectChapterMap[subject][chapter] = { correct: 0, wrong: 0, blank: 0, total: 0 };
+                }
+                const perf = subjectChapterMap[subject][chapter];
+                const cA = window.getCleanAns(q.ans);
+                const gA = window.getCleanAns(window.userAnswers[i]);
+                if (!window.userAnswers[i]) {
+                    perf.blank++;
+                } else if (gA === cA) {
+                    perf.correct++;
+                } else {
+                    perf.wrong++;
+                }
+                perf.total++;
+            });
+
+            const subjects = Object.keys(subjectChapterMap);
+            if (subjects.length === 0) return;
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'analytics-title';
+            titleEl.style.marginTop = '4px';
+            titleEl.innerHTML = '📖 Chapter-wise Performance <span class="analytics-badge">Topic Tags</span>';
+            container.appendChild(titleEl);
+
+            const isDark = document.body.classList.contains('dark-mode');
+            const textColor = isDark ? '#e8edf5' : '#1a2332';
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+
+            subjects.forEach(sub => {
+                const chapters = subjectChapterMap[sub];
+                const chapterNames = Object.keys(chapters);
+                if (chapterNames.length === 0) return;
+
+                const chCorrect = chapterNames.map(c => chapters[c].correct || 0);
+                const chWrong = chapterNames.map(c => chapters[c].wrong || 0);
+                const chBlank = chapterNames.map(c => chapters[c].blank || 0);
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'sub-graph-container';
+                wrapper.innerHTML = `
+                    <div class="sub-graph-title">📖 ${sub} — Chapter-wise Performance</div>
+                    <div class="sub-graph-wrapper"><canvas id="chapterChart-${sub.replace(/\s/g,'')}"></canvas></div>
+                    <table class="sub-graph-detail-table">
+                        <thead><tr><th>Chapter</th><th>Total</th><th>Correct</th><th>Wrong</th><th>Accuracy</th></tr></thead>
+                        <tbody id="chapterTable-${sub.replace(/\s/g,'')}"></tbody>
+                    </table>
+                `;
+                container.appendChild(wrapper);
+
+                const tbody = wrapper.querySelector('tbody');
+                let tableHtml = '';
+                chapterNames.forEach(c => {
+                    const perf = chapters[c];
+                    const acc = perf.total > 0 ? Math.round((perf.correct / perf.total) * 100) : 0;
+                    tableHtml += `
+                        <tr>
+                            <td>${c}</td>
+                            <td>${perf.total}</td>
+                            <td style="color:var(--success);">${perf.correct}</td>
+                            <td style="color:var(--danger);">${perf.wrong}</td>
+                            <td style="font-weight:bold;">${acc}%</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = tableHtml;
+
+                const canvas = wrapper.querySelector('canvas');
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chapterNames,
+                        datasets: [{
+                            label: '✅ Correct',
+                            data: chCorrect,
+                            backgroundColor: 'rgba(15,157,88,0.7)',
+                            borderColor: '#0f9d58',
+                            borderWidth: 1,
+                            borderRadius: 3,
+                            maxBarThickness: 40
+                        }, {
+                            label: '❌ Wrong',
+                            data: chWrong,
+                            backgroundColor: 'rgba(220,53,69,0.7)',
+                            borderColor: '#dc3545',
+                            borderWidth: 1,
+                            borderRadius: 3,
+                            maxBarThickness: 40
+                        }, {
+                            label: '⬜ Blank',
+                            data: chBlank,
+                            backgroundColor: '#ffffff',
+                            borderColor: isDark ? '#ffffff' : '#94a3b8',
+                            borderWidth: 1.5,
+                            borderRadius: 3,
+                            maxBarThickness: 40
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: textColor,
+                                    font: { size: 11, weight: 'bold' },
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: textColor,
+                                    font: { size: 10, weight: '600' },
+                                    maxRotation: 30,
+                                    minRotation: 20
+                                },
+                                grid: { display: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: textColor,
+                                    font: { size: 11, weight: '600' },
+                                    stepSize: 1
+                                },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+                window.chapterChartInstances.push(chart);
+            });
         };
 
         /* ==========================================================================
@@ -12169,12 +11705,14 @@
 
             const allSavedTests = window.getAllMergedTests();
             const shownTestCodes = new Set();
+            window._historyRecordsCache = window._historyRecordsCache || {};
 
             let h = '';
             records.forEach(r => {
                 const pdfCode = r.testCode ? String(r.testCode).replace('-RE', '') : '';
                 if (shownTestCodes.has(pdfCode)) return;
                 shownTestCodes.add(pdfCode);
+                window._historyRecordsCache[pdfCode] = r; // used by "View Result" below
 
                 const tData = allSavedTests.find(t => t.code === pdfCode) || {};
                 const p = window.parseHack(tData.topic || "");
@@ -12183,12 +11721,118 @@
                 const tCat = p.cat || "Mock Test";
                 const tSub = p.subcat || tData.subject || tData.sub || "Subject";
                 const tChap = p.topic || "";
-                h += `<div class="test-card hist-card-layout"><div class="hist-left"><h4 style="margin:0;color:var(--primary);font-size:14px;">📝 ${tBoard} - ${tExam} (${r.testCode||'Test'})</h4><div style="font-size:11px;color:var(--text-muted);margin:2px 0 6px 0;font-weight:600;">📂 ${tCat} | 📚 ${tSub} ${tChap ? ' | 📖 ' + tChap : ''}</div><div style="font-size:11px;color:var(--text-main);background:var(--bg-subtle);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-color); display:inline-block;">Attempt: <b>${r.attempt||1}</b> | Score: <b style="color:var(--success);font-size:13px;">${r.score||0}</b><br><span style="color:var(--success);margin-top:2px;display:inline-block;">✅ Right: ${r.right||0}</span> | <span style="color:var(--danger);">❌ Wrong: ${r.wrong||0}</span> | <span style="color:var(--text-muted);">⬜ Blank: ${r.blank||0}</span><br><div style="margin-top:2px;">⏱ Time Taken: ${Math.floor((r.timeSpent||0)/60)}m ${(r.timeSpent||0)%60}s</div></div></div><div class="hist-right"><button class="btn btn-danger btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.downloadHistoryPDF('${pdfCode}')">📥 Download PDF</button></div></div>`;
+                h += `<div class="test-card hist-card-layout"><div class="hist-left"><h4 style="margin:0;color:var(--primary);font-size:14px;">📝 ${tBoard} - ${tExam} (${r.testCode||'Test'})</h4><div style="font-size:11px;color:var(--text-muted);margin:2px 0 6px 0;font-weight:600;">📂 ${tCat} | 📚 ${tSub} ${tChap ? ' | 📖 ' + tChap : ''}</div><div style="font-size:11px;color:var(--text-main);background:var(--bg-subtle);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-color); display:inline-block;">Attempt: <b>${r.attempt||1}</b> | Score: <b style="color:var(--success);font-size:13px;">${r.score||0}</b><br><span style="color:var(--success);margin-top:2px;display:inline-block;">✅ Right: ${r.right||0}</span> | <span style="color:var(--danger);">❌ Wrong: ${r.wrong||0}</span> | <span style="color:var(--text-muted);">⬜ Blank: ${r.blank||0}</span><br><div style="margin-top:2px;">⏱ Time Taken: ${Math.floor((r.timeSpent||0)/60)}m ${(r.timeSpent||0)%60}s</div></div></div><div class="hist-right" style="display:flex;flex-direction:column;gap:6px;"><button class="btn btn-primary btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.openHistoricalResult('${pdfCode}')">👁️ View Result</button><button class="btn btn-danger btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.downloadHistoryPDF('${pdfCode}')">📥 Download PDF</button></div></div>`;
             });
             list.innerHTML = h;
 
             window.renderSubjectFilterAndTopicPerformance(allSavedTests, records);
             window.computeAndShowRanks();
+        };
+
+        /* ==========================================================================
+           VIEW RESULT (from My Report) — reopens the exact same score-card +
+           rank + live leaderboard screen shown right after a fresh submission,
+           any time later, for any past test. Only a saved result record (score,
+           right/wrong/blank, timestamp) is available for a PAST attempt — the
+           per-question answer breakdown was never stored historically — so the
+           Analysis (Correct/Wrong/Blank review) and Subject-wise Analytics
+           sections, which need that detail, are hidden in this view rather than
+           shown inaccurately. Score, Rank, and Leaderboard are all populated
+           for real from the database, exactly like a fresh submission.
+           ========================================================================== */
+        window.openHistoricalResult = function(pdfCode) {
+            const record = window._historyRecordsCache && window._historyRecordsCache[pdfCode];
+            if (!record) return window.showCustomAlert("Error", "Result data not found — please refresh My Report and try again.", "⚠️");
+
+            const allSavedTests = window.getAllMergedTests();
+            const tData = allSavedTests.find(t => t.code === pdfCode) || {};
+
+            const certLogo = document.getElementById('cert-logo-img');
+            if (certLogo) certLogo.src = window.portalLogoURL || '';
+            const examTitleEl = document.getElementById('cert-exam-title');
+            if (examTitleEl) examTitleEl.innerText = "Performance Certificate";
+            const examNameEl = document.getElementById('cert-exam-name');
+            if (examNameEl) examNameEl.innerText = record.testName || tData.exam || record.testCode || "Test";
+            const testCodeEl = document.getElementById('cert-test-code');
+            if (testCodeEl) testCodeEl.innerText = record.testCode || "---";
+            const rwEl = document.getElementById('cert-right-wrong');
+            if (rwEl) rwEl.innerText = `${record.right||0} / ${record.wrong||0}`;
+            const scoreEl = document.getElementById('cert-score');
+            if (scoreEl) scoreEl.innerText = `${record.score||0}`;
+            const nameEl = document.getElementById('cert-student-name');
+            if (nameEl) nameEl.innerText = record.name || (window.studentInfo && window.studentInfo.name) || "Student";
+            const dateEl = document.getElementById('cert-date');
+            if (dateEl) dateEl.innerText = "Generated: " + (record.timestamp ? new Date(record.timestamp).toLocaleString('en-IN') : "—");
+            const rankEl = document.getElementById('cert-rank');
+            if (rankEl) rankEl.innerText = "#... / ...";
+
+            const heading = document.getElementById('result-heading');
+            if (heading) heading.innerHTML = '<span class="highlight">📊</span> Your Test Result';
+
+            // Hide the pieces that need the full per-question answer data,
+            // which isn't retained for past attempts — showing them without
+            // that data would be misleading. Score / Rank / Leaderboard below
+            // are all still real, live numbers pulled fresh from the database.
+            const btnRow = document.querySelector('.result-buttons-row');
+            if (btnRow) btnRow.style.display = 'none';
+            const analysisSection = document.querySelector('.result-analysis-section');
+            if (analysisSection) analysisSection.style.display = 'none';
+            const analyticsContainer = document.getElementById('analytics-container');
+            if (analyticsContainer) analyticsContainer.style.display = 'none';
+
+            // Swap the close button to return to My Report instead of Home.
+            const closeBtn = document.getElementById('result-close-btn');
+            if (closeBtn) { closeBtn.innerText = "⬅️ Back to My Report";
+                closeBtn.setAttribute('onclick', 'window.closeHistoricalResult()'); }
+
+            // Rank + live leaderboard — same real data source a fresh
+            // submission uses, just re-queried on demand.
+            const rankLoader = document.getElementById('rank-loader');
+            if (rankLoader) rankLoader.style.display = 'block';
+            db.collection("results").where("testCode", "==", record.testCode).get().then(snap => {
+                const scores = [];
+                snap.forEach(d => scores.push(d.data().score));
+                scores.sort((a, b) => b - a);
+                const rank = scores.indexOf(record.score) + 1;
+                if (rankLoader) rankLoader.style.display = 'none';
+                if (rankEl) rankEl.innerText = '#' + rank + ' / ' + scores.length;
+            }).catch(() => {
+                if (rankLoader) rankLoader.style.display = 'none';
+                if (rankEl) rankEl.innerText = 'N/A';
+            });
+            window.fetchLeaderboardWithPhotos(record.testCode);
+
+            document.querySelectorAll('.view-section').forEach(v => { v.classList.remove('active-view');
+                v.style.display = ''; });
+            const resView = document.getElementById('result-view');
+            if (resView) resView.classList.add('active-view');
+            window.toggleAdminLock(true);
+        };
+
+        window.closeHistoricalResult = function() {
+            // Restore the normal result-view UI so a genuinely fresh
+            // submission (right after a live test) still shows everything
+            // as usual the next time this same screen is used for that.
+            const btnRow = document.querySelector('.result-buttons-row');
+            if (btnRow) btnRow.style.display = '';
+            const analysisSection = document.querySelector('.result-analysis-section');
+            if (analysisSection) analysisSection.style.display = '';
+            const closeBtn = document.getElementById('result-close-btn');
+            if (closeBtn) { closeBtn.innerText = "🏠 Close & Go Home";
+                closeBtn.setAttribute('onclick', 'window.closeAndRedirect()'); }
+
+            document.querySelectorAll('.view-section').forEach(v => { v.classList.remove('active-view');
+                v.style.display = ''; });
+            const dashView = document.getElementById('student-dashboard-view');
+            if (dashView) {
+                dashView.classList.add('active-view');
+                window.toggleAdminLock(true);
+                window.switchStudentTab('history');
+            } else {
+                window.location.href = BASE_URL;
+            }
+            window.navStack = [];
+            try { history.pushState({}, "", window.location.pathname); } catch (e) {}
         };
 
         /* ==========================================================================
@@ -12281,12 +11925,19 @@
                             const parts = tag.split(':');
                             const subject = parts.length >= 1 ? parts[0].trim() : 'General';
                             subjectSet.add(subject);
+                            const topicTagVal = (q.topicTag || '').trim();
+                            let chapter = null;
+                            if (topicTagVal) {
+                                const ttParts = topicTagVal.split('::').map(s => s.trim()).filter(Boolean);
+                                if (ttParts.length >= 2) chapter = ttParts[1];
+                            }
                             allQuestionsWithTags.push({
                                 testCode: code,
                                 testName: test.exam || code,
                                 question: q,
                                 tag: tag,
                                 subject: subject,
+                                chapter: chapter,
                                 index: idx,
                             });
                             if (!tagPerformance[tag]) {
@@ -12386,6 +12037,7 @@
         window.filterHistorySubjectTop = function(subject) {
             const container = document.getElementById('subject-questions-container-top');
             const buttons = document.querySelectorAll('#subject-filter-bar-top .filter-btn');
+            const chapterBar = document.getElementById('chapter-filter-bar-top');
             if (!container) return;
 
             buttons.forEach(btn => {
@@ -12396,6 +12048,7 @@
             const data = window._historySubjectDataTop;
             if (!data) {
                 container.innerHTML = '<p style="color:var(--text-muted);">No data available.</p>';
+                if (chapterBar) { chapterBar.style.display = 'none'; chapterBar.innerHTML = ''; }
                 return;
             }
 
@@ -12404,9 +12057,66 @@
                 filtered = filtered.filter(item => item.subject === subject);
             }
 
-            if (filtered.length === 0) {
+            // ---- Chapter filter (built from !T topicTag data within the selected subject) ----
+            if (chapterBar) {
+                if (subject !== 'all') {
+                    const chapterSet = new Set();
+                    filtered.forEach(item => { if (item.chapter) chapterSet.add(item.chapter); });
+                    const sortedChapters = Array.from(chapterSet).sort();
+                    if (sortedChapters.length > 0) {
+                        let chBtnsHtml = '<span class="filter-label">📖 Filter by Chapter:</span>';
+                        chBtnsHtml += `<button class="filter-btn active" data-chapter="all" onclick="window.filterHistoryChapterTop('all')">📋 All</button>`;
+                        sortedChapters.forEach(ch => {
+                            chBtnsHtml += `<button class="filter-btn" data-chapter="${ch}" onclick="window.filterHistoryChapterTop('${ch.replace(/'/g, "\\'")}')">${ch}</button>`;
+                        });
+                        chapterBar.innerHTML = chBtnsHtml;
+                        chapterBar.style.display = 'flex';
+                    } else {
+                        chapterBar.style.display = 'none';
+                        chapterBar.innerHTML = '';
+                    }
+                } else {
+                    chapterBar.style.display = 'none';
+                    chapterBar.innerHTML = '';
+                }
+            }
+
+            window._historyChapterDataTop = {
+                subject: subject,
+                subjectFilteredItems: filtered
+            };
+
+            window.renderHistoryFilteredQuestions(filtered, subject === 'all' ? 'any subject' : subject);
+        };
+
+        /* ---- Filter (within the currently selected Subject) by Chapter, built from !T topicTag ---- */
+        window.filterHistoryChapterTop = function(chapter) {
+            const chapterButtons = document.querySelectorAll('#chapter-filter-bar-top .filter-btn');
+            chapterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.chapter === chapter) btn.classList.add('active');
+            });
+
+            const data = window._historyChapterDataTop;
+            if (!data) return;
+
+            let filtered = data.subjectFilteredItems;
+            if (chapter !== 'all') {
+                filtered = filtered.filter(item => item.chapter === chapter);
+            }
+
+            window.renderHistoryFilteredQuestions(filtered, chapter === 'all' ? data.subject : chapter);
+        };
+
+        /* ---- Shared renderer: builds the grouped question/answer list for whatever
+             filtered set (by Subject and/or Chapter) is currently active ---- */
+        window.renderHistoryFilteredQuestions = function(filtered, emptyLabel) {
+            const container = document.getElementById('subject-questions-container-top');
+            if (!container) return;
+
+            if (!filtered || filtered.length === 0) {
                 container.innerHTML =
-                    `<p style="color:var(--text-muted); font-size:13px; padding:8px 0;">No questions found for ${subject === 'all' ? 'any subject' : subject}.</p>`;
+                    `<p style="color:var(--text-muted); font-size:13px; padding:8px 0;">No questions found for ${emptyLabel === 'any subject' ? 'any subject' : emptyLabel}.</p>`;
                 return;
             }
 
@@ -12435,7 +12145,9 @@
                     const q = item.question;
                     const idxNum = item.index + 1;
                     const solutionId = 'sol-' + groupId + '-' + idx;
+                    const predictId = 'predq-' + groupId + '-' + idx;
                     const hasExp = q.exp && q.exp.trim() !== "";
+                    const hasPredicted = q.predicted && Array.isArray(q.predicted) && q.predicted.length > 0;
 
                     // Find the correct option text
                     let correctOptionText = q.ans || 'N/A';
@@ -12444,6 +12156,20 @@
                         if (found) {
                             correctOptionText = q.ans + '. ' + found.text;
                         }
+                    }
+
+                    let predictedHtml = '';
+                    if (hasPredicted) {
+                        predictedHtml += `<div class="sq-solution-content" id="${predictId}"><button class="sq-solution-close" onclick="window.closeHistorySolution('${predictId}')">✕ Close</button><br>`;
+                        q.predicted.forEach((pq, pi) => {
+                            predictedHtml += `
+                                        <div style="margin-top:${pi === 0 ? '4' : '10'}px;padding-top:${pi === 0 ? '0' : '8'}px;${pi === 0 ? '' : 'border-top:1px dashed var(--border-color);'}">
+                                            <b>PQ${pi+1}. ${pq.q || ''}</b>
+                                            ${pq.s ? `<div style="margin-top:4px;color:var(--text-muted);"><b>Solution:</b> ${pq.s}</div>` : ''}
+                                        </div>
+                                    `;
+                        });
+                        predictedHtml += `</div>`;
                     }
 
                     html += `
@@ -12456,10 +12182,12 @@
                                     <div class="sq-answer">
                                         <span style="color:var(--text-muted);">Correct: ${correctOptionText}</span>
                                         ${hasExp ? `<button class="sq-solution-btn" onclick="window.toggleHistorySolution('${solutionId}')">💡 Solution</button>` : ''}
+                                        ${hasPredicted ? `<button class="sq-solution-btn" onclick="window.toggleHistorySolution('${predictId}')">🔥 Predict Questions</button>` : ''}
                                     </div>
                                     ${hasExp ? `<div class="sq-solution-content" id="${solutionId}"><button class="sq-solution-close" onclick="window.closeHistorySolution('${solutionId}')">✕ Close</button><br>${q.exp}</div>` : ''}
+                                    ${predictedHtml}
                                 </div>
-                            `;
+                        `;
                 });
                 html += `</div></div></div>`;
             }
@@ -12989,7 +12717,6 @@
            ========================================================================== */
         window.generateCaptcha();
         window.loadPortalLogo();
-        window.flushPendingResultSubmissions();
 
         console.log('🚀 TEST BODHI v24.1 — FINAL FIXES + WEAK QUESTIONS FEATURE');
         console.log('✅ Result view now uses TWO-COLUMN LAYOUT: Graphs on RIGHT, everything else on LEFT');
