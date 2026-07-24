@@ -11916,33 +11916,56 @@
             const allQuestionsWithTags = [];
             const tagPerformance = {};
 
+            // ---- QUESTION-CENTRIC extraction ----
+            // Subject/Chapter/Topic are derived PER QUESTION from that question's own
+            // tags — never from which Test it happened to belong to. We scan every
+            // question of every attempted test (regardless of test) and, for each
+            // question, prefer the structured !T topicTag ("Subject :: Chapter ::
+            // Topic") for Subject+Chapter; if a question has no topicTag we fall back
+            // to the legacy !tag ("Subject: Topic") so older content still counts.
+            // This guarantees the Subject list (and, in turn, the Chapter list built
+            // from it) reflects ALL attempted questions across ALL tests, not just
+            // whichever tests happened to carry a particular tag format.
             uniqueTestCodes.forEach(code => {
                 const test = allTests.find(t => t.code === code);
                 if (test && test.questions) {
                     test.questions.forEach((q, idx) => {
-                        const tag = q.tag || test.tags?.[idx] || "General";
-                        if (tag && tag !== "General" && !tag.match(/\d{2}\/\d{2}\/\d{4}/)) {
-                            const parts = tag.split(':');
-                            const subject = parts.length >= 1 ? parts[0].trim() : 'General';
-                            subjectSet.add(subject);
-                            const topicTagVal = (q.topicTag || '').trim();
-                            let chapter = null;
-                            if (topicTagVal) {
-                                const ttParts = topicTagVal.split('::').map(s => s.trim()).filter(Boolean);
-                                if (ttParts.length >= 2) chapter = ttParts[1];
-                            }
-                            allQuestionsWithTags.push({
-                                testCode: code,
-                                testName: test.exam || code,
-                                question: q,
-                                tag: tag,
-                                subject: subject,
-                                chapter: chapter,
-                                index: idx,
-                            });
-                            if (!tagPerformance[tag]) {
-                                tagPerformance[tag] = { correct: 0, wrong: 0, blank: 0, total: 0 };
-                            }
+                        const legacyTag = q.tag || test.tags?.[idx] || "";
+                        const isDateLike = legacyTag && legacyTag.match(/\d{2}\/\d{2}\/\d{4}/);
+                        const topicTagVal = (q.topicTag || '').trim();
+                        const ttParts = topicTagVal ? topicTagVal.split('::').map(s => s.trim()).filter(Boolean) : [];
+
+                        let subject = null, chapter = null, topic = null;
+                        if (ttParts.length >= 1) {
+                            // Preferred source: structured Subject :: Chapter :: Topic tag
+                            subject = ttParts[0];
+                            chapter = ttParts.length >= 2 ? ttParts[1] : null;
+                            topic = ttParts.length >= 3 ? ttParts[2] : null;
+                        } else if (legacyTag && legacyTag !== "General" && !isDateLike) {
+                            // Fallback: legacy "Subject: Topic" tag (no chapter info available)
+                            const parts = legacyTag.split(':');
+                            subject = parts.length >= 1 ? parts[0].trim() : null;
+                            topic = parts.length >= 2 ? parts.slice(1).join(':').trim() : null;
+                        }
+
+                        if (!subject) return; // nothing usable to tag this question by
+
+                        const displayTag = legacyTag && legacyTag !== "General" && !isDateLike ? legacyTag :
+                            (topicTagVal || subject);
+
+                        subjectSet.add(subject);
+                        allQuestionsWithTags.push({
+                            testCode: code,
+                            testName: test.exam || code,
+                            question: q,
+                            tag: displayTag,
+                            subject: subject,
+                            chapter: chapter,
+                            topic: topic,
+                            index: idx,
+                        });
+                        if (!tagPerformance[displayTag]) {
+                            tagPerformance[displayTag] = { correct: 0, wrong: 0, blank: 0, total: 0 };
                         }
                     });
                 }
@@ -11967,34 +11990,43 @@
 
             window.filterHistorySubjectTop('all');
 
+            // ---- Topic-wise Performance table ----
+            // Reuses allQuestionsWithTags (already derived question-by-question,
+            // preferring !T topicTag over the legacy !tag) instead of re-scanning
+            // test.questions with the old legacy-tag-only logic. Otherwise any
+            // question tagged solely with !T (no legacy !tag) would silently vanish
+            // from this table, exactly like it used to vanish from the Subject
+            // filter above.
             const topicPerf = {};
+            const subjectOf = {};
             const uniqueCodes = new Set(records.map(r => r.testCode ? r.testCode.replace('-RE', '') : '').filter(Boolean));
             uniqueCodes.forEach(code => {
-                const test = allTests.find(t => t.code === code);
-                if (test && test.questions) {
-                    const record = records.find(r => (r.testCode || '').replace('-RE', '') === code);
-                    if (!record) return;
-                    const rightCount = record.right || 0;
-                    const wrongCount = record.wrong || 0;
-                    const blankCount = record.blank || 0;
-                    const tagDistribution = {};
-                    test.questions.forEach(q => {
-                        const tag = q.tag || test.tags?.[test.questions.indexOf(q)] || "General";
-                        if (tag && tag !== "General" && !tag.match(/\d{2}\/\d{2}\/\d{4}/)) {
-                            if (!tagDistribution[tag]) tagDistribution[tag] = 0;
-                            tagDistribution[tag]++;
-                        }
-                    });
-                    const totalTagged = Object.values(tagDistribution).reduce((a, b) => a + b, 0);
-                    if (totalTagged > 0) {
-                        for (const tag in tagDistribution) {
-                            const proportion = tagDistribution[tag] / totalTagged;
-                            if (!topicPerf[tag]) topicPerf[tag] = { correct: 0, wrong: 0, blank: 0, total: 0 };
-                            topicPerf[tag].correct += Math.round(rightCount * proportion);
-                            topicPerf[tag].wrong += Math.round(wrongCount * proportion);
-                            topicPerf[tag].blank += Math.round(blankCount * proportion);
-                            topicPerf[tag].total += Math.round((rightCount + wrongCount + blankCount) * proportion);
-                        }
+                const record = records.find(r => (r.testCode || '').replace('-RE', '') === code);
+                if (!record) return;
+                const rightCount = record.right || 0;
+                const wrongCount = record.wrong || 0;
+                const blankCount = record.blank || 0;
+                const itemsForTest = allQuestionsWithTags.filter(item => item.testCode === code);
+                if (itemsForTest.length === 0) return;
+                const tagDistribution = {};
+                itemsForTest.forEach(item => {
+                    // Group by Subject + Chapter (falls back to the item's display tag
+                    // when no chapter is available) so every distinct row still maps
+                    // back to a single Subject for the table's Subject column.
+                    const key = item.chapter ? (item.subject + ' :: ' + item.chapter) : item.tag;
+                    if (!tagDistribution[key]) tagDistribution[key] = 0;
+                    tagDistribution[key]++;
+                    subjectOf[key] = item.subject;
+                });
+                const totalTagged = Object.values(tagDistribution).reduce((a, b) => a + b, 0);
+                if (totalTagged > 0) {
+                    for (const tag in tagDistribution) {
+                        const proportion = tagDistribution[tag] / totalTagged;
+                        if (!topicPerf[tag]) topicPerf[tag] = { correct: 0, wrong: 0, blank: 0, total: 0 };
+                        topicPerf[tag].correct += Math.round(rightCount * proportion);
+                        topicPerf[tag].wrong += Math.round(wrongCount * proportion);
+                        topicPerf[tag].blank += Math.round(blankCount * proportion);
+                        topicPerf[tag].total += Math.round((rightCount + wrongCount + blankCount) * proportion);
                     }
                 }
             });
@@ -12006,9 +12038,15 @@
                 const perf = topicPerf[tag] || { correct: 0, wrong: 0, blank: 0, total: 0 };
                 const total = perf.total || 0;
                 const acc = total > 0 ? Math.round((perf.correct / total) * 100) : 0;
-                const parts = tag.split(':');
-                const subject = parts.length >= 1 ? parts[0] : 'General';
-                const topic = parts.length >= 2 ? parts.slice(1).join(':') : tag;
+                let subject, topic;
+                if (subjectOf[tag] && tag.includes(' :: ')) {
+                    subject = subjectOf[tag];
+                    topic = tag.slice((subject + ' :: ').length);
+                } else {
+                    const parts = tag.split(':');
+                    subject = parts.length >= 1 ? parts[0] : 'General';
+                    topic = parts.length >= 2 ? parts.slice(1).join(':') : tag;
+                }
                 const status = acc >= 70 ? 'Strong' : (acc >= 40 ? 'Average' : 'Weak');
                 const statusClass = acc >= 70 ? 'status-strong' : (acc >= 40 ? 'status-average' : 'status-weak');
                 tableHtml += `
