@@ -4318,37 +4318,27 @@
            ============================================================ */
         .subject-filter-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-            gap: 8px;
-            padding: 12px;
-            margin: 6px 0 12px 0;
+            grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+            gap: 6px;
+            padding: 8px;
+            margin: 4px 0 8px 0;
             border: 1px solid var(--border-color);
             background: var(--bg-subtle);
-            border-radius: var(--radius);
-        }
-        .subject-filter-bar .filter-label {
-            grid-column: 1 / -1;
-            font-weight: 800;
-            font-size: 10.5px;
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            padding-bottom: 6px;
-            margin-bottom: 2px;
-            border-bottom: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
         }
         .subject-filter-bar .filter-btn {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
-            padding: 9px 12px;
-            border-radius: 8px;
+            gap: 5px;
+            padding: 6px 8px;
+            border-radius: 6px;
             border: 1.5px solid var(--border-color);
             background: var(--bg-card);
             color: var(--text-main);
             font-weight: 700;
-            font-size: 12px;
+            font-size: 10.5px;
+            line-height: 1.25;
             text-align: left;
             cursor: pointer;
             transition: var(--transition);
@@ -4357,12 +4347,11 @@
         .subject-filter-bar .filter-btn .sq-btn-badges {
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
             flex-shrink: 0;
         }
         .subject-filter-bar .filter-btn:hover {
             border-color: var(--accent);
-            background: var(--bg-card);
             transform: translateY(-1px);
             box-shadow: var(--shadow-sm);
         }
@@ -4378,37 +4367,33 @@
         }
         .subject-filter-bar .filter-btn .badge-count {
             background: rgba(0, 0, 0, 0.15);
-            padding: 1px 7px;
+            padding: 1px 5px;
             border-radius: 50px;
-            font-size: 9.5px;
+            font-size: 8.5px;
             font-weight: 800;
+            white-space: nowrap;
         }
         .subject-filter-bar .filter-btn.active .badge-count {
             background: rgba(255, 255, 255, 0.3);
         }
 
         /* ---- Chapter filter bar: intentionally styled differently (blue
-             theme + connector) from the Subject bar above it (gold theme),
-             so students can visually tell these are two separate, stacked
-             filter levels — Subject first, then Chapter within it. ---- */
+             theme) from the Subject bar above it (gold theme), so students
+             can visually tell these are two separate, stacked filter
+             levels — Subject first, then Chapter within it. The connector
+             hint text lives OUTSIDE the grid (in the wrapper markup) so it
+             never fights the grid's own column layout. ---- */
+        .chapter-connector-hint {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin: 0 0 4px 2px;
+            letter-spacing: 0.2px;
+        }
         #chapter-filter-bar-top {
             position: relative;
             background: linear-gradient(135deg, rgba(15, 43, 92, 0.06), rgba(26, 75, 140, 0.04));
             border: 1.5px dashed var(--primary-light);
-        }
-        #chapter-filter-bar-top::before {
-            content: "↳ Subject ke andar Chapter-wise dekhein";
-            display: block;
-            grid-column: 1 / -1;
-            font-size: 10.5px;
-            font-weight: 700;
-            color: var(--primary-light);
-            margin-bottom: 2px;
-            letter-spacing: 0.2px;
-        }
-        #chapter-filter-bar-top .filter-label {
-            color: var(--primary);
-            border-bottom-color: var(--primary-light);
         }
         #chapter-filter-bar-top .filter-btn {
             border-color: var(--primary-light);
@@ -4425,20 +4410,22 @@
         }
 
         .subject-filter-hint {
-            font-size: 11.5px;
+            font-size: 10.5px;
             color: var(--text-muted);
-            margin: -2px 0 10px 0;
+            margin: -1px 0 6px 0;
             font-style: italic;
+            line-height: 1.4;
         }
         .subject-filter-hint b {
             color: var(--primary);
             font-style: normal;
         }
 
-        /* ---- Predict-Question count badge on chapter filter buttons:
-             visually distinct (warm orange) from the plain question-count
-             badge, so students instantly see how many predicted questions
-             a chapter has, even before opening it. ---- */
+        /* ---- Predict-Question count badge on filter buttons: visually
+             distinct (warm orange, "P" label) from the plain question-count
+             badge ("M" label), so students instantly see how many main (M)
+             vs predicted (P) questions a subject/chapter has, even before
+             opening it. ---- */
         .subject-filter-bar .filter-btn .badge-count.predict-badge {
             background: linear-gradient(135deg, #ff6b35, #f7931e);
             color: #fff;
@@ -4453,37 +4440,39 @@
              since it's a brand-new DOM node every time a filter is tapped)
              right above the matched test/question list, so the student gets
              an immediate, unmissable confirmation of exactly how many
-             questions match whatever they just tapped. ---- */
+             questions match whatever they just tapped. Kept compact so it
+             doesn't dominate small screens. ---- */
         @keyframes sqResultPop {
-            0% { opacity: 0; transform: scale(0.92) translateY(-4px); }
-            60% { opacity: 1; transform: scale(1.02) translateY(0); }
+            0% { opacity: 0; transform: scale(0.94) translateY(-3px); }
+            60% { opacity: 1; transform: scale(1.01) translateY(0); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         .sq-results-summary {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: linear-gradient(135deg, var(--success), #16a34a);
             color: #fff;
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            margin: 4px 0 12px 0;
-            box-shadow: var(--shadow-md);
-            animation: sqResultPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            margin: 4px 0 8px 0;
+            box-shadow: var(--shadow-sm);
+            animation: sqResultPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            flex-wrap: wrap;
         }
         .sq-results-summary .sq-results-icon {
-            font-size: 22px;
+            font-size: 16px;
             line-height: 1;
         }
         .sq-results-summary .sq-results-text {
-            font-size: 13.5px;
+            font-size: 12px;
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.3;
         }
         .sq-results-summary .sq-results-count {
-            font-size: 19px;
+            font-size: 15px;
             font-weight: 900;
-            margin: 0 2px;
+            margin: 0 1px;
         }
         .sq-results-summary .sq-results-label {
             font-weight: 800;
@@ -4493,11 +4482,39 @@
         .sq-results-summary .sq-results-predict {
             margin-left: auto;
             background: rgba(255, 255, 255, 0.22);
-            padding: 4px 10px;
+            padding: 3px 9px;
             border-radius: 50px;
-            font-size: 11.5px;
+            font-size: 10.5px;
             font-weight: 800;
             white-space: nowrap;
+        }
+
+        /* ---- Compact further on small phone screens ---- */
+        @media (max-width: 480px) {
+            .subject-filter-bar {
+                grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+                gap: 5px;
+                padding: 6px;
+            }
+            .subject-filter-bar .filter-btn {
+                padding: 5px 6px;
+                font-size: 10px;
+                border-radius: 5px;
+            }
+            .subject-filter-bar .filter-btn .badge-count {
+                font-size: 8px;
+                padding: 1px 4px;
+            }
+            .sq-results-summary {
+                padding: 7px 10px;
+                gap: 6px;
+            }
+            .sq-results-summary .sq-results-text {
+                font-size: 11px;
+            }
+            .sq-results-summary .sq-results-count {
+                font-size: 13px;
+            }
         }
 
         .subject-questions-container {
@@ -5397,11 +5414,14 @@
                     <input type="hidden" id="hist-phone" />
                 </div>
 
-                <div id="subject-filter-section-top" style="margin:0 0 16px 0; border:2px solid var(--accent); border-radius:var(--radius); padding:12px 14px; background:var(--bg-subtle);">
-                    <h3 style="color:var(--primary); font-size:14px; margin:0 0 4px 0;">📂 Filter by Subject</h3>
-                    <p class="subject-filter-hint">👉 Subject चुनने के बाद नीचे <b>Chapter-wise</b> filter भी अपने-आप दिख जाएगा — subject ke andar specific chapter chun kar भी questions dekh sakte hain।</p>
+                <div id="subject-filter-section-top" style="margin:0 0 16px 0; border:2px solid var(--accent); border-radius:var(--radius); padding:10px 12px; background:var(--bg-subtle);">
+                    <h3 style="color:var(--primary); font-size:13px; margin:0 0 3px 0;">📂 Filter by Subject</h3>
+                    <p class="subject-filter-hint">👉 Subject चुनने के बाद नीचे <b>Chapter-wise</b> filter भी अपने-आप दिख जाएगा।</p>
                     <div class="subject-filter-bar" id="subject-filter-bar-top" style="margin:0; border:none; padding:0; background:transparent;"></div>
-                    <div class="subject-filter-bar" id="chapter-filter-bar-top" style="display:none; margin:10px 0 0 0;"></div>
+                    <div id="chapter-filter-wrap-top" style="display:none; margin-top:8px;">
+                        <div class="chapter-connector-hint">↳ Subject ke andar Chapter-wise dekhein</div>
+                        <div class="subject-filter-bar" id="chapter-filter-bar-top" style="margin:0;"></div>
+                    </div>
                     <div id="subject-questions-container-top" class="subject-questions-container" style="margin-top:8px;">
                         <p style="color:var(--text-muted); font-size:13px; padding:8px 0;">Select a subject above to see all questions.</p>
                     </div>
@@ -12304,7 +12324,7 @@
                 }
             });
 
-            let buttonsHtml = '<span class="filter-label">📂 Filter by Subject:</span>';
+            let buttonsHtml = '';
             const sortedSubjects = Array.from(subjectSet).sort();
             const totalAllCount = allQuestionsWithTags.length;
             const totalAllPredict = allQuestionsWithTags.reduce((sum, item) =>
@@ -12313,12 +12333,12 @@
                 const subItems = allQuestionsWithTags.filter(item => item.subject === sub);
                 const subPredict = subItems.reduce((sum, item) =>
                     sum + (item.question && Array.isArray(item.question.predicted) ? item.question.predicted.length : 0), 0);
-                const predictBadge = subPredict > 0 ? ` <span class="badge-count predict-badge">🔥${subPredict}</span>` : '';
+                const predictBadge = subPredict > 0 ? ` <span class="badge-count predict-badge">P ${subPredict}</span>` : '';
                 buttonsHtml +=
-                    `<button class="filter-btn" data-subject="${sub}" onclick="window.filterHistorySubjectTop('${sub}')"><span>${sub}</span><span class="sq-btn-badges"><span class="badge-count">${subItems.length}</span>${predictBadge}</span></button>`;
+                    `<button class="filter-btn" data-subject="${sub}" onclick="window.filterHistorySubjectTop('${sub}')"><span>${sub}</span><span class="sq-btn-badges"><span class="badge-count">M ${subItems.length}</span>${predictBadge}</span></button>`;
             });
             buttonsHtml +=
-                `<button class="filter-btn active" data-subject="all" onclick="window.filterHistorySubjectTop('all')"><span>📋 All</span><span class="sq-btn-badges"><span class="badge-count">${totalAllCount}</span>${totalAllPredict > 0 ? ` <span class="badge-count predict-badge">🔥${totalAllPredict}</span>` : ''}</span></button>`;
+                `<button class="filter-btn active" data-subject="all" onclick="window.filterHistorySubjectTop('all')"><span>📋 All</span><span class="sq-btn-badges"><span class="badge-count">M ${totalAllCount}</span>${totalAllPredict > 0 ? ` <span class="badge-count predict-badge">P ${totalAllPredict}</span>` : ''}</span></button>`;
             filterBar.innerHTML = buttonsHtml;
 
             window._historySubjectDataTop = {
@@ -12416,6 +12436,7 @@
             const container = document.getElementById('subject-questions-container-top');
             const buttons = document.querySelectorAll('#subject-filter-bar-top .filter-btn');
             const chapterBar = document.getElementById('chapter-filter-bar-top');
+            const chapterWrap = document.getElementById('chapter-filter-wrap-top');
             if (!container) return;
 
             buttons.forEach(btn => {
@@ -12426,7 +12447,8 @@
             const data = window._historySubjectDataTop;
             if (!data) {
                 container.innerHTML = '<p style="color:var(--text-muted);">No data available.</p>';
-                if (chapterBar) { chapterBar.style.display = 'none'; chapterBar.innerHTML = ''; }
+                if (chapterWrap) chapterWrap.style.display = 'none';
+                if (chapterBar) chapterBar.innerHTML = '';
                 return;
             }
 
@@ -12436,7 +12458,7 @@
             }
 
             // ---- Chapter filter (built from !T topicTag data within the selected subject) ----
-            if (chapterBar) {
+            if (chapterBar && chapterWrap) {
                 if (subject !== 'all') {
                     // ---- Per-chapter stats: total question count + total
                     // Predict-Question count, computed BEFORE the chapter is
@@ -12456,21 +12478,20 @@
                         const totalCount = filtered.length;
                         const totalPredict = filtered.reduce((sum, item) =>
                             sum + (item.question && Array.isArray(item.question.predicted) ? item.question.predicted.length : 0), 0);
-                        let chBtnsHtml = '<span class="filter-label">📖 Filter by Chapter:</span>';
-                        chBtnsHtml += `<button class="filter-btn active" data-chapter="all" onclick="window.filterHistoryChapterTop('all')"><span>📋 All</span><span class="sq-btn-badges"><span class="badge-count">${totalCount}</span>${totalPredict > 0 ? ` <span class="badge-count predict-badge">🔥${totalPredict}</span>` : ''}</span></button>`;
+                        let chBtnsHtml = `<button class="filter-btn active" data-chapter="all" onclick="window.filterHistoryChapterTop('all')"><span>📋 All</span><span class="sq-btn-badges"><span class="badge-count">M ${totalCount}</span>${totalPredict > 0 ? ` <span class="badge-count predict-badge">P ${totalPredict}</span>` : ''}</span></button>`;
                         sortedChapters.forEach(ch => {
                             const stat = chapterStats[ch];
-                            const predictBadge = stat.predictCount > 0 ? ` <span class="badge-count predict-badge">🔥${stat.predictCount}</span>` : '';
-                            chBtnsHtml += `<button class="filter-btn" data-chapter="${ch}" onclick="window.filterHistoryChapterTop('${ch.replace(/'/g, "\\'")}')"><span>${ch}</span><span class="sq-btn-badges"><span class="badge-count">${stat.count}</span>${predictBadge}</span></button>`;
+                            const predictBadge = stat.predictCount > 0 ? ` <span class="badge-count predict-badge">P ${stat.predictCount}</span>` : '';
+                            chBtnsHtml += `<button class="filter-btn" data-chapter="${ch}" onclick="window.filterHistoryChapterTop('${ch.replace(/'/g, "\\'")}')"><span>${ch}</span><span class="sq-btn-badges"><span class="badge-count">M ${stat.count}</span>${predictBadge}</span></button>`;
                         });
                         chapterBar.innerHTML = chBtnsHtml;
-                        chapterBar.style.display = 'flex';
+                        chapterWrap.style.display = 'block';
                     } else {
-                        chapterBar.style.display = 'none';
+                        chapterWrap.style.display = 'none';
                         chapterBar.innerHTML = '';
                     }
                 } else {
-                    chapterBar.style.display = 'none';
+                    chapterWrap.style.display = 'none';
                     chapterBar.innerHTML = '';
                 }
             }
@@ -12531,7 +12552,7 @@
                         <div class="sq-results-summary">
                             <span class="sq-results-icon">✅</span>
                             <span class="sq-results-text"><span class="sq-results-count">${filtered.length}</span> प्रश्न मिले — <span class="sq-results-label">${labelDisplay}</span></span>
-                            ${totalPredictInFiltered > 0 ? `<span class="sq-results-predict">🔥 ${totalPredictInFiltered} Predict Qs</span>` : ''}
+                            ${totalPredictInFiltered > 0 ? `<span class="sq-results-predict">P ${totalPredictInFiltered} Predict Qs</span>` : ''}
                         </div>
                 `;
 
