@@ -5488,19 +5488,24 @@
                 </div>
 
                 <div id="st-hist-content">
-                    <div id="my-rank-card" style="background:rgba(37,99,235,0.06);border:2px solid var(--primary);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;"></div>
-                    <div style="background:rgba(15,157,88,0.08);border:2px solid var(--success);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;">
-                        <h3 style="margin:0 0 12px 0;color:var(--success);text-align:center;font-size:17px;">📊 Overall Report Card</h3>
-                        <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:8px;text-align:center;">
-                            <div><h4 style="margin:0;font-size:11px;color:var(--text-muted);">Tests Given</h4><b style="font-size:22px;color:var(--primary);" id="gr-tot">0</b></div>
-                            <div><h4 style="margin:0;font-size:11px;color:var(--text-muted);">Qs Attended</h4><b style="font-size:22px;color:var(--primary);" id="gr-qs">0</b></div>
-                            <div><h4 style="margin:0;font-size:11px;color:var(--text-muted);">Accuracy</h4><b style="font-size:22px;color:var(--danger);" id="gr-acc">0%</b></div>
+                    <div id="compact-report-card" style="background:linear-gradient(135deg, rgba(37,99,235,0.07), rgba(15,157,88,0.07));border:2px solid var(--primary);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:210px;">
+                            <div id="my-rank-card" style="margin-bottom:6px;font-size:11px;"></div>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;border-top:1px dashed var(--border-color);padding-top:6px;">
+                                <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Tests</div><b style="font-size:15px;color:var(--primary);" id="gr-tot">0</b></div>
+                                <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Qs</div><b style="font-size:15px;color:var(--primary);" id="gr-qs">0</b></div>
+                                <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Accuracy</div><b style="font-size:15px;color:var(--danger);" id="gr-acc">0%</b></div>
+                                <div style="font-size:10px;font-weight:700;display:flex;gap:8px;flex-wrap:wrap;">
+                                    <span style="color:var(--success);">🟩 <span id="gr-r">0</span></span>
+                                    <span style="color:var(--danger);">🟥 <span id="gr-w">0</span></span>
+                                    <span style="color:var(--text-muted);">⬜ <span id="gr-b">0</span></span>
+                                </div>
+                            </div>
+                            <div id="gr-bar" style="display:flex;height:12px;border-radius:50px;overflow:hidden;margin-top:6px;background:var(--bg-input);border:1px solid var(--border-color);max-width:300px;"></div>
                         </div>
-                        <div id="gr-bar" style="display:flex;height:24px;border-radius:50px;overflow:hidden;margin-top:10px;background:var(--bg-input);border:1px solid var(--border-color);"></div>
-                        <div style="display:flex;justify-content:center;gap:14px;margin-top:6px;font-size:11px;font-weight:700;flex-wrap:wrap;">
-                            <span style="color:var(--success);">🟩 Correct (<span id="gr-r">0</span>)</span>
-                            <span style="color:var(--danger);">🟥 Wrong (<span id="gr-w">0</span>)</span>
-                            <span style="color:var(--text-muted);">⬜ Blank (<span id="gr-b">0</span>)</span>
+                        <div style="text-align:center;flex-shrink:0;">
+                            <img id="report-qr-img" src="" alt="QR Code" style="width:60px;height:60px;border-radius:8px;border:1px solid var(--border-color);background:#fff;padding:3px;display:block;" />
+                            <div style="font-size:8px;color:var(--text-muted);margin-top:2px;">📱 Scan to Open</div>
                         </div>
                     </div>
                     <h3 style="color:var(--primary);border-bottom:2px solid var(--border-color);padding-bottom:6px;font-size:16px;">📜 Individual Test Records</h3>
@@ -5508,6 +5513,7 @@
                         <div class="loader-mini" style="width:28px; height:28px;"></div><br />
                         <span style="color:var(--text-muted); margin-top:8px; display:inline-block; font-size:13px;">Loading report history...</span>
                     </div>
+
                     <div id="st-hist-list" style="display:flex;flex-direction:column;gap:12px;margin-top:12px;"></div>
 
                     <div id="topic-performance-table" style="margin-top:16px; border-top:2px solid var(--border-color); padding-top:12px;">
@@ -12105,6 +12111,7 @@
             window.populateReportExamDropdown(allSavedTests, records);
             window.applyReportExamFilter(window.currentReportExam || 'all');
             window.computeAndShowRanks();
+            window.renderReportQrCode();
         };
 
         /* ---- Populate the "Select Exam" dropdown at the top of the report,
@@ -12332,7 +12339,7 @@
             const uid = window.studentInfo && window.studentInfo.uid;
             const rankCard = document.getElementById('my-rank-card');
             if (!uid || !rankCard) return;
-            rankCard.innerHTML = "<div style='text-align:center;padding:10px;'><div class='loader-mini' style='width:22px;height:22px;'></div></div>";
+            rankCard.innerHTML = "<div style='text-align:left;padding:2px 0;'><div class='loader-mini' style='width:16px;height:16px;'></div></div>";
             Promise.all([
                 db.collection("results").get(),
                 db.collection("users").get()
@@ -12371,23 +12378,35 @@
                 const distRows = myDistrict ? rows.filter(r => r.district === myDistrict && r.state === myState) : [];
                 const distRank = myDistrict ? (distRows.findIndex(r => r.uid === uid) + 1) : null;
 
-                let html = `<h4 style="margin:0 0 10px 0;color:var(--primary);font-size:15px;text-align:center;">🏆 My Rank</h4>
-                    <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:10px;text-align:center;">
-                        <div><div style="font-size:11px;color:var(--text-muted);">🇮🇳 All India</div><b style="font-size:20px;color:var(--primary);">#${allIndiaRank}</b><div style="font-size:10px;color:var(--text-muted);">of ${totalStudents}</div></div>`;
+                let html =
+                    `<span style="font-weight:800;color:var(--primary);">🏆 Rank:</span> <span style="color:var(--text-main);">🇮🇳 All India <b style="color:var(--primary);">#${allIndiaRank}</b><span style="color:var(--text-muted);">/${totalStudents}</span></span>`;
                 if (myState) {
-                    html += `<div><div style="font-size:11px;color:var(--text-muted);">🗺️ ${myState}</div><b style="font-size:20px;color:var(--success);">#${stateRank}</b><div style="font-size:10px;color:var(--text-muted);">of ${stateRows.length}</div></div>`;
+                    html +=
+                        ` &nbsp;·&nbsp; <span style="color:var(--text-main);">🗺️ ${myState} <b style="color:var(--success);">#${stateRank}</b><span style="color:var(--text-muted);">/${stateRows.length}</span></span>`;
                 }
                 if (myDistrict) {
-                    html += `<div><div style="font-size:11px;color:var(--text-muted);">📍 ${myDistrict}</div><b style="font-size:20px;color:var(--warning);">#${distRank}</b><div style="font-size:10px;color:var(--text-muted);">of ${distRows.length}</div></div>`;
+                    html +=
+                        ` &nbsp;·&nbsp; <span style="color:var(--text-main);">📍 ${myDistrict} <b style="color:var(--warning);">#${distRank}</b><span style="color:var(--text-muted);">/${distRows.length}</span></span>`;
                 }
-                html += `</div>`;
                 if (!myState) {
-                    html += `<p style="text-align:center;font-size:11px;color:var(--text-muted);margin:10px 0 0 0;">📝 State/District Rank dekhne ke liye apni <b>Profile</b> me State &amp; District add karein.</p>`;
+                    html += `<br><span style="font-size:9.5px;color:var(--text-muted);">📝 State/District Rank ke liye apni Profile me State &amp; District add karein.</span>`;
                 }
                 rankCard.innerHTML = html;
             }).catch((err) => {
-                rankCard.innerHTML = `<p style="text-align:center;color:var(--danger);font-size:11px;">Rank load failed: ${err.message}</p>`;
+                rankCard.innerHTML = `<span style="color:var(--danger);font-size:10.5px;">Rank load failed: ${err.message}</span>`;
             });
+        };
+
+        /* ---- Small QR code shown on the compact report card, so students can
+             quickly scan-and-open the portal (e.g. on a shared/print view).
+             Uses a free, keyless QR-generation image API. ---- */
+        window.renderReportQrCode = function() {
+            const img = document.getElementById('report-qr-img');
+            if (!img) return;
+            const uid = window.studentInfo && window.studentInfo.uid;
+            const qrTarget = BASE_URL + (uid ? ('?student=' + encodeURIComponent(uid)) : '');
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=0&data=${encodeURIComponent(qrTarget)}`;
+            img.alt = 'Scan to open TEST BODHI';
         };
 
         /* ---- Subject Filter Bar + Topic Performance ----
