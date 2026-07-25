@@ -8712,7 +8712,17 @@
             window._liveTestsListenerAttached = true;
             db.collection("tests").onSnapshot((querySnapshot) => {
                 const tests = [];
-                querySnapshot.forEach((doc) => { tests.push(doc.data()); });
+                querySnapshot.forEach((doc) => {
+                    const t = doc.data();
+                    // Root fix: this listener is the actual source feeding
+                    // getAllMergedTests() → My Report, dashboard, PDF exports,
+                    // exam view, everywhere. It was pushing raw doc.data()
+                    // straight through WITHOUT ever running sanitizeQuestions(),
+                    // so Devanagari-in-math fixes never had a chance to apply
+                    // to this data no matter how correct sanitizeMath itself was.
+                    if (t.questions) t.questions = window.sanitizeQuestions(t.questions);
+                    tests.push(t);
+                });
                 window.globalActiveTests = tests;
 
                 const stLoader = document.getElementById('st-active-loader');
@@ -8740,6 +8750,7 @@
                 const stLoader = document.getElementById('st-active-loader');
                 if (stLoader) stLoader.style.display = 'none';
                 const localTests = JSON.parse(localStorage.getItem('myMockTests')) || [];
+                localTests.forEach(t => { if (t.questions) t.questions = window.sanitizeQuestions(t.questions); });
                 window.globalActiveTests = localTests;
                 window.showExamsView();
                 window._liveTestsListenerAttached = false;
