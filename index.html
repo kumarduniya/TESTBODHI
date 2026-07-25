@@ -4697,6 +4697,14 @@
         .hindi-frac .hf-den {
             padding: 2px 4px 0;
         }
+        /* Native-rendered Hindi word/phrase pulled out of a mixed math span
+           (e.g. "T_A", "इकाई", "=", "5") so it shapes correctly via the
+           browser instead of MathJax's per-character \text{} rendering. */
+        .hindi-inline {
+            display: inline;
+            font-family: var(--font-sans);
+            margin: 0 2px;
+        }
 
         /* ============================================================
            PREMIUM UPGRADE — SMOOTHNESS, PERFORMANCE & 3D VISUAL LAYER
@@ -6398,6 +6406,19 @@
             str = str.replace(/([a-zA-Z0-9])\$([a-zA-Z0-9])/g, `$1${PLACEHOLDER}$2`);
 
             const HINDI_RE = /[\u0900-\u097F]/;
+            const HINDI_PHRASE_SRC = '[\\u0900-\\u097F](?:[\\u0900-\\u097F\\u0964\\u0965 \\t\\-.,;:()/\']*[\\u0900-\\u097F])?';
+
+            // Math chunks re-emitted by the mixed-span handler below are
+            // stashed here and swapped back in only after ALL FOUR outer
+            // delimiter passes ($$, $, \[\], \(\)) have finished — otherwise
+            // the literal "$"/"$$" characters inside a freshly-built chunk
+            // would get matched AGAIN by the next pass in this same call.
+            const mathChunks = [];
+            const CHUNK_OPEN = '\uE020', CHUNK_CLOSE = '\uE021';
+            function stashChunk(html) {
+                mathChunks.push(html);
+                return `${CHUNK_OPEN}${mathChunks.length - 1}${CHUNK_CLOSE}`;
+            }
 
             // Builds a plain-HTML fraction (numerator over denominator, browser
             // rendered) instead of a TeX \frac — used only when the fraction
@@ -6407,14 +6428,14 @@
                 return `<span class="hindi-frac"><span class="hf-num">${numer.trim()}</span><span class="hf-den">${denom.trim()}</span></span>`;
             }
 
-            // Converts a whole math span to plain HTML (dropping TeX delimiters
-            // entirely) when it's really just numbers + Hindi labels — no
-            // actual algebra — so the browser's native font shaping handles
-            // the Devanagari instead of MathJax mangling it.
-            function bypassToHTML(innerMath) {
-                let out = innerMath;
-                out = out.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, (m, a, b) => htmlFrac(a, b));
+            // Symbol/spacing clean-up shared by both the Hindi-only bypass and
+            // the mixed-span path below (kept separate from actual Hindi-word
+            // handling so it's safe to run on plain math leftovers too).
+            function plainSymbols(s) {
+                let out = s;
                 out = out.replace(/\\times/g, '×').replace(/\\Rightarrow/g, '⇒').replace(/\\div/g, '÷').replace(/\\cdot/g, '×');
+                out = out.replace(/\\propto/g, '∝').replace(/\\approx/g, '≈').replace(/\\pm/g, '±')
+                    .replace(/\\neq/g, '≠').replace(/\\leq/g, '≤').replace(/\\geq/g, '≥');
                 out = out.replace(/\\,/g, ' ').replace(/\\;/g, ' ').replace(/\\ /g, ' ');
                 out = out.replace(/ {2,}/g, ' ');
                 return out;
@@ -6428,39 +6449,98 @@
                 return /[a-zA-Z]/.test(stripped);
             }
 
-            function processMath(math) {
-                if (!math || !math.trim()) return math;
-                let processed = math;
-                processed = processed.replace(/(?<!\\)#/g, '\\#');
-                // Wrap whole Hindi PHRASES (word + internal spaces/hyphens/punctuation)
-                // in one \text{}, not just single contiguous-script runs — so spacing
-                // between Hindi words (e.g. "यूनिट है", "गति समय") survives, since
-                // spaces are only preserved by MathJax when they're inside \text{}.
-                processed = processed.replace(
-                    /[\u0900-\u097F](?:[\u0900-\u097F\u0964\u0965 \t\-.,;:()/']*[\u0900-\u097F])?/g,
-                    (m) => `\\text{${m}}`
-                );
-                // Pull any space touching a \text{} boundary INSIDE the braces —
-                // plain spaces outside \text{} are invisible in math mode, so
-                // "7 \text{यूनिट}" would otherwise render as "7यूनिट" with no gap.
-                processed = processed.replace(/([ \t]+)\\text\{/g, '\\text{$1');
-                processed = processed.replace(/\\text\{([^{}]*)\}([ \t]+)/g, '\\text{$1$2}');
-                return processed;
+            // Strips display-math wrapper commands (\begin{aligned}...\end{...},
+            // "&" alignment) and turns real TeX line breaks ("\\") into a <br>
+            // marker — needed once we start slicing a math span into several
+            // independent chunks below, since an aligned/array environment (or
+            // a bare "\\") can't be split across separate $...$ pairs without
+            // becoming invalid TeX.
+            const BR_MARK = '\uE010';
+            function stripEnvironment(s) {
+                let out = s.replace(/\\begin\{[a-zA-Z*]+\}/g, '').replace(/\\end\{[a-zA-Z*]+\}/g, '');
+                out = out.replace(/&/g, ' ');
+                out = out.replace(/\\\\(?:\[[^\]]*\])?/g, BR_MARK);
+                return out;
             }
 
-            // Decides, per math span, whether to keep it as real TeX (for MathJax)
-            // or bypass entirely to plain HTML (for Hindi-only content).
+            // Decides, per math span, whether to keep it as real TeX (for
+            // MathJax), bypass entirely to plain HTML (Hindi-only content), or
+            // — for a MIXED span that combines Hindi labels with genuine Latin
+            // math variables (e.g. "T_A", "E_B") — walk through it and pull
+            // out just the Hindi words/phrases and any Hindi-labelled \frac
+            // as native HTML, while whatever real math remains still goes to
+            // MathJax. This is what fixes labels like "कार्यक्षमता"/"इकाई"/
+            // "दिन" showing up as broken glyphs (क○र○यक○षमत○) whenever they
+            // shared a math block with a Latin variable — previously that one
+            // Latin variable forced the ENTIRE block (Hindi included) through
+            // MathJax's \text{}, which can't shape Devanagari conjuncts.
             function handleSpan(innerMath, open, close) {
-                if (HINDI_RE.test(innerMath) && !hasLatinMathVar(innerMath)) {
-                    return bypassToHTML(innerMath.replace(/\\text\{([^{}]*)\}/g, '$1'));
+                if (!HINDI_RE.test(innerMath)) {
+                    return open + innerMath + close; // pure math, untouched
                 }
-                return open + processMath(innerMath) + close;
+
+                if (!hasLatinMathVar(innerMath)) {
+                    // Hindi-only span — bypass entirely to native HTML.
+                    let out = stripEnvironment(innerMath);
+                    out = out.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, (m, a, b) => htmlFrac(a, b));
+                    out = plainSymbols(out);
+                    out = out.split(BR_MARK).map(p => p.trim()).filter(p => p !== '').join('<br>');
+                    return out;
+                }
+
+                // Mixed span: Hindi labels + real Latin math variables.
+                let working = stripEnvironment(innerMath);
+
+                // Protect Hindi-labelled fractions first (as a whole unit),
+                // so the phrase-splitter below doesn't try to only grab the
+                // Devanagari text out from the middle of a \frac{}{}.
+                const fracHtml = [];
+                working = working.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, (m, a, b) => {
+                    if (HINDI_RE.test(a) || HINDI_RE.test(b)) {
+                        fracHtml.push(htmlFrac(a, b));
+                        return `\uE000${fracHtml.length - 1}\uE001`;
+                    }
+                    return m;
+                });
+
+                const SPLIT_RE = new RegExp(`(\\uE000\\d+\\uE001)|(${BR_MARK})|(${HINDI_PHRASE_SRC})`, 'g');
+                let resultHtml = '';
+                let mathBuf = '';
+                let lastIndex = 0;
+                let m2;
+                const flushMath = () => {
+                    if (mathBuf.trim() !== '') {
+                        resultHtml += stashChunk(open + mathBuf + close);
+                    }
+                    mathBuf = '';
+                };
+                while ((m2 = SPLIT_RE.exec(working)) !== null) {
+                    mathBuf += working.slice(lastIndex, m2.index);
+                    if (m2[1]) {
+                        flushMath();
+                        resultHtml += fracHtml[parseInt(m2[1].slice(1, -1), 10)];
+                    } else if (m2[2]) {
+                        flushMath();
+                        resultHtml += '<br>';
+                    } else {
+                        flushMath();
+                        resultHtml += `<span class="hindi-inline">${plainSymbols(m2[3].trim())}</span>`;
+                    }
+                    lastIndex = SPLIT_RE.lastIndex;
+                }
+                mathBuf += working.slice(lastIndex);
+                flushMath();
+                return resultHtml;
             }
 
             str = str.replace(/\$\$([\s\S]*?)\$\$/g, (m, inner) => handleSpan(inner, '$$', '$$'));
             str = str.replace(/\$(?!\$)([\s\S]*?)(?<!\$)\$/g, (m, inner) => handleSpan(inner, '$', '$'));
             str = str.replace(/\\\[([\s\S]*?)\\\]/g, (m, inner) => handleSpan(inner, '\\[', '\\]'));
             str = str.replace(/\\\(([\s\S]*?)\\\)/g, (m, inner) => handleSpan(inner, '\\(', '\\)'));
+            // Only now — after every outer delimiter pass has already run —
+            // swap the stashed mixed-span math chunks back in, so their own
+            // literal "$"/"$$" characters can never be re-matched above.
+            str = str.replace(new RegExp(CHUNK_OPEN + '(\\d+)' + CHUNK_CLOSE, 'g'), (m, idx) => mathChunks[parseInt(idx, 10)]);
             str = str.replace(new RegExp(PLACEHOLDER, 'g'), '\\$');
             return str;
         };
