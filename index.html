@@ -4723,6 +4723,17 @@
             font-size: 10.5px;
             font-weight: 800;
         }
+        /* A brand-new badge element every render (each Subject/Chapter tap
+           rebuilds this list), so the pop-in animation replays automatically
+           each time — drawing the student's eye straight to the count,
+           without needing the old separate banner bar above the list. */
+        .sq-toggle-count-pop {
+            animation: sqResultPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .sq-toggle-count-predict {
+            background: linear-gradient(135deg, var(--warning), #f97316);
+            color: #fff;
+        }
         .sq-group-content {
             display: none;
             padding: 12px 14px;
@@ -12737,28 +12748,11 @@
 
             if (!filtered || filtered.length === 0) {
                 container.innerHTML =
-                    `<div class="sq-results-summary" style="background:linear-gradient(135deg, var(--danger), #dc2626);">
-                        <span class="sq-results-icon">🔍</span>
-                        <span class="sq-results-text">Is filter (<span class="sq-results-label">${labelDisplay}</span>) me <span class="sq-results-count">0</span> प्रश्न मिले।</span>
-                    </div>
-                    <p style="color:var(--text-muted); font-size:13px; padding:8px 0;">No questions found for ${labelDisplay}.</p>`;
+                    `<p style="color:var(--text-muted); font-size:13px; padding:8px 0;">🔍 Is filter (<b>${labelDisplay}</b>) me koi question nahi mila.</p>`;
                 return;
             }
 
-            const totalPredictInFiltered = filtered.reduce((sum, item) =>
-                sum + (item.question && Array.isArray(item.question.predicted) ? item.question.predicted.length : 0), 0);
-
-            // A brand-new element every render, so the CSS "pop in" animation
-            // above plays automatically each time a filter is tapped —
-            // giving the student an immediate, unmissable confirmation of
-            // exactly how many questions matched.
-            let html = `
-                        <div class="sq-results-summary">
-                            <span class="sq-results-icon">✅</span>
-                            <span class="sq-results-text"><span class="sq-results-count">${filtered.length}</span> प्रश्न मिले — <span class="sq-results-label">${labelDisplay}</span></span>
-                            ${totalPredictInFiltered > 0 ? `<span class="sq-results-predict">P ${totalPredictInFiltered} Predict Qs</span>` : ''}
-                        </div>
-                `;
+            let html = '';
 
             // ---- Group by EXAM (not by individual test) so, e.g., 5 different
             // UP SI tests a student has attempted all collapse into a single
@@ -12801,7 +12795,7 @@
                 html += `
                             <div class="sq-group-wrapper" style="margin-bottom:10px;">
                                 <div class="sq-group-toggle" onclick="window.toggleSubjectGroup('${groupId}')">
-                                    <span><b>📝 ${examName}</b> <span class="sq-toggle-count">${items.length} questions</span></span>
+                                    <span><b>📝 ${examName}</b> <span class="sq-toggle-count sq-toggle-count-pop">✅ ${items.length} Qs</span>${sumPredict > 0 ? ` <span class="sq-toggle-count sq-toggle-count-pop sq-toggle-count-predict">🔥 P ${sumPredict}</span>` : ''}</span>
                                     <span class="sq-toggle-icon" id="${groupId}-icon">▶</span>
                                 </div>
                                 <div class="sq-group-content" id="${groupId}">
