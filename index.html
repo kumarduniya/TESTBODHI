@@ -4418,6 +4418,20 @@
             font-style: normal;
         }
 
+        /* ---- Predict-Question count badge on chapter filter buttons:
+             visually distinct (warm orange) from the plain question-count
+             badge, so students instantly see how many predicted questions
+             a chapter has, even before opening it. ---- */
+        .subject-filter-bar .filter-btn .badge-count.predict-badge {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #fff;
+            font-weight: 800;
+        }
+        .subject-filter-bar .filter-btn.active .badge-count.predict-badge {
+            background: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
+
         .subject-questions-container {
             margin-top: 10px;
         }
@@ -12248,14 +12262,30 @@
             // ---- Chapter filter (built from !T topicTag data within the selected subject) ----
             if (chapterBar) {
                 if (subject !== 'all') {
-                    const chapterSet = new Set();
-                    filtered.forEach(item => { if (item.chapter) chapterSet.add(item.chapter); });
-                    const sortedChapters = Array.from(chapterSet).sort();
+                    // ---- Per-chapter stats: total question count + total
+                    // Predict-Question count, computed BEFORE the chapter is
+                    // opened, so students can see at a glance how many
+                    // questions (and how many predicted questions) each
+                    // chapter has.
+                    const chapterStats = {};
+                    filtered.forEach(item => {
+                        if (!item.chapter) return;
+                        if (!chapterStats[item.chapter]) chapterStats[item.chapter] = { count: 0, predictCount: 0 };
+                        chapterStats[item.chapter].count++;
+                        const pq = item.question && Array.isArray(item.question.predicted) ? item.question.predicted.length : 0;
+                        chapterStats[item.chapter].predictCount += pq;
+                    });
+                    const sortedChapters = Object.keys(chapterStats).sort();
                     if (sortedChapters.length > 0) {
+                        const totalCount = filtered.length;
+                        const totalPredict = filtered.reduce((sum, item) =>
+                            sum + (item.question && Array.isArray(item.question.predicted) ? item.question.predicted.length : 0), 0);
                         let chBtnsHtml = '<span class="filter-label">📖 Filter by Chapter:</span>';
-                        chBtnsHtml += `<button class="filter-btn active" data-chapter="all" onclick="window.filterHistoryChapterTop('all')">📋 All</button>`;
+                        chBtnsHtml += `<button class="filter-btn active" data-chapter="all" onclick="window.filterHistoryChapterTop('all')">📋 All <span class="badge-count">${totalCount}</span>${totalPredict > 0 ? ` <span class="badge-count predict-badge">🔥${totalPredict}</span>` : ''}</button>`;
                         sortedChapters.forEach(ch => {
-                            chBtnsHtml += `<button class="filter-btn" data-chapter="${ch}" onclick="window.filterHistoryChapterTop('${ch.replace(/'/g, "\\'")}')">${ch}</button>`;
+                            const stat = chapterStats[ch];
+                            const predictBadge = stat.predictCount > 0 ? ` <span class="badge-count predict-badge">🔥${stat.predictCount}</span>` : '';
+                            chBtnsHtml += `<button class="filter-btn" data-chapter="${ch}" onclick="window.filterHistoryChapterTop('${ch.replace(/'/g, "\\'")}')">${ch} <span class="badge-count">${stat.count}</span>${predictBadge}</button>`;
                         });
                         chapterBar.innerHTML = chBtnsHtml;
                         chapterBar.style.display = 'flex';
