@@ -81,8 +81,6 @@
             --classic-maroon-light: #9c2e3c;
             --classic-ivory: #f7f0dc;
             --badge-bg: rgba(15, 43, 92, 0.08);
-            --heading-color: var(--primary);
-            --heading-color-light: var(--primary-light);
         }
 
         body.dark-mode {
@@ -107,8 +105,6 @@
             --classic-maroon-light: #d06a7b;
             --classic-ivory: #d9cfa8;
             --badge-bg: rgba(255, 255, 255, 0.14);
-            --heading-color: #7fb0ec;
-            --heading-color-light: #a8cdf5;
         }
 
         /* ============================================================
@@ -620,7 +616,7 @@
         }
         .tcs-sub-header .s-left .s-name {
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
             font-size: 13px;
         }
         body.dark-mode .tcs-sub-header .s-left .s-name {
@@ -634,7 +630,7 @@
         }
         .tcs-sub-header .s-right .s-exam {
             font-size: 12px;
-            color: var(--heading-color);
+            color: var(--primary);
             font-weight: 700;
             background: rgba(212, 168, 67, 0.12);
             padding: 3px 14px;
@@ -643,7 +639,7 @@
         }
         .tcs-sub-header .s-right .s-category {
             font-size: 11px;
-            color: var(--heading-color-light);
+            color: var(--primary-light);
             font-weight: 600;
             background: rgba(26, 75, 140, 0.08);
             padding: 2px 12px;
@@ -794,7 +790,7 @@
         .opt-label.selected {
             background: rgba(212, 168, 67, 0.10);
             border-color: var(--accent);
-            color: var(--heading-color);
+            color: var(--primary);
             font-weight: 700;
             box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.12);
         }
@@ -831,7 +827,7 @@
         .exam-sidebar .sb-title {
             font-size: 13px;
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
             text-align: center;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 8px;
@@ -954,7 +950,7 @@
             color: var(--warning);
         }
         .sb-stats .stat-row .stat-val.blue {
-            color: var(--heading-color);
+            color: var(--primary);
         }
         .sb-stats .stat-divider {
             border-top: 1px solid var(--border-color);
@@ -1139,7 +1135,7 @@
         #profile-modal .pm-box .pm-name {
             font-size: 20px;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             text-align: center;
             margin-bottom: 2px;
         }
@@ -1297,7 +1293,7 @@
         .btn-outline {
             background: transparent;
             border: 2px solid var(--primary);
-            color: var(--heading-color);
+            color: var(--primary);
             box-shadow: none;
         }
         body.dark-mode .btn-outline {
@@ -1353,7 +1349,7 @@
             font-size: 18px;
             font-weight: 800;
             margin: 0 0 4px 0;
-            color: var(--heading-color);
+            color: var(--primary);
         }
         .modal-box .modal-desc {
             color: var(--text-muted);
@@ -1431,7 +1427,7 @@
             justify-content: center;
             box-shadow: var(--shadow-lg);
             pointer-events: auto;
-            color: var(--heading-color);
+            color: var(--primary);
         }
         .admin-lock:hover {
             transform: scale(1.10);
@@ -1470,7 +1466,7 @@
         .ss-box .ss-title {
             font-size: 22px;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             text-align: center;
             margin-bottom: 4px;
         }
@@ -1509,7 +1505,7 @@
             color: var(--warning);
         }
         .ss-box .ss-row .ss-value.blue {
-            color: var(--heading-color);
+            color: var(--primary);
         }
         .ss-box .ss-divider {
             border-top: 2px solid var(--border-color);
@@ -1586,7 +1582,7 @@
         .leaderboard-container .lb-title {
             font-size: 20px;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             text-align: center;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
@@ -1643,7 +1639,7 @@
         .lb-item .lb-score {
             font-weight: 700;
             font-size: 14px;
-            color: var(--heading-color);
+            color: var(--primary);
         }
         .lb-item .lb-detail {
             font-size: 11px;
@@ -1813,7 +1809,7 @@
         .exam-card .exam-name {
             font-size: 16px;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             margin: 0 0 2px 0;
             line-height: 1.2;
         }
@@ -2228,7 +2224,7 @@
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
             margin-bottom: 14px;
-            color: var(--heading-color);
+            color: var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -2294,7 +2290,7 @@
             pointer-events: none;
             font-size: 60px;
             font-weight: 900;
-            color: var(--heading-color);
+            color: var(--primary);
             white-space: nowrap;
             z-index: 0;
             font-family: 'Poppins', sans-serif;
@@ -2348,7 +2344,7 @@
             background: rgba(22, 42, 74, 0.92);
         }
         .bc-link {
-            color: var(--heading-color);
+            color: var(--primary);
             cursor: pointer;
             padding: 2px 10px;
             border-radius: 50px;
@@ -2536,7 +2532,7 @@
         .dash-welcome-box .greeting {
             font-size: 16px;
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
         }
         .dash-welcome-box .greeting .name {
             color: var(--accent);
@@ -2806,7 +2802,7 @@
         .folder-card .folder-title {
             font-size: 13px;
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
             line-height: 1.2;
         }
         body.dark-mode .folder-card .folder-title {
@@ -2846,7 +2842,7 @@
         .test-card .test-title {
             font-size: 14px;
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
             margin: 0;
         }
         .test-card .test-subtitle {
@@ -2981,7 +2977,7 @@
         .score-card-certificate .cert-header .cert-title-group .cert-main-title {
             font-size: 18px;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             letter-spacing: 0.5px;
         }
         .score-card-certificate .cert-header .cert-title-group .cert-main-title span {
@@ -2995,7 +2991,7 @@
         .score-card-certificate .cert-header .cert-title-group .cert-test-info {
             font-size: 10px;
             font-weight: 600;
-            color: var(--heading-color);
+            color: var(--primary);
             margin-top: 1px;
         }
         .score-card-certificate .cert-header .cert-title-group .cert-test-info span {
@@ -3029,7 +3025,7 @@
         .score-card-certificate .cert-body .cert-item .cert-value {
             font-size: 22px;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             margin-top: 2px;
         }
         .score-card-certificate .cert-body .cert-item .cert-value.gold {
@@ -3042,7 +3038,7 @@
             color: var(--danger);
         }
         .score-card-certificate .cert-body .cert-item .cert-value.blue {
-            color: var(--heading-color-light);
+            color: var(--primary-light);
         }
         .score-card-certificate .cert-body .cert-item .cert-sub {
             font-size: 9px;
@@ -3672,7 +3668,7 @@
         }
         .vp-btn.svg-btn {
             background: rgba(15, 43, 92, 0.10);
-            color: var(--heading-color);
+            color: var(--primary);
             border-color: var(--primary);
         }
         .vp-btn.svg-btn:hover {
@@ -3915,7 +3911,7 @@
         #admin-view .admin-section-title {
             font-size: 16px;
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
             margin-bottom: 12px;
             display: flex;
             align-items: center;
@@ -4124,7 +4120,7 @@
             font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.3px;
-            color: var(--heading-color);
+            color: var(--primary);
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             padding: 3px 12px;
@@ -4166,7 +4162,7 @@
             padding-bottom: 0;
             border-bottom: none;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             font-size: 11.5px;
         }
         .subject-question-item .sq-tag {
@@ -4175,7 +4171,7 @@
             border-radius: 50px;
             font-size: 9px;
             font-weight: 700;
-            color: var(--heading-color-light);
+            color: var(--primary-light);
             border: 1px solid var(--border-color);
             letter-spacing: 0.2px;
         }
@@ -4246,7 +4242,7 @@
             font-size: 11px;
             font-weight: 800;
             letter-spacing: 0.3px;
-            color: var(--heading-color);
+            color: var(--primary);
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             padding: 2px 10px;
@@ -4280,7 +4276,7 @@
         .analytics-container .analytics-title {
             font-size: 16px;
             font-weight: 800;
-            color: var(--heading-color);
+            color: var(--primary);
             text-align: center;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
@@ -4328,7 +4324,7 @@
         }
         .analytics-container .mentor-msg-box .mentor-text .mentor-name {
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
         }
 
         /* PDF Tag Badge */
@@ -4435,7 +4431,7 @@
         .chapter-connector-hint {
             font-size: 10px;
             font-weight: 700;
-            color: var(--heading-color-light);
+            color: var(--primary-light);
             margin: 0 0 4px 2px;
             letter-spacing: 0.2px;
         }
@@ -4446,7 +4442,7 @@
         }
         #chapter-filter-bar-top .filter-btn {
             border-color: var(--primary-light);
-            color: var(--heading-color);
+            color: var(--primary);
         }
         #chapter-filter-bar-top .filter-btn:hover {
             border-color: var(--primary);
@@ -4505,7 +4501,7 @@
             color: var(--text-main);
         }
         .sq-combined-summary b {
-            color: var(--heading-color);
+            color: var(--primary);
         }
         .sq-combined-summary .sq-combined-note {
             width: 100%;
@@ -4522,7 +4518,7 @@
             line-height: 1.4;
         }
         .subject-filter-hint b {
-            color: var(--heading-color);
+            color: var(--primary);
             font-style: normal;
         }
 
@@ -4627,7 +4623,7 @@
         }
         .subject-questions-container .sq-group-title {
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
             font-size: 13px;
             margin: 8px 0 4px 0;
             border-bottom: 1px solid var(--border-color);
@@ -4736,7 +4732,7 @@
         }
         .sq-group-toggle .sq-toggle-icon {
             font-size: 14px;
-            color: var(--heading-color);
+            color: var(--primary);
             transition: transform 0.3s ease;
         }
         .sq-group-toggle .sq-toggle-icon.open {
@@ -4858,7 +4854,7 @@
         .sub-graph-container .sub-graph-title {
             font-size: 15px;
             font-weight: 700;
-            color: var(--heading-color);
+            color: var(--primary);
             margin-bottom: 10px;
             text-align: center;
         }
@@ -5245,7 +5241,7 @@
     <div id="test-room-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999999999;align-items:center;justify-content:center;padding:16px;">
         <div style="background:var(--bg-card);border-radius:var(--radius-lg);max-width:480px;width:100%;max-height:85vh;overflow-y:auto;padding:20px;position:relative;box-shadow:var(--shadow-lg);">
             <button onclick="window.closeTestRoomModal()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">✕</button>
-            <h3 style="margin:0 0 12px 0;color: var(--heading-color);font-size:16px;">👥 Test Room</h3>
+            <h3 style="margin:0 0 12px 0;color:var(--primary);font-size:16px;">👥 Test Room</h3>
             <div id="trm-body">Loading...</div>
         </div>
     </div>
@@ -5523,7 +5519,7 @@
             <div id="st-history-section" style="display:none;">
                 <div style="background:var(--bg-card);border:1px solid var(--border-color);padding:16px;border-radius:var(--radius-lg);margin-bottom:16px;box-shadow:var(--shadow-sm); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <div>
-                        <h4 style="margin:0 0 4px 0;color: var(--heading-color);font-size:15px;">📈 My Performance Report</h4>
+                        <h4 style="margin:0 0 4px 0;color:var(--primary);font-size:15px;">📈 My Performance Report</h4>
                         <p style="font-size:12px;color:var(--text-muted);margin:0;">Mobile: <b id="disp-hist-phone" style="color:var(--text-main);">...</b></p>
                     </div>
                     <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -5533,7 +5529,7 @@
                 </div>
 
                 <div id="report-exam-filter-section" style="margin:0 0 14px 0; border:2px solid var(--primary); border-radius:var(--radius); padding:10px 12px; background:var(--bg-subtle);">
-                    <h3 style="color: var(--heading-color); font-size:13px; margin:0 0 6px 0;">🎯 Select Exam</h3>
+                    <h3 style="color:var(--primary); font-size:13px; margin:0 0 6px 0;">🎯 Select Exam</h3>
                     <select id="report-exam-select" class="report-exam-select" onchange="window.onReportExamChange(this.value)">
                         <option value="all">All Exams</option>
                     </select>
@@ -5541,7 +5537,7 @@
                 </div>
 
                 <div id="subject-filter-section-top" style="margin:0 0 16px 0; border:2px solid var(--accent); border-radius:var(--radius); padding:10px 12px; background:var(--bg-subtle);">
-                    <h3 style="color: var(--heading-color); font-size:13px; margin:0 0 3px 0;">📂 Filter by Subject</h3>
+                    <h3 style="color:var(--primary); font-size:13px; margin:0 0 3px 0;">📂 Filter by Subject</h3>
                     <p class="subject-filter-hint">👉 After selecting a Subject, a <b>Chapter-wise</b> filter will automatically appear below.</p>
                     <div class="subject-filter-bar" id="subject-filter-bar-top" style="margin:0; border:none; padding:0; background:transparent;"></div>
                     <div id="chapter-filter-wrap-top" style="display:none; margin-top:8px;">
@@ -5558,8 +5554,8 @@
                         <div style="flex:1;min-width:210px;">
                             <div id="my-rank-card" style="margin-bottom:6px;font-size:11px;"></div>
                             <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;border-top:1px dashed var(--border-color);padding-top:6px;">
-                                <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Tests</div><b style="font-size:15px;color: var(--heading-color);" id="gr-tot">0</b></div>
-                                <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Qs</div><b style="font-size:15px;color: var(--heading-color);" id="gr-qs">0</b></div>
+                                <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Tests</div><b style="font-size:15px;color:var(--primary);" id="gr-tot">0</b></div>
+                                <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Qs</div><b style="font-size:15px;color:var(--primary);" id="gr-qs">0</b></div>
                                 <div style="text-align:center;"><div style="font-size:9.5px;color:var(--text-muted);">Accuracy</div><b style="font-size:15px;color:var(--danger);" id="gr-acc">0%</b></div>
                                 <div style="font-size:10px;font-weight:700;display:flex;gap:8px;flex-wrap:wrap;">
                                     <span style="color:var(--success);">🟩 <span id="gr-r">0</span></span>
@@ -5574,7 +5570,7 @@
                             <div style="font-size:8px;color:var(--text-muted);margin-top:2px;">📱 Scan to Open</div>
                         </div>
                     </div>
-                    <h3 style="color: var(--heading-color);border-bottom:2px solid var(--border-color);padding-bottom:6px;font-size:16px;">📜 Individual Test Records</h3>
+                    <h3 style="color:var(--primary);border-bottom:2px solid var(--border-color);padding-bottom:6px;font-size:16px;">📜 Individual Test Records</h3>
                     <div id="st-hist-loader" style="text-align:center; display:none; margin-top:16px;">
                         <div class="loader-mini" style="width:28px; height:28px;"></div><br />
                         <span style="color:var(--text-muted); margin-top:8px; display:inline-block; font-size:13px;">Loading report history...</span>
@@ -5583,7 +5579,7 @@
                     <div id="st-hist-list" class="hist-list-grid"></div>
 
                     <div id="topic-performance-table" style="margin-top:16px; border-top:2px solid var(--border-color); padding-top:12px;">
-                        <h3 style="color: var(--heading-color); font-size:14px; margin-bottom:6px;">📊 Topic-wise Performance (Strong / Weak)</h3>
+                        <h3 style="color:var(--primary); font-size:14px; margin-bottom:6px;">📊 Topic-wise Performance (Strong / Weak)</h3>
                         <div id="topic-table-container" class="topic-perf-table-wrap">
                             <table class="topic-perf-table">
                                 <thead>
@@ -5609,10 +5605,10 @@
         <!-- ===== TEST ENTRY ===== -->
         <div id="login-view" class="view-section">
             <div id="specific-test-login" style="max-width:440px;margin:16px auto;background:var(--bg-card);padding:24px;border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);border-top:5px solid var(--accent);">
-                <h3 style="color: var(--heading-color);text-align:center;margin-bottom:2px;font-size:18px;" id="login-test-name">Test Entry</h3>
+                <h3 style="color:var(--primary);text-align:center;margin-bottom:2px;font-size:18px;" id="login-test-name">Test Entry</h3>
                 <p style="text-align:center;color:var(--danger);font-weight:700;margin:0;font-size:13px;">Code: <span id="disp-code">...</span></p>
                 <p style="text-align:center;color:var(--text-muted);font-size:12px;margin:2px 0 4px 0;">+<span id="disp-marks"></span> / -<span id="disp-neg"></span></p>
-                <p id="disp-time-info" style="text-align:center;color: var(--heading-color);font-size:11px;font-weight:700;margin:0 0 12px 0;"></p>
+                <p id="disp-time-info" style="text-align:center;color:var(--primary);font-size:11px;font-weight:700;margin:0 0 12px 0;"></p>
 
                 <div style="margin:10px 0 14px 0;text-align:center;border-bottom:1px dashed var(--border-color);padding-bottom:10px;">
                     <label style="font-weight:700;color:var(--text-main);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;">
@@ -5688,7 +5684,7 @@
         <div id="palette-overlay" class="fullscreen-overlay">
             <div class="fs-container">
                 <div class="fs-header">
-                    <h3 style="margin:0;color: var(--heading-color);font-size:17px;">📋 All Questions</h3>
+                    <h3 style="margin:0;color:var(--primary);font-size:17px;">📋 All Questions</h3>
                     <button class="btn btn-danger btn-sm" onclick="window.togglePaletteOverlay(false)">✕ Close</button>
                 </div>
                 <div class="palette-legend">
@@ -5703,7 +5699,7 @@
         <!-- ===== RESULT VIEW – TWO COLUMN LAYOUT ===== -->
         <div id="result-view" class="view-section" oncontextmenu="return false;">
             <div class="result-title" id="result-heading"><span class="highlight">🎉</span> Test Submitted!</div>
-            <div id="rank-loader" style="margin:6px 0 10px 0;color: var(--heading-color);font-weight:700;display:none;"><div class="loader-mini"></div> Calculating rank...</div>
+            <div id="rank-loader" style="margin:6px 0 10px 0;color:var(--primary);font-weight:700;display:none;"><div class="loader-mini"></div> Calculating rank...</div>
 
             <div id="report-section">
                 <!-- TWO COLUMN LAYOUT -->
@@ -5799,7 +5795,7 @@
 
                             <!-- DETAILED PERFORMANCE TABLE -->
                             <div id="result-topic-table" style="margin-top:12px; border-top:1px solid var(--border-color); padding-top:10px; overflow-x:auto;">
-                                <h4 style="margin:0 0 6px 0; color: var(--heading-color); font-size:13px;">📋 Detailed Topic Performance</h4>
+                                <h4 style="margin:0 0 6px 0; color:var(--primary); font-size:13px;">📋 Detailed Topic Performance</h4>
                                 <table class="topic-perf-table">
                                     <thead style="background:var(--primary); color:#fff;">
                                         <tr>
@@ -5837,7 +5833,7 @@
         <!-- ===== LOADING / ERROR ===== -->
         <div id="loading-view" class="view-section" style="text-align:center; padding:40px 20px;">
             <div class="loader-mini" style="width:36px; height:36px; border-width:4px;"></div>
-            <h3 style="color: var(--heading-color); margin-top:16px; font-size:17px;">Loading data, please wait...</h3>
+            <h3 style="color:var(--primary); margin-top:16px; font-size:17px;">Loading data, please wait...</h3>
         </div>
         <div id="error-view" class="view-section" style="text-align:center; padding:40px 20px;">
             <h2 style="color:var(--danger); font-size:20px;">❌ Failed to load test</h2>
@@ -7025,7 +7021,7 @@
                         helperMsg = document.createElement('p');
                         helperMsg.id = 'otp-helper-msg';
                         helperMsg.style =
-                            "color: var(--heading-color); font-size:11px; font-weight:700; margin-top:8px; background:var(--bg-subtle); padding:6px; border-radius:6px; border:1px solid var(--border-color); text-align:center;";
+                            "color:var(--primary); font-size:11px; font-weight:700; margin-top:8px; background:var(--bg-subtle); padding:6px; border-radius:6px; border:1px solid var(--border-color); text-align:center;";
                         helperMsg.innerText = "The email may take 1-2 minutes to arrive — please don't refresh the page.";
                         otpField.insertBefore(helperMsg, otpField.firstChild);
                     }
@@ -7893,11 +7889,14 @@
                                     const secure = secureDoc.data();
                                     if (secure.rawText) fData.rawText = secure.rawText;
                                     if (secure.answerKey && fData.questions) {
-                                        fData.questions = fData.questions.map((q, i) => ({
-                                            ...q,
-                                            ans: (secure.answerKey[i] && secure.answerKey[i].ans) || "",
-                                            exp: (secure.answerKey[i] && secure.answerKey[i].exp) || ""
-                                        }));
+                                        fData.questions = fData.questions.map((q, i) => {
+                                            const sk = secure.answerKey[i] || {};
+                                            const predicted = (q.predicted || []).map((p, pi) => ({
+                                                q: p.q || "",
+                                                s: (sk.predictedSolutions && sk.predictedSolutions[pi]) || ""
+                                            }));
+                                            return { ...q, ans: sk.ans || "", exp: sk.exp || "", predicted };
+                                        });
                                     }
                                 }
                                 fData.questions = window.sanitizeQuestions(fData.questions);
@@ -8235,7 +8234,7 @@
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                             <span class="live-dot-badge"><span class="dot"></span> LIVE NOW${durationBadge ? ' • ' + durationBadge : ''}</span>
                         </div>
-                        <div style="margin-top:8px;font-weight:800;color: var(--heading-color);font-size:14px;">🏛️ ${board} — 🎓 ${exam}</div>
+                        <div style="margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🏛️ ${board} — 🎓 ${exam}</div>
                         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${sub}${t.code ? ' • Code: ' + t.code : ''}</div>
                         <div class="live-test-meta-row">
                             <span class="badge" style="font-size:9px;">📂 ${cat}</span>
@@ -8259,7 +8258,7 @@
                 html += `
                     <div class="live-test-card" style="border-color:var(--warning);">
                         <span class="upcoming-badge">📅 Starts Soon</span>
-                        <div style="margin-top:8px;font-weight:800;color: var(--heading-color);font-size:14px;">🏛️ ${board} — 🎓 ${exam}</div>
+                        <div style="margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🏛️ ${board} — 🎓 ${exam}</div>
                         <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${sub}${t.code ? ' • Code: ' + t.code : ''}</div>
                         <div class="live-test-meta-row">
                             <span class="badge" style="font-size:9px;">📂 ${cat}</span>
@@ -8333,7 +8332,7 @@
                 h += `
                     <div class="upcoming-test-card">
                         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                            <span style="font-weight:800;color: var(--heading-color);font-size:13px;">🏛️ ${it.board} — 🎓 ${it.exam}</span>
+                            <span style="font-weight:800;color:var(--primary);font-size:13px;">🏛️ ${it.board} — 🎓 ${it.exam}</span>
                             <span class="upcoming-badge">📅 ${dateStr}</span>
                         </div>
                         <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📂 ${it.type||'Mock Tests'}${it.testCode ? ' • 🔗 Test Code: ' + it.testCode : ''}</div>
@@ -8370,7 +8369,7 @@
                 const addedNotice = (!amIHost && myInfo.addedByHost) ? `<div style="font-size:10px;color:var(--success);margin-top:2px;">🎉 ${myRoom.hostName} added you</div>` : "";
                 area.innerHTML = `
                     <div style="background:rgba(37,99,235,0.08);border:1px dashed var(--primary);border-radius:var(--radius-sm);padding:8px 10px;">
-                        <div style="font-size:11px;font-weight:700;color: var(--heading-color);">👥 Your Room • ${statusLabel} • ${memberCount} joined</div>
+                        <div style="font-size:11px;font-weight:700;color:var(--primary);">👥 Your Room • ${statusLabel} • ${memberCount} joined</div>
                         ${addedNotice}
                         <button class="btn btn-primary btn-sm" style="width:100%;margin-top:6px;" onclick="window.openTestRoomModal('${myRoom.id}', ${amIHost})">🔓 Open Room</button>
                     </div>
@@ -8578,7 +8577,7 @@
                 ${addedByFriendNotice}
                 <div style="background:rgba(37,99,235,0.08);border:1px dashed var(--primary);border-radius:var(--radius);padding:10px;text-align:center;margin-bottom:12px;">
                     <div style="font-size:10px;color:var(--text-muted);">Room Code (share with friends)</div>
-                    <div style="font-size:20px;font-weight:800;letter-spacing:2px;color: var(--heading-color);">${roomId}</div>
+                    <div style="font-size:20px;font-weight:800;letter-spacing:2px;color:var(--primary);">${roomId}</div>
                     <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="window.copyRoomShareText('${roomId}','${(room.board||'').replace(/'/g,"\\'")}','${(room.exam||'').replace(/'/g,"\\'")}','${(room.category||'').replace(/'/g,"\\'")}','${room.testCode||''}')">📋 Copy to share (WhatsApp etc.)</button>
                 </div>
                 <h4 style="font-size:12px;margin:0 0 6px 0;color:var(--text-main);">👥 Members (${members.length})</h4>
@@ -8739,7 +8738,7 @@
                     html += `
                         <div class="live-test-card" style="border-color:var(--primary);">
                             <span class="upcoming-badge" style="background:var(--primary);color:#fff;">👥 Test Room ${r.status === 'started' ? '(Live Now)' : '(Waiting)'}</span>
-                            <div style="margin-top:8px;font-weight:800;color: var(--heading-color);font-size:14px;">🎓 ${r.exam} — ${r.board}</div>
+                            <div style="margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🎓 ${r.exam} — ${r.board}</div>
                             <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${amIHost ? 'You created this room' : 'Hosted by ' + r.hostName} • Room: ${r.id} • 👥 ${(r.memberUids||[]).length} joined</div>
                             <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="window.openTestRoomModal('${r.id}', ${amIHost})">🔓 Open Room</button>
                         </div>
@@ -8860,9 +8859,9 @@
                     const dateStr = r.endedAt ? new Date(r.endedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "";
                     html += `
                         <div style="background:var(--bg-subtle);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;">
-                            <div style="font-weight:800;color: var(--heading-color);font-size:13px;">🎓 ${r.exam} — ${r.board}</div>
+                            <div style="font-weight:800;color:var(--primary);font-size:13px;">🎓 ${r.exam} — ${r.board}</div>
                             <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">📂 ${r.category} • Host: ${r.hostName} • ${dateStr}</div>
-                            <div style="font-size:12px;margin-top:6px;">Your Rank: <b style="color: var(--heading-color);">#${mine.rank || '-'} / ${(r.finalLeaderboard||[]).length}</b> &nbsp;|&nbsp; Score: <b style="color:var(--success);">${mine.score || 0}</b></div>
+                            <div style="font-size:12px;margin-top:6px;">Your Rank: <b style="color:var(--primary);">#${mine.rank || '-'} / ${(r.finalLeaderboard||[]).length}</b> &nbsp;|&nbsp; Score: <b style="color:var(--success);">${mine.score || 0}</b></div>
                             <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">👥 ${(r.memberUids||[]).length} members played together</div>
                             <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;" onclick="window.showRoomHistoryLeaderboard('${r.roomId}')">📊 Full Leaderboard</button>
                         </div>
@@ -8878,7 +8877,7 @@
             db.collection("roomHistory").doc(roomId).get().then((doc) => {
                 if (!doc.exists) return;
                 const r = doc.data();
-                let html = `<h3 style="text-align:center;color: var(--heading-color);font-size:16px;margin-bottom:10px;">🏆 ${r.exam} — Final Leaderboard</h3>`;
+                let html = `<h3 style="text-align:center;color:var(--primary);font-size:16px;margin-bottom:10px;">🏆 ${r.exam} — Final Leaderboard</h3>`;
                 (r.finalLeaderboard || []).forEach((s) => {
                     const medal = s.rank === 1 ? '🥇' : (s.rank === 2 ? '🥈' : (s.rank === 3 ? '🥉' : s.rank + '.'));
                     html += `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-subtle);border-radius:var(--radius-sm);margin-bottom:6px;font-size:13px;"><span>${medal} <b>${s.name}</b>${s.uid === r.hostUid ? ' <span class="badge" style="background:var(--primary);color:#fff;font-size:8px;">HOST</span>' : ''}</span><b style="color:var(--success);">${s.score || 0}</b></div>`;
@@ -8895,7 +8894,7 @@
                     const scores = [];
                     snap.forEach(d => scores.push(d.data()));
                     scores.sort((a, b) => (b.score || 0) - (a.score || 0));
-                    let html = `<h3 style="text-align:center;color: var(--heading-color);font-size:16px;margin-bottom:10px;">🏆 Room Leaderboard</h3>`;
+                    let html = `<h3 style="text-align:center;color:var(--primary);font-size:16px;margin-bottom:10px;">🏆 Room Leaderboard</h3>`;
                     if (scores.length === 0) {
                         html += `<p style="text-align:center;color:var(--text-muted);font-size:12px;">No one has submitted yet.</p>`;
                     } else {
@@ -9246,7 +9245,7 @@
                 const subjects = [...new Set(catTests.map(t => window.parseHack(t.topic).subcat || t.subject || t.sub ||
                     "General Studies"))];
                 html =
-                    `<h3 style="margin:0 0 12px 0;color: var(--heading-color);border-bottom:2px solid var(--border-color);padding-bottom:8px;font-size:15px;">📚 Select Subject</h3><div class="subject-grid">`;
+                    `<h3 style="margin:0 0 12px 0;color:var(--primary);border-bottom:2px solid var(--border-color);padding-bottom:8px;font-size:15px;">📚 Select Subject</h3><div class="subject-grid">`;
                 if (subjects.length === 0) html +=
                     `<p style="color:var(--text-muted);width:100%;text-align:center;padding:16px 0;font-size:13px;">No subjects added yet.</p>`;
                 subjects.forEach(sub => {
@@ -9296,7 +9295,7 @@
             }
             const titleText = (subjectName === 'ALL') ? `${activeCat}` : `${subjectName} - ${activeCat}`;
             let html =
-                `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><h3 style="margin:0;color: var(--heading-color);font-size:15px;">${titleText}</h3>`;
+                `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;"><h3 style="margin:0;color:var(--primary);font-size:15px;">${titleText}</h3>`;
             if (subjectName !== 'ALL') {
                 html += `<button class="btn btn-outline btn-sm" onclick="window.goBackFromDirectTests()">🔙 Back</button>`;
             } else {
@@ -9662,7 +9661,20 @@
                     const eIdx = savedTests.findIndex(x => x.code === t.code);
                     if (eIdx >= 0) savedTests[eIdx] = t;
                     else savedTests.push(t);
-                    try { await db.collection("tests").doc(t.code).set(t);
+                    // SECURITY: t.questions/t.rawText here come from local
+                    // cache and may carry full answers — never write that
+                    // back to the public /tests/{code} doc. Answers live
+                    // safely in secure/key and are untouched by this update.
+                    const publicT = { ...t };
+                    delete publicT.rawText;
+                    if (publicT.questions) {
+                        publicT.questions = publicT.questions.map(q => {
+                            const { ans, exp, predicted, ...rest } = q;
+                            const publicPredicted = (predicted || []).map(p => ({ q: p.q || "" }));
+                            return { ...rest, predicted: publicPredicted };
+                        });
+                    }
+                    try { await db.collection("tests").doc(t.code).set(publicT);
                         count++; } catch (e) { console.error(e); }
                 }
             }
@@ -9785,9 +9797,32 @@
             window.adminActionMode = action;
             window.adminPdfMode = mode;
             window.showLoadingModal("Downloading full test data securely...<br><br><i>Wait just a second...</i>");
-            db.collection("tests").doc(window.adminActionCode).get().then((doc) => {
-                if (doc.exists) { window.handleAdminTestLoad(doc.data()); } else { window.closeModal();
-                    window.showCustomAlert("Error", "Test not found on server!", "❌"); }
+            const testRef = db.collection("tests").doc(window.adminActionCode);
+            testRef.get().then((doc) => {
+                if (!doc.exists) { window.closeModal();
+                    window.showCustomAlert("Error", "Test not found on server!", "❌"); return; }
+                const data = doc.data();
+                // Answers/explanations/predicted-solutions/rawText now live
+                // only in the secure sub-document. Admin can always read it
+                // (see isAdmin() in the Firestore rules) — merge it back in
+                // before handing off to the editor.
+                testRef.collection("secure").doc("key").get().then((secureDoc) => {
+                    if (secureDoc.exists) {
+                        const secure = secureDoc.data();
+                        if (secure.rawText) data.rawText = secure.rawText;
+                        if (secure.answerKey && data.questions) {
+                            data.questions = data.questions.map((q, i) => {
+                                const sk = secure.answerKey[i] || {};
+                                const predicted = (q.predicted || []).map((p, pi) => ({
+                                    q: p.q || "",
+                                    s: (sk.predictedSolutions && sk.predictedSolutions[pi]) || ""
+                                }));
+                                return { ...q, ans: sk.ans || "", exp: sk.exp || "", predicted };
+                            });
+                        }
+                    }
+                    window.handleAdminTestLoad(data);
+                }).catch(() => { window.handleAdminTestLoad(data); });
             }).catch((error) => { window.closeModal();
                 window.showCustomAlert("Network Error", "Failed to connect to Database.", "❌"); });
         };
@@ -9981,6 +10016,22 @@
             const eTopic = finalTopicRaw + "|||QS:" + fQs + "|||CAT:" + eCategory + "|||LOGO:" + eLogo + "|||BOARD:" +
                 eBoard + "|||EXAM:" + eName + "|||SUBCAT:" + eSub + "|||SUMMARY:" + eSummary;
 
+            // SECURITY: split into a PUBLIC copy (no answers/explanations/
+            // predicted-solutions — this is what anyone can read per the
+            // Firestore rules on /tests/{code}) and a SECURE answer key
+            // (goes only into /tests/{code}/secure/key, which rules restrict
+            // to admins, free tests, or premium users).
+            const publicQs = finalQs.map(q => {
+                const { ans, exp, predicted, ...rest } = q;
+                const publicPredicted = (predicted || []).map(p => ({ q: p.q || "" }));
+                return { ...rest, predicted: publicPredicted };
+            });
+            const secureAnswerKey = finalQs.map(q => ({
+                ans: q.ans || "",
+                exp: q.exp || "",
+                predictedSolutions: (q.predicted || []).map(p => p.s || "")
+            }));
+
             const fObj = {
                 exam: eName,
                 category: eCategory,
@@ -9996,9 +10047,8 @@
                 isFree: isFree,
                 price: ePrice,
                 key: eKey,
-                questions: finalQs,
+                questions: publicQs,
                 qs: fQs,
-                rawText: rawText,
                 isActive: true,
                 tags: finalQs.map(q => q.tag || "General")
             };
@@ -10009,6 +10059,13 @@
                 btnVp.disabled = true; }
 
             db.collection("tests").doc(eCode).set(fObj).then(() => {
+                // Answers/explanations/predicted-solutions/rawText live ONLY
+                // here from now on.
+                return db.collection("tests").doc(eCode).collection("secure").doc("key").set({
+                    rawText: rawText,
+                    answerKey: secureAnswerKey
+                });
+            }).then(() => {
                 if (btn) { btn.innerText = "🚀 Generate / Update Test";
                     btn.disabled = false;
                     btn.style.background = "var(--primary)"; }
@@ -10025,7 +10082,11 @@
                 const tLink = BASE_URL + "?test=" + eCode;
                 const sTests = JSON.parse(localStorage.getItem('myMockTests')) || [];
                 const eIdx = sTests.findIndex(t => t.code === eCode);
-                const tObj = { ...fObj, link: tLink, date: new Date().toLocaleDateString() };
+                // Local cache (this admin's own browser storage only) keeps
+                // the FULL data — questions with answers, plus rawText — so
+                // "Edit Test" still works instantly. This never leaves the
+                // admin's own machine; the public Firestore doc above does not.
+                const tObj = { ...fObj, questions: finalQs, rawText: rawText, link: tLink, date: new Date().toLocaleDateString() };
                 if (eIdx >= 0) sTests[eIdx] = tObj;
                 else sTests.push(tObj);
                 localStorage.setItem('myMockTests', JSON.stringify(sTests));
@@ -10441,7 +10502,7 @@
                 container.innerHTML = `
                     <div class="vp-sticky-header">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                            <h4 style="color: var(--heading-color); margin:0;font-size:15px;">🖼️ Visual Image & SVG Editor</h4>
+                            <h4 style="color:var(--primary); margin:0;font-size:15px;">🖼️ Visual Image & SVG Editor</h4>
                             <button class="btn btn-danger btn-sm" onclick="window.closeVisualEditor()" style="font-size:11px;">✕ Close</button>
                         </div>
                         <p style="font-size:10px; color:var(--text-muted); margin-top:4px; margin-bottom:8px;">Search question number to quickly add SVG/Images without scrolling.</p>
@@ -10494,7 +10555,7 @@
                         cleanText = line.replace(/<img[^>]*>/g,
                                 '<br><span style="color:var(--success);font-weight:bold;">[🖼️ IMAGE ADDED]</span>')
                             .replace(/<svg[\s\S]*?<\/svg>/g,
-                                '<br><span style="color: var(--heading-color);font-weight:bold;">[🖋️ SVG ADDED]</span>');
+                                '<br><span style="color:var(--primary);font-weight:bold;">[🖋️ SVG ADDED]</span>');
                     }
                     let btnsHTML = `
                         <button class="vp-btn" id="vp-btn-${i}" onclick="window.triggerVisualUpload(${i})">🖼️ Add Image</button>
@@ -12002,7 +12063,7 @@
 
             const h =
                 `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--border-color);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap;gap:6px;">
-                    <b style="color: var(--heading-color);font-size:15px;">${tt[window.currentAnalysisType]} (${window.currentAnalysisIndex+1} of ${window.currentAnalysisArray.length})</b>
+                    <b style="color:var(--primary);font-size:15px;">${tt[window.currentAnalysisType]} (${window.currentAnalysisIndex+1} of ${window.currentAnalysisArray.length})</b>
                     <button class="btn btn-danger btn-sm" onclick="document.getElementById('analysis-box').style.display='none';" style="font-size:10px;padding:4px 12px;">✕ Close</button>
                 </div>
                 ${pH}
@@ -12280,7 +12341,7 @@
                 const tCat = p.cat || "Mock Test";
                 const tSub = p.subcat || tData.subject || tData.sub || "Subject";
                 const tChap = p.topic || "";
-                h += `<div class="test-card hist-card-layout"><div class="hist-left"><h4 style="margin:0;color: var(--heading-color);font-size:14px;">📝 ${tBoard} - ${tExam} (${r.testCode||'Test'})</h4><div style="font-size:11px;color:var(--text-muted);margin:2px 0 6px 0;font-weight:600;">📂 ${tCat} | 📚 ${tSub} ${tChap ? ' | 📖 ' + tChap : ''}</div><div style="font-size:11px;color:var(--text-main);background:var(--bg-subtle);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-color); display:inline-block;">Attempt: <b>${r.attempt||1}</b> | Score: <b style="color:var(--success);font-size:13px;">${r.score||0}</b><br><span style="color:var(--success);margin-top:2px;display:inline-block;">✅ Right: ${r.right||0}</span> | <span style="color:var(--danger);">❌ Wrong: ${r.wrong||0}</span> | <span style="color:var(--text-muted);">⬜ Blank: ${r.blank||0}</span><br><div style="margin-top:2px;">⏱ Time Taken: ${Math.floor((r.timeSpent||0)/60)}m ${(r.timeSpent||0)%60}s</div></div></div><div class="hist-right" style="display:flex;flex-direction:column;gap:6px;"><button class="btn btn-primary btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.openHistoricalResult('${pdfCode}')">👁️ View Result</button><button class="btn btn-danger btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.downloadHistoryPDF('${pdfCode}')">📥 Download PDF</button></div></div>`;
+                h += `<div class="test-card hist-card-layout"><div class="hist-left"><h4 style="margin:0;color:var(--primary);font-size:14px;">📝 ${tBoard} - ${tExam} (${r.testCode||'Test'})</h4><div style="font-size:11px;color:var(--text-muted);margin:2px 0 6px 0;font-weight:600;">📂 ${tCat} | 📚 ${tSub} ${tChap ? ' | 📖 ' + tChap : ''}</div><div style="font-size:11px;color:var(--text-main);background:var(--bg-subtle);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-color); display:inline-block;">Attempt: <b>${r.attempt||1}</b> | Score: <b style="color:var(--success);font-size:13px;">${r.score||0}</b><br><span style="color:var(--success);margin-top:2px;display:inline-block;">✅ Right: ${r.right||0}</span> | <span style="color:var(--danger);">❌ Wrong: ${r.wrong||0}</span> | <span style="color:var(--text-muted);">⬜ Blank: ${r.blank||0}</span><br><div style="margin-top:2px;">⏱ Time Taken: ${Math.floor((r.timeSpent||0)/60)}m ${(r.timeSpent||0)%60}s</div></div></div><div class="hist-right" style="display:flex;flex-direction:column;gap:6px;"><button class="btn btn-primary btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.openHistoricalResult('${pdfCode}')">👁️ View Result</button><button class="btn btn-danger btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.downloadHistoryPDF('${pdfCode}')">📥 Download PDF</button></div></div>`;
             });
             list.innerHTML = h ||
                 "<p style='text-align:center;color:var(--text-muted);padding:16px;font-size:13px;'>No test records found for this Exam.</p>";
@@ -12445,7 +12506,7 @@
                 const distRank = myDistrict ? (distRows.findIndex(r => r.uid === uid) + 1) : null;
 
                 let html =
-                    `<span style="font-weight:800;color: var(--heading-color);">🏆 Rank:</span> <span style="color:var(--text-main);">🇮🇳 All India <b style="color: var(--heading-color);">#${allIndiaRank}</b><span style="color:var(--text-muted);">/${totalStudents}</span></span>`;
+                    `<span style="font-weight:800;color:var(--primary);">🏆 Rank:</span> <span style="color:var(--text-main);">🇮🇳 All India <b style="color:var(--primary);">#${allIndiaRank}</b><span style="color:var(--text-muted);">/${totalStudents}</span></span>`;
                 if (myState) {
                     html +=
                         ` &nbsp;·&nbsp; <span style="color:var(--text-main);">🗺️ ${myState} <b style="color:var(--success);">#${stateRank}</b><span style="color:var(--text-muted);">/${stateRows.length}</span></span>`;
@@ -12994,9 +13055,31 @@
         window.downloadHistoryPDF = function(code) {
             if (!code) return window.showCustomAlert("Error", "Invalid test code", "❌");
             window.showLoadingModal("Fetching PDF data securely...<br><i>Please wait...</i>");
-            db.collection("tests").doc(code).get().then(doc => {
-                if (doc.exists) { window.handleHistoryPDFLoad(doc.data()); } else { window.closeModal();
-                    window.showCustomAlert("Error", "Test data missing in database.", "❌"); }
+            const testRef = db.collection("tests").doc(code);
+            testRef.get().then(doc => {
+                if (!doc.exists) { window.closeModal();
+                    window.showCustomAlert("Error", "Test data missing in database.", "❌"); return; }
+                const data = doc.data();
+                // Answers/explanations/rawText live only in secure/key now —
+                // merge them back in (rules gate this to admin/free/premium,
+                // same eligibility this PDF feature already required).
+                testRef.collection("secure").doc("key").get().then((secureDoc) => {
+                    if (secureDoc.exists) {
+                        const secure = secureDoc.data();
+                        if (secure.rawText) data.rawText = secure.rawText;
+                        if (secure.answerKey && data.questions) {
+                            data.questions = data.questions.map((q, i) => {
+                                const sk = secure.answerKey[i] || {};
+                                const predicted = (q.predicted || []).map((p, pi) => ({
+                                    q: p.q || "",
+                                    s: (sk.predictedSolutions && sk.predictedSolutions[pi]) || ""
+                                }));
+                                return { ...q, ans: sk.ans || "", exp: sk.exp || "", predicted };
+                            });
+                        }
+                    }
+                    window.handleHistoryPDFLoad(data);
+                }).catch(() => window.handleHistoryPDFLoad(data));
             }).catch(err => { window.closeModal();
                 window.showCustomAlert("Error", "Network Error.", "❌"); });
         };
@@ -13317,7 +13400,7 @@
                 // Render in a modal
                 let html = '<div style="max-height:60vh; overflow-y:auto; text-align:left;">';
                 for (const [code, data] of weakMap) {
-                    html += `<h4 style="margin:10px 0 4px 0; color: var(--heading-color);">📝 ${data.testName}</h4>`;
+                    html += `<h4 style="margin:10px 0 4px 0; color:var(--primary);">📝 ${data.testName}</h4>`;
                     html += `<ul style="list-style:none; padding-left:0;">`;
                     data.questions.forEach((wq, idx) => {
                         // We need to fetch the actual question text. Since we have the test code and qId,
@@ -13346,29 +13429,47 @@
 
         window.practiceWeakQuestion = function(testCode, qId) {
             // Fetch the original test data to get the question
-            db.collection("tests").doc(testCode).get().then((doc) => {
+            const testRef = db.collection("tests").doc(testCode);
+            testRef.get().then((doc) => {
                 if (!doc.exists) {
                     return window.showCustomAlert("Error", "Test data not found.", "❌");
                 }
                 const testData = doc.data();
-                const question = testData.questions?.[qId];
-                if (!question) {
-                    return window.showCustomAlert("Error", "Question not found.", "❌");
-                }
-                // Create a mini test with just this question
-                const weakExamData = {
-                    ...testData,
-                    code: testCode + '-WEAK-SINGLE',
-                    questions: [question],
-                    totTime: 60, // 1 minute for a single question
-                    qTime: 30,
-                    exam: testData.exam + ' (Weak Q)'
-                };
-                window.examData = weakExamData;
-                window.startExam(true);
+                // Answers now live only in secure/key — merge them back in
+                // (rules allow this for the same free/premium/admin students
+                // who were eligible to see them in the original test) so
+                // grading on this practice retake still works.
+                testRef.collection("secure").doc("key").get().then((secureDoc) => {
+                    if (secureDoc.exists && testData.questions) {
+                        const secure = secureDoc.data();
+                        const sk = (secure.answerKey && secure.answerKey[qId]) || {};
+                        if (testData.questions[qId]) {
+                            testData.questions[qId] = { ...testData.questions[qId], ans: sk.ans || "", exp: sk.exp || "" };
+                        }
+                    }
+                    window.finishPracticeWeakQuestion(testCode, qId, testData);
+                }).catch(() => window.finishPracticeWeakQuestion(testCode, qId, testData));
             }).catch(err => {
                 window.showCustomAlert("Error", "Could not load question: " + err.message, "❌");
             });
+        };
+
+        window.finishPracticeWeakQuestion = function(testCode, qId, testData) {
+            const question = testData.questions?.[qId];
+            if (!question) {
+                return window.showCustomAlert("Error", "Question not found.", "❌");
+            }
+            // Create a mini test with just this question
+            const weakExamData = {
+                ...testData,
+                code: testCode + '-WEAK-SINGLE',
+                questions: [question],
+                totTime: 60, // 1 minute for a single question
+                qTime: 30,
+                exam: testData.exam + ' (Weak Q)'
+            };
+            window.examData = weakExamData;
+            window.startExam(true);
         };
 
         window.startWeakTest = function(testCode) {
@@ -13388,29 +13489,42 @@
                 }
 
                 // Fetch the full test data
-                db.collection("tests").doc(testCode).get().then((doc) => {
+                const testRef = db.collection("tests").doc(testCode);
+                testRef.get().then((doc) => {
                     if (!doc.exists) {
                         return window.showCustomAlert("Error", "Test data not found.", "❌");
                     }
                     const testData = doc.data();
-                    const allQuestions = testData.questions || [];
-                    const weakQuestions = allQuestions.filter((_, idx) => weakIndices.has(idx));
-
-                    if (weakQuestions.length === 0) {
-                        return window.showCustomAlert("Info", "No weak questions found.", "💡");
-                    }
-
-                    // Create a new exam with only weak questions
-                    const weakExamData = {
-                        ...testData,
-                        code: testCode + '-WEAK',
-                        questions: weakQuestions,
-                        totTime: weakQuestions.length * 60, // 1 min per question
-                        qTime: 45,
-                        exam: testData.exam + ' (Weak Practice)'
-                    };
-                    window.examData = weakExamData;
-                    window.startExam(true); // reattempt mode
+                    // Merge answers back in from secure/key (rules allow this
+                    // for the same free/premium/admin students who could see
+                    // them originally) so grading on the retake still works.
+                    testRef.collection("secure").doc("key").get().then((secureDoc) => {
+                        if (secureDoc.exists && testData.questions) {
+                            const secure = secureDoc.data();
+                            testData.questions = testData.questions.map((q, i) => {
+                                const sk = (secure.answerKey && secure.answerKey[i]) || {};
+                                return { ...q, ans: sk.ans || "", exp: sk.exp || "" };
+                            });
+                        }
+                        const allQuestions = testData.questions || [];
+                        const weakQuestions = allQuestions.filter((_, idx) => weakIndices.has(idx));
+                        if (weakQuestions.length === 0) {
+                            return window.showCustomAlert("Info", "No weak questions found.", "💡");
+                        }
+                        // Create a new exam with only weak questions
+                        const weakExamData = {
+                            ...testData,
+                            code: testCode + '-WEAK',
+                            questions: weakQuestions,
+                            totTime: weakQuestions.length * 60, // 1 min per question
+                            qTime: 45,
+                            exam: testData.exam + ' (Weak Practice)'
+                        };
+                        window.examData = weakExamData;
+                        window.startExam(true); // reattempt mode
+                    }).catch(err => {
+                        window.showCustomAlert("Error", "Failed to load test: " + err.message, "❌");
+                    });
                 }).catch(err => {
                     window.showCustomAlert("Error", "Failed to load test: " + err.message, "❌");
                 });
