@@ -5508,15 +5508,15 @@
                     <select id="report-exam-select" class="report-exam-select" onchange="window.onReportExamChange(this.value)">
                         <option value="all">All Exams</option>
                     </select>
-                    <p style="font-size:10.5px;color:var(--text-muted);margin:6px 0 0 0;">👉 Exam चुनने के बाद नीचे पूरा Report (Subjects, Chapters, Tests, Questions) सिर्फ उसी Exam का दिखेगा।</p>
+                    <p style="font-size:10.5px;color:var(--text-muted);margin:6px 0 0 0;">👉 After selecting an Exam, the entire Report below (Subjects, Chapters, Tests, Questions) will show only that Exam's data.</p>
                 </div>
 
                 <div id="subject-filter-section-top" style="margin:0 0 16px 0; border:2px solid var(--accent); border-radius:var(--radius); padding:10px 12px; background:var(--bg-subtle);">
                     <h3 style="color:var(--primary); font-size:13px; margin:0 0 3px 0;">📂 Filter by Subject</h3>
-                    <p class="subject-filter-hint">👉 Subject चुनने के बाद नीचे <b>Chapter-wise</b> filter भी अपने-आप दिख जाएगा।</p>
+                    <p class="subject-filter-hint">👉 After selecting a Subject, a <b>Chapter-wise</b> filter will automatically appear below.</p>
                     <div class="subject-filter-bar" id="subject-filter-bar-top" style="margin:0; border:none; padding:0; background:transparent;"></div>
                     <div id="chapter-filter-wrap-top" style="display:none; margin-top:8px;">
-                        <div class="chapter-connector-hint">↳ Subject ke andar Chapter-wise dekhein</div>
+                        <div class="chapter-connector-hint">↳ See Chapter-wise breakdown inside a Subject</div>
                         <div class="subject-filter-bar" id="chapter-filter-bar-top" style="margin:0;"></div>
                     </div>
                     <div id="subject-questions-container-top" class="subject-questions-container" style="margin-top:8px;">
@@ -6226,7 +6226,7 @@
             }).catch((err) => {
                 if (saveBtn) { saveBtn.innerText = "💾 Save";
                     saveBtn.disabled = false; }
-                window.showCustomAlert("Save Failed", "Address save nahi ho paya: " + err.message + "<br><br>Agar ye baar-baar ho raha hai to internet connection check karein ya app admin se sampark karein.", "❌");
+                window.showCustomAlert("Save Failed", "Address could not be saved: " + err.message + "<br><br>If this keeps happening, check your internet connection or contact the app admin.", "❌");
             });
         };
 
@@ -6997,7 +6997,7 @@
                         helperMsg.id = 'otp-helper-msg';
                         helperMsg.style =
                             "color:var(--primary); font-size:11px; font-weight:700; margin-top:8px; background:var(--bg-subtle); padding:6px; border-radius:6px; border:1px solid var(--border-color); text-align:center;";
-                        helperMsg.innerText = "Bhai, email aane mein 1-2 minute lag sakte hain, kripya page refresh na karein.";
+                        helperMsg.innerText = "The email may take 1-2 minutes to arrive — please don't refresh the page.";
                         otpField.insertBefore(helperMsg, otpField.firstChild);
                     }
                 }
@@ -7171,10 +7171,10 @@
                 prefillName = (document.getElementById('reg-name-quick').value || "").trim();
                 prefillPhone = (document.getElementById('reg-phone-quick').value || "").trim();
                 if (!prefillName) {
-                    return window.showCustomAlert("Error", "Pehle apna naam likhein!", "⚠️");
+                    return window.showCustomAlert("Error", "Please enter your name first!", "⚠️");
                 }
                 if (!/^[0-9]{10}$/.test(prefillPhone)) {
-                    return window.showCustomAlert("Error", "Sahi 10-digit mobile number likhein!", "⚠️");
+                    return window.showCustomAlert("Error", "Please enter a valid 10-digit mobile number!", "⚠️");
                 }
             }
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -7200,7 +7200,7 @@
                         let finalPhone = prefillPhone;
                         if (!finalPhone) {
                             window.closeModal();
-                            const enteredPhone = prompt("📱 Apna 10-digit mobile number likhein (Report dekhne ke liye zaroori hai):", "");
+                            const enteredPhone = prompt("📱 Enter your 10-digit mobile number (required to view your Report):", "");
                             finalPhone = (enteredPhone || "").trim();
                         }
                         window.showLoadingModal("Creating your account...<br>Please wait.");
@@ -7233,9 +7233,9 @@
                     window.toggleAuthScreens('login');
                     const loginEmailInput = document.getElementById('login-email');
                     if (loginEmailInput) loginEmailInput.value = error.email || "";
-                    window.showCustomAlert("Notice", "Ye email pehle se Password se registered hai.<br>Neeche apna Password daal kar Login karein — Google account apne aap link ho jayega, aur agli baar seedha Google se login kar paoge.", "💡");
+                    window.showCustomAlert("Notice", "This email is already registered with a Password.<br>Enter your Password below to Login — your Google account will then be linked automatically, and next time you can log in directly with Google.", "💡");
                 } else if (error.code === 'auth/popup-closed-by-user') {
-                    // Student ne popup band kar diya, kuch karne ki zarurat nahi
+                    // Student dismissed the popup, nothing to do
                 } else {
                     window.showCustomAlert("Error", "Google Sign-In failed: " + error.message, "❌");
                 }
@@ -7962,7 +7962,7 @@
                 const startOk = data.liveStart ? now >= new Date(data.liveStart) : true;
                 if (!startOk) {
                     const s = new Date(data.liveStart).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                    return window.showErrorView(`🔴 Ye Live Test abhi shuru nahi hua hai. Yeh ${s} se live hoga.`);
+                    return window.showErrorView(`🔴 This Live Test hasn't started yet. It will go live at ${s}.`);
                 }
                 // Once liveEnd has passed, the test simply behaves like a normal
                 // Active test again — no block here (see getAllMergedTests).
@@ -8180,7 +8180,7 @@
             });
 
             if (ongoing.length === 0 && notStarted.length === 0) {
-                box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:13px;padding:20px 0;'>Abhi koi Live Test available nahi hai. Neeche upcoming schedule dekhein 👇</p>";
+                box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:13px;padding:20px 0;'>No Live Test available right now. See the upcoming schedule below 👇</p>";
                 return;
             }
 
@@ -8295,7 +8295,7 @@
             const upcoming = items.filter(it => it.date && new Date(it.date) > now)
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
             if (upcoming.length === 0) {
-                box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:12px;padding:10px 0;'>Koi upcoming test announcement nahi hai.</p>";
+                box.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:12px;padding:10px 0;'>No upcoming test announcements.</p>";
                 return;
             }
             let h = "";
@@ -8338,7 +8338,7 @@
                 const memberCount = (myRoom.memberUids || []).length;
                 const statusLabel = myRoom.status === 'started' ? '🔴 Live Now' : (myRoom.status === 'ended' ? '🛑 Ended' : '⏳ Waiting');
                 const myInfo = (myRoom.memberInfo && window.studentInfo && myRoom.memberInfo[window.studentInfo.uid]) || {};
-                const addedNotice = (!amIHost && myInfo.addedByHost) ? `<div style="font-size:10px;color:var(--success);margin-top:2px;">🎉 Aapko ${myRoom.hostName} ne add kiya hai</div>` : "";
+                const addedNotice = (!amIHost && myInfo.addedByHost) ? `<div style="font-size:10px;color:var(--success);margin-top:2px;">🎉 ${myRoom.hostName} added you</div>` : "";
                 area.innerHTML = `
                     <div style="background:rgba(37,99,235,0.08);border:1px dashed var(--primary);border-radius:var(--radius-sm);padding:8px 10px;">
                         <div style="font-size:11px;font-weight:700;color:var(--primary);">👥 Your Room • ${statusLabel} • ${memberCount} joined</div>
@@ -8351,7 +8351,7 @@
 
             if (isLive) {
                 // Test already went live per schedule — no new rooms allowed.
-                area.innerHTML = `<div style="font-size:11px;color:var(--text-muted);">🔒 Ab room create/join nahi ho sakta — test live ho chuka hai. Test seedhe upar se shuru karein.</div>`;
+                area.innerHTML = `<div style="font-size:11px;color:var(--text-muted);">🔒 Room create/join is no longer possible — the test has gone live. Start the test directly from above.</div>`;
                 return;
             }
 
@@ -8420,7 +8420,7 @@
                 }).then((roomId) => {
                     window.openTestRoomModal(roomId, true);
                 }).catch((err) => {
-                    window.showCustomAlert("Error", "Room create failed: " + err.message + (err.code === 'permission-denied' ? "\n\n⚠️ Firestore rules me 'testRooms' collection ka rule add karwana hoga." : ""), "❌");
+                    window.showCustomAlert("Error", "Room create failed: " + err.message + (err.code === 'permission-denied' ? "\n\n⚠️ A Firestore rule needs to be added for the 'testRooms' collection." : ""), "❌");
                 });
             };
 
@@ -8453,22 +8453,22 @@
             if (!me || !me.uid) return window.showCustomAlert("Error", "Please log in again.", "⚠️");
             const ref = db.collection("testRooms").doc(roomId);
             ref.get().then((doc) => {
-                if (!doc.exists) return window.showCustomAlert("Not Found", "Is code ka koi room nahi mila. Code check karke dobara try karein.", "❌");
+                if (!doc.exists) return window.showCustomAlert("Not Found", "No room found for this code. Please check the code and try again.", "❌");
                 const room = doc.data();
                 if ((room.memberUids || []).includes(me.uid)) {
                     return window.openTestRoomModal(roomId, room.hostUid === me.uid);
                 }
                 if (scheduleId && room.scheduleId && room.scheduleId !== scheduleId) {
-                    return window.showCustomAlert("Wrong Test", `Ye Room Code kisi doosre test ke liye hai (Test Code: ${room.testCode}). Sahi schedule card se "Join Room" try karein.`, "⚠️");
+                    return window.showCustomAlert("Wrong Test", `This Room Code is for a different test (Test Code: ${room.testCode}). Try "Join Room" from the correct schedule card.`, "⚠️");
                 }
                 if (room.status !== 'waiting') {
-                    return window.showCustomAlert("Can't Join", "Ye room ab join nahi ho sakta — test already start/end ho chuka hai.", "⚠️");
+                    return window.showCustomAlert("Can't Join", "This room can no longer be joined — the test has already started/ended.", "⚠️");
                 }
                 if (room.liveAt && new Date(room.liveAt) <= new Date()) {
-                    return window.showCustomAlert("Can't Join", "Test live ho chuka hai — ab is room mein join nahi ho sakta.", "🔒");
+                    return window.showCustomAlert("Can't Join", "The test has gone live — this room can no longer be joined.", "🔒");
                 }
                 if ((room.memberUids || []).length >= (room.maxMembers || 20)) {
-                    return window.showCustomAlert("Room Full", "Ye room already full hai (max " + (room.maxMembers || 20) + " members). Host se naya room banane ko kahein.", "⚠️");
+                    return window.showCustomAlert("Room Full", "This room is already full (max " + (room.maxMembers || 20) + " members). Ask the host to create a new room.", "⚠️");
                 }
                 ref.update({
                     memberUids: firebase.firestore.FieldValue.arrayUnion(me.uid),
@@ -8512,7 +8512,7 @@
             const isLive = room.liveAt ? (new Date(room.liveAt) <= new Date()) : false;
 
             if (room.status === 'ended') {
-                body.innerHTML = `<p style="text-align:center;font-size:13px;color:var(--danger);padding:20px 0;">🛑 Ye Live Test Room complete ho chuka hai.<br>Iska final result "🏆 Live Test History" mein dekh sakte hain.</p>`;
+                body.innerHTML = `<p style="text-align:center;font-size:13px;color:var(--danger);padding:20px 0;">🛑 This Live Test Room is complete.<br>You can see its final result under "🏆 Live Test History".</p>`;
                 return;
             }
 
@@ -8543,7 +8543,7 @@
 
             const myInfoForNotice = (room.memberInfo && me && room.memberInfo[me.uid]) || {};
             const addedByFriendNotice = (!amIHost && myInfoForNotice.addedByHost) ?
-                `<p style="text-align:center;font-size:12px;background:rgba(16,185,129,0.1);color:var(--success);padding:8px;border-radius:var(--radius-sm);margin:0 0 10px 0;">🎉 Aapko <b>${room.hostName}</b> ne is Live Test ke liye add kiya hai!</p>` : "";
+                `<p style="text-align:center;font-size:12px;background:rgba(16,185,129,0.1);color:var(--success);padding:8px;border-radius:var(--radius-sm);margin:0 0 10px 0;">🎉 <b>${room.hostName}</b> added you to this Live Test!</p>` : "";
             let html = `
                 <p style="font-size:12px;color:var(--text-muted);margin:0 0 8px 0;">🎓 ${room.board} — ${room.exam} | 📂 ${room.category}</p>
                 ${addedByFriendNotice}
@@ -8558,7 +8558,7 @@
 
             if (amIHost && room.status === 'waiting') {
                 if (isLive) {
-                    html += `<p style="text-align:center;font-size:12px;color:var(--danger);margin-top:12px;background:rgba(220,38,38,0.08);padding:8px;border-radius:var(--radius-sm);">🔒 Test live ho chuka hai — ab naye members add nahi kar sakte. Test khud-ba-khud shuru hone wala hai.</p>`;
+                    html += `<p style="text-align:center;font-size:12px;color:var(--danger);margin-top:12px;background:rgba(220,38,38,0.08);padding:8px;border-radius:var(--radius-sm);">🔒 The test has gone live — no new members can be added now. The test is about to start automatically.</p>`;
                 } else {
                     html += `
                         <div style="display:flex;gap:6px;margin-top:12px;">
@@ -8573,7 +8573,7 @@
                 html += `<p style="text-align:center;font-size:12px;color:var(--warning);margin-top:12px;">⏳ Waiting for host to start the test... (this will auto-open when they do)</p>`;
             }
 
-            html += `<div id="trm-leaderboard" style="margin-top:14px;"><h4 style="font-size:12px;margin:0 0 6px 0;color:var(--text-main);">🏆 Room Leaderboard <span style="font-weight:400;color:var(--text-muted);font-size:10px;">(live — jitne submit kar chuke hain unka score turant yahin dikhega)</span></h4><div id="trm-leaderboard-body" style="font-size:12px;color:var(--text-muted);">Loading...</div></div>`;
+            html += `<div id="trm-leaderboard" style="margin-top:14px;"><h4 style="font-size:12px;margin:0 0 6px 0;color:var(--text-main);">🏆 Room Leaderboard <span style="font-weight:400;color:var(--text-muted);font-size:10px;">(live — scores of everyone who has submitted appear here instantly)</span></h4><div id="trm-leaderboard-body" style="font-size:12px;color:var(--text-muted);">Loading...</div></div>`;
             body.innerHTML = html;
             window.attachRoomLeaderboardListener(roomId);
         };
@@ -8592,7 +8592,7 @@
                 snap.forEach(d => scores.push(d.data()));
                 scores.sort((a, b) => (b.score || 0) - (a.score || 0));
                 if (scores.length === 0) {
-                    box.innerHTML = `<p style="text-align:center;padding:8px 0;">Abhi tak kisi ne submit nahi kiya.</p>`;
+                    box.innerHTML = `<p style="text-align:center;padding:8px 0;">No one has submitted yet.</p>`;
                     return;
                 }
                 box.innerHTML = scores.map((s, idx) => {
@@ -8601,7 +8601,7 @@
                 }).join('');
             }, (err) => {
                 const box = document.getElementById('trm-leaderboard-body');
-                if (box) box.innerHTML = `<p style="color:var(--danger);">Leaderboard load nahi ho paya: ${err.message}</p>`;
+                if (box) box.innerHTML = `<p style="color:var(--danger);">Leaderboard could not load: ${err.message}</p>`;
             });
         };
 
@@ -8612,7 +8612,7 @@
         window.copyTextRobust = function(text, successMsg) {
             const done = () => window.showToast(successMsg || "Copied!", "📋");
             const fail = () => {
-                window.showCustomAlert("Copy Failed", "Clipboard access nahi mila. Manually select karke copy karein:<br><br><textarea readonly style='width:100%;min-height:120px;font-size:12px;padding:8px;border-radius:8px;' onclick='this.select()'>" + text.replace(/</g, "&lt;") + "</textarea>", "⚠️");
+                window.showCustomAlert("Copy Failed", "Could not access the clipboard. Select the text manually and copy it:<br><br><textarea readonly style='width:100%;min-height:120px;font-size:12px;padding:8px;border-radius:8px;' onclick='this.select()'>" + text.replace(/</g, "&lt;") + "</textarea>", "⚠️");
             };
             if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(done).catch(() => window.copyTextRobustFallback(text, done, fail));
@@ -8643,7 +8643,7 @@
         };
 
         window.deleteTestRoom = function(roomId) {
-            window.showCustomConfirm("Delete Room?", "Ye room permanently delete ho jayega. Agar aapne ye galti se ban diya tha (jaise ki dost ne pehle se apna room bana liya tha), to ise delete karna sahi hai.", () => {
+            window.showCustomConfirm("Delete Room?", "This room will be permanently deleted. If you created it by mistake (e.g. a friend already made a room), it's fine to delete this one.", () => {
                 db.collection("testRooms").doc(roomId).delete().then(() => {
                     window.closeTestRoomModal();
                     window.showCustomAlert("Deleted", "Room delete ho gaya.", "🗑️");
@@ -8655,17 +8655,17 @@
         window.addFriendToRoom = function(roomId) {
             const input = document.getElementById('trm-friend-id');
             const sid = input ? input.value.trim().replace(/[^0-9]/g, "") : "";
-            if (!sid || sid.length < 6) return window.showCustomAlert("Invalid ID", "Friend ka valid Student ID (unka registered phone number) daalein.", "⚠️");
+            if (!sid || sid.length < 6) return window.showCustomAlert("Invalid ID", "Enter your friend's valid Student ID (their registered phone number).", "⚠️");
             db.collection("testRooms").doc(roomId).get().then((roomSnap) => {
                 const room = roomSnap.exists ? roomSnap.data() : {};
                 if ((room.memberUids || []).length >= (room.maxMembers || 20)) {
-                    return window.showCustomAlert("Room Full", "Ye room already full hai (max " + (room.maxMembers || 20) + " members).", "⚠️");
+                    return window.showCustomAlert("Room Full", "This room is already full (max " + (room.maxMembers || 20) + " members).", "⚠️");
                 }
                 if ((room.memberUids || []).some(uid => (room.memberInfo && room.memberInfo[uid] && room.memberInfo[uid].studentId) === sid)) {
-                    return window.showCustomAlert("Already In Room", "Ye student already is room mein hai.", "ℹ️");
+                    return window.showCustomAlert("Already In Room", "This student is already in the room.", "ℹ️");
                 }
                 db.collection("users").where("studentId", "==", sid).limit(1).get().then((snap) => {
-                    if (snap.empty) return window.showCustomAlert("Not Found", "Is Student ID ka koi account nahi mila.", "❌");
+                    if (snap.empty) return window.showCustomAlert("Not Found", "No account found for this Student ID.", "❌");
                     const doc = snap.docs[0];
                     const friendUid = doc.id;
                     const friendData = doc.data();
@@ -8684,7 +8684,7 @@
         };
 
         window.startRoomTest = function(roomId) {
-            window.showCustomConfirm("Start Test", "Sabhi members ke liye test abhi shuru ho jayega. Confirm?", () => {
+            window.showCustomConfirm("Start Test", "The test will start immediately for all members. Confirm?", () => {
                 db.collection("testRooms").doc(roomId).update({ status: "started", startedAt: new Date().toISOString() })
                     .catch((err) => window.showCustomAlert("Error", err.message, "❌"));
             }, "🚀");
@@ -8823,7 +8823,7 @@
                 snap.forEach(d => rows.push(d.data()));
                 rows.sort((a, b) => new Date(b.endedAt || 0) - new Date(a.endedAt || 0));
                 if (rows.length === 0) {
-                    return window.showCustomAlert("Live Test History", `<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:16px 0;">Aapne abhi tak koi Live Test Room complete nahi kiya hai.</p>`, "🏆");
+                    return window.showCustomAlert("Live Test History", `<p style="text-align:center;color:var(--text-muted);font-size:13px;padding:16px 0;">You haven't completed any Live Test Room yet.</p>`, "🏆");
                 }
                 let html = `<div style="max-height:60vh;overflow-y:auto;">`;
                 rows.forEach(r => {
@@ -8868,7 +8868,7 @@
                     scores.sort((a, b) => (b.score || 0) - (a.score || 0));
                     let html = `<h3 style="text-align:center;color:var(--primary);font-size:16px;margin-bottom:10px;">🏆 Room Leaderboard</h3>`;
                     if (scores.length === 0) {
-                        html += `<p style="text-align:center;color:var(--text-muted);font-size:12px;">Abhi tak kisi ne submit nahi kiya.</p>`;
+                        html += `<p style="text-align:center;color:var(--text-muted);font-size:12px;">No one has submitted yet.</p>`;
                     } else {
                         scores.forEach((s, idx) => {
                             const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : (idx + 1) + '.'));
@@ -10081,7 +10081,7 @@
                 tags: taggedQs.map(q => q.tag || "General"),
                 summary: window.parseHack(t.topic).summary || ""
             };
-            const customName = window.studentInfo.name || "अंकुश कुमार S/O मनोज कुमार";
+            const customName = window.studentInfo.name || "Sample Student";
             window.userAnswers = [];
             taggedQs.forEach((q, i) => { window.userAnswers[i] = window.getCleanAns(q.ans); });
             window.executePDFPrintWithMathFix(customName, mode);
@@ -10160,7 +10160,7 @@
                 const cA = window.getCleanAns(q.ans);
                 const gA = window.getCleanAns(uA);
                 const isW = (window.userAnswers.length > 0 && uA !== "N/A" && gA !== cA && window.studentInfo
-                    .name !== "अंकुश कुमार S/O मनोज कुमार");
+                    .name !== "Sample Student");
                 const wM = (isW && mode === 'full') ?
                     '<span style="color:red;font-size:16px;margin-right:4px;">❌</span>' : "";
 
@@ -10187,7 +10187,7 @@
                     const resView = document.getElementById('result-view');
                     const isResActive = resView ? resView.classList.contains('active-view') : false;
                     if (window.userAnswers.length > 0 && (isResActive || window.studentInfo.name ===
-                            "अंकुश कुमार S/O मनोज कुमार") && mode === 'full') {
+                            "Sample Student") && mode === 'full') {
                         const aC = (gA === cA) ? "color:green;" : "color:red;";
                         const uD = (gA && uA !== "N/A") ? gA : "Skipped";
                         h +=
@@ -10403,7 +10403,7 @@
             const rawData = document.getElementById('a-rawdata').value;
             if (!rawData.trim()) {
                 return window.showCustomAlert("Empty Box",
-                    "Bhai, pehle 'Paste Questions Here' wale box mein apna text paste karo, uske baad is editor ko open karna.",
+                    "First paste your text into the 'Paste Questions Here' box, then open this editor.",
                     "⚠️");
             }
             const container = document.getElementById('visual-editor-container');
@@ -12254,7 +12254,7 @@
                 h += `<div class="test-card hist-card-layout"><div class="hist-left"><h4 style="margin:0;color:var(--primary);font-size:14px;">📝 ${tBoard} - ${tExam} (${r.testCode||'Test'})</h4><div style="font-size:11px;color:var(--text-muted);margin:2px 0 6px 0;font-weight:600;">📂 ${tCat} | 📚 ${tSub} ${tChap ? ' | 📖 ' + tChap : ''}</div><div style="font-size:11px;color:var(--text-main);background:var(--bg-subtle);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-color); display:inline-block;">Attempt: <b>${r.attempt||1}</b> | Score: <b style="color:var(--success);font-size:13px;">${r.score||0}</b><br><span style="color:var(--success);margin-top:2px;display:inline-block;">✅ Right: ${r.right||0}</span> | <span style="color:var(--danger);">❌ Wrong: ${r.wrong||0}</span> | <span style="color:var(--text-muted);">⬜ Blank: ${r.blank||0}</span><br><div style="margin-top:2px;">⏱ Time Taken: ${Math.floor((r.timeSpent||0)/60)}m ${(r.timeSpent||0)%60}s</div></div></div><div class="hist-right" style="display:flex;flex-direction:column;gap:6px;"><button class="btn btn-primary btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.openHistoricalResult('${pdfCode}')">👁️ View Result</button><button class="btn btn-danger btn-sm" style="margin:0; padding:6px 14px; font-size:11px;" onclick="window.downloadHistoryPDF('${pdfCode}')">📥 Download PDF</button></div></div>`;
             });
             list.innerHTML = h ||
-                "<p style='text-align:center;color:var(--text-muted);padding:16px;font-size:13px;'>Is Exam ke liye koi test record nahi mila.</p>";
+                "<p style='text-align:center;color:var(--text-muted);padding:16px;font-size:13px;'>No test records found for this Exam.</p>";
 
             // ---- Subject/Chapter filters, question browser + Topic-wise table
             // (all derived from filteredRecords, so they automatically stay
@@ -12402,7 +12402,7 @@
                 const myIdx = rows.findIndex(r => r.uid === uid);
 
                 if (myIdx === -1) {
-                    rankCard.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:12px;margin:0;'>Rank ke liye pehle koi test complete karein.</p>";
+                    rankCard.innerHTML = "<p style='text-align:center;color:var(--text-muted);font-size:12px;margin:0;'>Complete a test first to see your Rank.</p>";
                     return;
                 }
 
@@ -12426,7 +12426,7 @@
                         ` &nbsp;·&nbsp; <span style="color:var(--text-main);">📍 ${myDistrict} <b style="color:var(--warning);">#${distRank}</b><span style="color:var(--text-muted);">/${distRows.length}</span></span>`;
                 }
                 if (!myState) {
-                    html += `<br><span style="font-size:9.5px;color:var(--text-muted);">📝 State/District Rank ke liye apni Profile me State &amp; District add karein.</span>`;
+                    html += `<br><span style="font-size:9.5px;color:var(--text-muted);">📝 To see your State/District Rank, add your State &amp; District in Profile.</span>`;
                 }
                 rankCard.innerHTML = html;
             }).catch((err) => {
@@ -12585,8 +12585,7 @@
 
             const sortedTags = Object.keys(topicPerf).sort();
             let tableHtml = '';
-            const displayTags = sortedTags.slice(0, 10);
-            displayTags.forEach(tag => {
+            sortedTags.forEach(tag => {
                 const perf = topicPerf[tag] || { correct: 0, wrong: 0, blank: 0, total: 0 };
                 const total = perf.total || 0;
                 const acc = total > 0 ? Math.round((perf.correct / total) * 100) : 0;
@@ -12748,7 +12747,7 @@
 
             if (!filtered || filtered.length === 0) {
                 container.innerHTML =
-                    `<p style="color:var(--text-muted); font-size:13px; padding:8px 0;">🔍 Is filter (<b>${labelDisplay}</b>) me koi question nahi mila.</p>`;
+                    `<p style="color:var(--text-muted); font-size:13px; padding:8px 0;">🔍 No questions found for this filter (<b>${labelDisplay}</b>).</p>`;
                 return;
             }
 
@@ -12806,7 +12805,7 @@
                                         <div><b>Total Questions:</b> ${items.length}</div>
                                         <div>✅ Correct: <b style="color:var(--success);">${sumCorrect}</b> | ❌ Wrong: <b style="color:var(--danger);">${sumWrong}</b> | ⬜ Blank: <b style="color:var(--text-muted);">${sumBlank}</b></div>
                                         ${sumPredict > 0 ? `<div>🔥 Predict Questions: <b style="color:var(--accent);">${sumPredict}</b></div>` : ''}
-                                        <div class="sq-combined-note">*Correct/Wrong/Blank is Exam ke saved score se estimate kiya gaya hai (is filter ke hisaab se).</div>
+                                        <div class="sq-combined-note">*Correct/Wrong/Blank is estimated from the Exam's saved score (as per this filter).</div>
                                     </div>
                                     <div style="margin-top:6px;">
                         `;
@@ -12828,7 +12827,7 @@
                     if (q.passage && q.passage.trim() !== '' && q.passage !== lastPassageShown) {
                         passageHtml = `
                                 <div class="sq-passage-block">
-                                    <div class="sq-passage-label">📖 अपठित गद्यांश / Passage</div>
+                                    <div class="sq-passage-label">📖 Passage</div>
                                     <div class="sq-passage-text">${q.passage}</div>
                                 </div>
                             `;
@@ -13443,8 +13442,6 @@
     </script>
     <!-- ===== PRINT AREA ===== -->
     <div id="print-area"></div>
-    12736  <!-- ===== PRINT AREA ===== -->
-12737  <div id="print-area"></div>
 <script>
     // 1. Right-Click Disable
     document.addEventListener('contextmenu', event => event.preventDefault());
