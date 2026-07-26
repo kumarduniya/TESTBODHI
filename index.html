@@ -4136,17 +4136,21 @@
 
         .subject-question-item {
             background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-left: 4px solid var(--accent);
-            padding: 14px 16px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            font-size: 13.5px;
-            line-height: 1.55;
+            border: none;
+            border-left: 3px solid var(--accent);
+            border-bottom: 1px solid var(--border-color);
+            padding: 7px 12px;
+            border-radius: 0;
+            box-shadow: none;
+            font-size: 12px;
+            line-height: 1.4;
             transition: var(--transition);
         }
         .subject-question-item:hover {
-            box-shadow: var(--shadow-md);
+            background: var(--bg-subtle);
+        }
+        .subject-question-item:last-child {
+            border-bottom: none;
         }
         .subject-question-item .sq-header {
             display: flex;
@@ -4154,37 +4158,38 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 6px;
-            margin-bottom: 6px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2px;
+            padding-bottom: 0;
+            border-bottom: none;
             font-weight: 800;
             color: var(--primary);
+            font-size: 11.5px;
         }
         .subject-question-item .sq-tag {
             background: var(--bg-subtle);
-            padding: 3px 12px;
+            padding: 2px 10px;
             border-radius: 50px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: var(--primary-light);
             border: 1px solid var(--border-color);
             letter-spacing: 0.2px;
         }
         .subject-question-item .sq-question {
-            margin: 6px 0 10px 0;
+            margin: 2px 0 5px 0;
             font-weight: 700;
             color: var(--text-main);
-            font-size: 14px;
+            font-size: 12.5px;
         }
         .subject-question-item .sq-answer {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
-            font-size: 12.5px;
+            gap: 8px;
+            font-size: 11px;
             color: var(--text-muted);
-            padding-top: 8px;
-            border-top: 1px dashed var(--border-color);
+            padding-top: 0;
+            border-top: none;
         }
         .subject-question-item .sq-answer .correct {
             color: var(--success);
@@ -4202,9 +4207,9 @@
             background: var(--accent-gradient);
             color: var(--primary-dark);
             border: none;
-            padding: 4px 14px;
+            padding: 3px 11px;
             border-radius: 50px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
@@ -4215,13 +4220,13 @@
         }
         .subject-question-item .sq-solution-content {
             display: none;
-            margin-top: 10px;
-            padding: 12px 14px;
+            margin-top: 7px;
+            padding: 10px 12px;
             background: var(--bg-subtle);
             border-left: 3px solid var(--accent);
             border-radius: var(--radius-sm);
-            font-size: 13.5px;
-            line-height: 1.75;
+            font-size: 12.5px;
+            line-height: 1.65;
             color: var(--text-main);
         }
         .subject-question-item .sq-solution-content.open {
@@ -4483,25 +4488,26 @@
 
         /* ---- Combined multi-test summary shown inside a merged exam card ---- */
         .sq-combined-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 6px 14px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px 14px;
             background: var(--bg-subtle);
-            border: 1.5px dashed var(--primary-light);
+            border: 1px dashed var(--primary-light);
             border-radius: var(--radius-sm);
-            padding: 10px 12px;
+            padding: 6px 10px;
             margin: 6px 0 4px 0;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-main);
         }
         .sq-combined-summary b {
             color: var(--primary);
         }
         .sq-combined-summary .sq-combined-note {
-            grid-column: 1 / -1;
-            font-size: 10px;
+            width: 100%;
+            font-size: 9px;
             color: var(--text-muted);
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         .subject-filter-hint {
@@ -12819,14 +12825,16 @@
                                 <div class="sq-group-content" id="${groupId}">
                                     <button class="sq-close-btn" onclick="window.closeSubjectGroup('${groupId}')">✕ Close</button>
                                     <div class="sq-combined-summary">
-                                        <div><b>Exam:</b> ${examName}</div>
-                                        <div><b>Total Tests Attended:</b> ${testCodesArr.length}</div>
-                                        <div><b>Total Questions:</b> ${items.length}</div>
-                                        <div>✅ Correct: <b style="color:var(--success);">${sumCorrect}</b> | ❌ Wrong: <b style="color:var(--danger);">${sumWrong}</b> | ⬜ Blank: <b style="color:var(--text-muted);">${sumBlank}</b></div>
-                                        ${sumPredict > 0 ? `<div>🔥 Predict Questions: <b style="color:var(--accent);">${sumPredict}</b></div>` : ''}
-                                        <div class="sq-combined-note">*Correct/Wrong/Blank is estimated from the Exam's saved score (as per this filter).</div>
+                                        <span><b>${examName}</b></span>
+                                        <span>📝 ${testCodesArr.length} Tests</span>
+                                        <span>📋 ${items.length} Qs</span>
+                                        <span>✅ <b style="color:var(--success);">${sumCorrect}</b></span>
+                                        <span>❌ <b style="color:var(--danger);">${sumWrong}</b></span>
+                                        <span>⬜ <b style="color:var(--text-muted);">${sumBlank}</b></span>
+                                        ${sumPredict > 0 ? `<span>🔥 P <b style="color:var(--accent);">${sumPredict}</b></span>` : ''}
+                                        <span class="sq-combined-note">*Correct/Wrong/Blank estimated from saved score (per this filter).</span>
                                     </div>
-                                    <div style="margin-top:6px;">
+                                    <div style="margin-top:6px;border:1px solid var(--border-color);border-radius:var(--radius-sm);overflow:hidden;">
                         `;
                 let lastPassageShown = null;
                 items.forEach((item, idx) => {
@@ -12895,7 +12903,7 @@
 
                     html += `
                                 ${passageHtml}
-                                <div class="subject-question-item" style="margin-bottom:8px;">
+                                <div class="subject-question-item">
                                     <div class="sq-header">
                                         <span>Q${idxNum}</span>
                                         <span class="sq-tag">${item.tag}</span>
