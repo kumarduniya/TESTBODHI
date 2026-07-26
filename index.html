@@ -5866,6 +5866,28 @@
             "https://script.google.com/macros/s/AKfycby_qNQhtbqVwqU5iTOPKVTXJCklWQpZvCdk79gUSOflo_3QrKQQWjjbiRLrAiAAIcPc_w/exec";
         const BASE_URL = "https://setupportal.netlify.app/";
 
+        // Question-parsing has moved to a Cloudflare Worker — the tag-format
+        // algorithm itself is no longer shipped in this file. This just calls
+        // that Worker and falls back to the old local parser only if the
+        // Worker can't be reached (e.g. offline), so Save never fully breaks.
+        const PARSER_WORKER_URL = "https://questionparser.girlsstudents2023.workers.dev";
+        const PARSER_KEY = "Ankush@1231@123";
+        window.parseRawQuestionsRemote = async function(rawText) {
+            try {
+                const res = await fetch(PARSER_WORKER_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-Parser-Key": PARSER_KEY },
+                    body: JSON.stringify({ rawText })
+                });
+                if (!res.ok) throw new Error("Worker returned " + res.status);
+                const data = await res.json();
+                return data.parsedQuestions || [];
+            } catch (err) {
+                console.warn("Parser Worker unreachable, using local fallback parser:", err.message);
+                return window.parseRawQuestions(rawText);
+            }
+        };
+
         const firebaseConfig = {
             apiKey: "AIzaSyA1ePcM8xYUOvYw8uLwiMI87_uv9xoPDyc",
             authDomain: "mocksarthi-test.firebaseapp.com",
@@ -9957,7 +9979,7 @@
         /* ==========================================================================
            GENERATE / UPDATE TEST – Manual Tagging Only
            ========================================================================== */
-        window.generateAndSaveLink = function() {
+        window.generateAndSaveLink = async function() {
             const aBoard = document.getElementById('a-board');
             const aExam = document.getElementById('a-exam');
             const aLogo = document.getElementById('a-logo');
@@ -9999,7 +10021,7 @@
             if (eCategory === "CUSTOM" && aCustomCatElem) { eCategory = aCustomCatElem.value || "Custom Category"; }
             let rawText = aRawDataElem ? aRawDataElem.value : "";
             if (!rawText.trim()) return window.showCustomAlert("Empty Box", "Paste questions!", "⚠️");
-            const parsedQs = window.parseRawQuestions(rawText);
+            const parsedQs = await window.parseRawQuestionsRemote(rawText);
             if (parsedQs.length === 0) return window.showCustomAlert("Format Error", "❌ Incorrect format.", "⚠️");
             const fQs = window.updateQsCount() || parsedQs.length;
 
