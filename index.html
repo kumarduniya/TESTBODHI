@@ -4491,13 +4491,13 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 4px 14px;
+            gap: 3px 12px;
             background: var(--bg-subtle);
             border: 1px dashed var(--primary-light);
             border-radius: var(--radius-sm);
-            padding: 6px 10px;
+            padding: 5px 12px;
             margin: 6px 0 4px 0;
-            font-size: 11px;
+            font-size: 10.5px;
             color: var(--text-main);
         }
         .sq-combined-summary b {
@@ -4766,10 +4766,10 @@
         .sq-group-content.open {
             display: block;
         }
-        .sq-group-content > div {
+        .sq-group-content > .sq-questions-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 0;
         }
         .sq-close-btn {
             background: transparent;
@@ -12834,7 +12834,7 @@
                                         ${sumPredict > 0 ? `<span>🔥 P <b style="color:var(--accent);">${sumPredict}</b></span>` : ''}
                                         <span class="sq-combined-note">*Correct/Wrong/Blank estimated from saved score (per this filter).</span>
                                     </div>
-                                    <div style="margin-top:6px;border:1px solid var(--border-color);border-radius:var(--radius-sm);overflow:hidden;">
+                                    <div class="sq-questions-list" style="margin-top:6px;border:1px solid var(--border-color);border-radius:var(--radius-sm);overflow:hidden;">
                         `;
                 let lastPassageShown = null;
                 items.forEach((item, idx) => {
