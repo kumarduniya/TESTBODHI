@@ -5883,8 +5883,13 @@
                 const data = await res.json();
                 return data.parsedQuestions || [];
             } catch (err) {
-                console.warn("Parser Worker unreachable, using local fallback parser:", err.message);
-                return window.parseRawQuestions(rawText);
+                console.error("Parser Worker unreachable:", err.message);
+                if (typeof window.showCustomAlert === "function") {
+                    window.showCustomAlert("Connection Error",
+                        "Could not reach the question-parsing service. Please check your internet connection and try again.",
+                        "❌");
+                }
+                return [];
             }
         };
 
@@ -6856,143 +6861,14 @@
         /* ==========================================================================
            CORE PARSER – FIXED: preserves explanation even with tags
            ========================================================================== */
-        window.parseRawQuestions = function(rawText) {
-            if (!rawText) return [];
-            // NOTE: sanitizeMath is intentionally NOT run here on the whole raw blob.
-            // Running it across all questions at once let a single unprotected
-            // reasoning-notation "$" (e.g. L$M) pair up with an unrelated "$" many
-            // questions away, turning everything in between into fake "math" and
-            // wrapping every Hindi word in \text{...}. Sanitization now happens
-            // per-field, per-question, later in window.sanitizeQuestions().
-            rawText = rawText.replace(/[\u200B-\u200D\uFEFF]/g, '')
-                .replace(/\r\n?/g, '\n')
-                .replace(/(\n|^)\s*(!!\s*\d+\s*!)/g, '\n$2')
-                .replace(/(\n|^)\s*(![A-D]\s)/gi, '\n$2')
-                .replace(/(\n|^)\s*(!!!\s*[A-D])/gi, '\n$2')
-                .replace(/(\n|^)\s*(!!!!)/g, '\n$2')
-                .replace(/(\n|^)\s*(!P\s)/gi, '\n$1!P ')
-                .replace(/(\n|^)\s*(!T\s)/gi, '\n$1!T ')
-                .replace(/(\n|^)\s*(!PQ\d+\s)/gi, '\n$2')
-                .replace(/(\n|^)\s*(!PS\d+\s)/gi, '\n$2');
-            const parsedQs = [];
-            let tempQ = null;
-            let cPass = "";
-            let cMode = "";
-            let pendingTag = "";
-            let pendingTopicTag = "";
-            let predictIdx = -1;
-            const lines = rawText.split('\n');
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (!line) continue;
-                line = line.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-
-                const tagLineMatch = line.match(/^!tag\(([^)]+)\)/i);
-                if (tagLineMatch) {
-                    pendingTag = tagLineMatch[1].trim();
-                    continue;
-                }
-
-                const topicTagLineMatch = line.match(/^!T\s+(.+)/i);
-                if (topicTagLineMatch) {
-                    pendingTopicTag = topicTagLineMatch[1].trim();
-                    continue;
-                }
-
-                const pqMatch = line.match(/^!PQ(\d+)\s*(.*)$/i);
-                if (pqMatch && tempQ) {
-                    const n = parseInt(pqMatch[1], 10);
-                    if (!tempQ.predicted) tempQ.predicted = [];
-                    while (tempQ.predicted.length < n) tempQ.predicted.push({ q: "", s: "" });
-                    predictIdx = n - 1;
-                    tempQ.predicted[predictIdx].q = pqMatch[2].trim();
-                    cMode = "predicted_q";
-                    continue;
-                }
-
-                const psMatch = line.match(/^!PS(\d+)\s*(.*)$/i);
-                if (psMatch && tempQ) {
-                    const n = parseInt(psMatch[1], 10);
-                    if (!tempQ.predicted) tempQ.predicted = [];
-                    while (tempQ.predicted.length < n) tempQ.predicted.push({ q: "", s: "" });
-                    predictIdx = n - 1;
-                    tempQ.predicted[predictIdx].s = psMatch[2].trim();
-                    cMode = "predicted_s";
-                    continue;
-                }
-
-                if (line.match(/^!P/i)) {
-                    let passageText = line.replace(/^!P\s*/i, '').trim();
-                    if (passageText.toLowerCase() === "none") {
-                        cPass = "";
-                        cMode = "P_NONE";
-                    } else {
-                        cPass = passageText;
-                        cMode = "P";
-                    }
-                    continue;
-                }
-
-                if (line.match(/^!!\s*\d+\s*!/)) {
-                    if (tempQ && tempQ.q) parsedQs.push(tempQ);
-                    let qLine = line.replace(/^!!\s*\d+\s*!\s*/, '').trim();
-                    let tag = '';
-                    const tagMatch = qLine.match(/!tag\(([^)]+)\)/);
-                    if (tagMatch) {
-                        tag = tagMatch[1].trim();
-                        qLine = qLine.replace(/!tag\([^)]+\)/, '').trim();
-                    }
-                    if (!tag && pendingTag) {
-                        tag = pendingTag;
-                    }
-                    qLine = qLine.replace(/!tag\([^)]*\)/g, '').trim();
-                    tempQ = {
-                        q: qLine, opts: [], ans: "", exp: "", passage: cPass || "", tag: tag || "",
-                        topicTag: pendingTopicTag || "", predicted: []
-                    };
-                    pendingTopicTag = "";
-                    predictIdx = -1;
-                    cMode = "q";
-                } else if (line.match(/^![A-D]/i)) {
-                    if (tempQ) {
-                        const optId = line.charAt(1).toUpperCase();
-                        const optText = line.substring(2).trim();
-                        tempQ.opts.push({ id: optId, text: optText });
-                    }
-                    cMode = "opt";
-                } else if (line.match(/^!!!!/)) {
-                    if (tempQ) {
-                        let expText = line.replace(/^!!!!\s*/, '').trim();
-                        tempQ.exp = (tempQ.exp || "") + (tempQ.exp ? "<br>" : "") + expText;
-                    }
-                    cMode = "exp";
-                } else if (line.match(/^!!!(?!!)/)) {
-                    if (tempQ) {
-                        let ansVal = line.replace(/^!!!\s*/i, '').trim();
-                        ansVal = window.getCleanAns(ansVal);
-                        tempQ.ans = ansVal;
-                    }
-                    cMode = "ans";
-                } else {
-                    if (tempQ) {
-                        if (cMode === "exp") {
-                            tempQ.exp = (tempQ.exp || "") + (tempQ.exp ? "<br>" : "") + line;
-                        } else if (cMode === "q") {
-                            tempQ.q = (tempQ.q || "") + (tempQ.q ? "<br>" : "") + line;
-                        } else if (cMode === "predicted_q" && tempQ.predicted && predictIdx >= 0) {
-                            tempQ.predicted[predictIdx].q = (tempQ.predicted[predictIdx].q || "") + (tempQ.predicted[predictIdx].q ? "<br>" : "") + line;
-                        } else if (cMode === "predicted_s" && tempQ.predicted && predictIdx >= 0) {
-                            tempQ.predicted[predictIdx].s = (tempQ.predicted[predictIdx].s || "") + (tempQ.predicted[predictIdx].s ? "<br>" : "") + line;
-                        } else if (cMode === "P" && cPass) {
-                            cPass = (cPass || "") + (cPass ? "<br>" : "") + line;
-                            if (tempQ) tempQ.passage = cPass;
-                        }
-                    }
-                }
-            }
-            if (tempQ && tempQ.q) parsedQs.push(tempQ);
-            return parsedQs;
-        };
+        // ============================================================================
+        // Question parsing has moved to a Cloudflare Worker (see
+        // window.parseRawQuestionsRemote below / near BASE_URL). The tag-format
+        // algorithm itself is intentionally NOT present in this file anymore --
+        // this is the student-facing page, and that logic should never ship here.
+        // If the Worker is unreachable, parseRawQuestionsRemote reports an error
+        // instead of silently parsing locally.
+        // ============================================================================
 
         window.getCleanAns = function(val) {
             if (!val) return "";
@@ -9339,11 +9215,8 @@
                 const isFreeStatus = (t.isFree === true || String(t.isFree).toLowerCase() === "true");
                 const priceText = isFreeStatus ? "Free" : "₹" + t.price;
                 let qsCount = p.qs || t.qs || 0;
-                if (!qsCount || qsCount === 0 || qsCount === "N/A") {
-                    if (t.questions && Array.isArray(t.questions) && t.questions.length > 0) qsCount = t.questions
-                        .length;
-                    else if (t.rawText) { const match = String(t.rawText).match(/!!\s*\d+\s*!/g); if (match) qsCount =
-                            match.length; }
+                if ((!qsCount || qsCount === 0 || qsCount === "N/A") && t.questions && Array.isArray(t.questions)) {
+                    qsCount = t.questions.length;
                 }
                 if (!qsCount) qsCount = 0;
                 let attemptHtml = "";
@@ -9658,53 +9531,6 @@
                 window.showCustomAlert("Upload Failed", error.message, "❌"); });
         };
 
-        window.updateAdminIcon = async function() {
-            const sel = document.getElementById('icon-select');
-            const oldName = sel ? sel.value : "";
-            const newNameElem = document.getElementById('icon-new-name');
-            const newName = newNameElem ? newNameElem.value.trim() : "";
-            const newLogoElem = document.getElementById('icon-new-logo');
-            const newLogo = newLogoElem ? newLogoElem.value.trim() : "";
-            if (!oldName || !newName) return window.showCustomAlert("Error", "Select icon and provide new name.", "❌");
-            window.showLoadingModal("Updating logos globally on server...<br>Please wait...");
-            const allTests = window.getAllMergedTests();
-            let count = 0;
-            const savedTests = JSON.parse(localStorage.getItem('myMockTests')) || [];
-            for (let i = 0; i < allTests.length; i++) {
-                const t = allTests[i];
-                const p = window.parseHack(t.topic);
-                const bName = p.board || t.exam || "General Exam";
-                if (bName === oldName) {
-                    const finalTopic = (p.topic || "") + "|||QS:" + (p.qs || t.qs || 0) + "|||CAT:" + (p.cat || "") +
-                        "|||LOGO:" + newLogo + "|||BOARD:" + newName + "|||EXAM:" + (p.exam || t.exam) +
-                        "|||SUBCAT:" + (p.subcat || t.subject || t.sub) + "|||SUMMARY:" + (p.summary || "");
-                    t.topic = finalTopic;
-                    if (!p.board && t.exam === oldName) t.exam = newName;
-                    const eIdx = savedTests.findIndex(x => x.code === t.code);
-                    if (eIdx >= 0) savedTests[eIdx] = t;
-                    else savedTests.push(t);
-                    // SECURITY: t.questions/t.rawText here come from local
-                    // cache and may carry full answers — never write that
-                    // back to the public /tests/{code} doc. Answers live
-                    // safely in secure/key and are untouched by this update.
-                    const publicT = { ...t };
-                    delete publicT.rawText;
-                    if (publicT.questions) {
-                        publicT.questions = publicT.questions.map(q => {
-                            const { ans, exp, predicted, ...rest } = q;
-                            const publicPredicted = (predicted || []).map(p => ({ q: p.q || "" }));
-                            return { ...rest, predicted: publicPredicted };
-                        });
-                    }
-                    try { await db.collection("tests").doc(t.code).set(publicT);
-                        count++; } catch (e) { console.error(e); }
-                }
-            }
-            localStorage.setItem('myMockTests', JSON.stringify(savedTests));
-            window.closeModal();
-            window.showCustomAlert("Success", `${count} tests updated globally!`, "✅");
-            window.fetchActiveTests();
-        };
 
         window.deleteAdminIcon = function() {
             const sel = document.getElementById('icon-select');
@@ -9720,23 +9546,7 @@
             });
         };
 
-        window.updateQsCount = function() {
-            const rawData = document.getElementById('a-rawdata');
-            if (!rawData) return 0;
-            const text = rawData.value;
-            const matches = text.match(/!!\s*\d+\s*!/g);
-            const count = matches ? matches.length : 0;
-            const countBox = document.getElementById('a-qs-count');
-            if (countBox) countBox.value = count;
-            return count;
-        };
 
-        window.clearAdminMemory = function() {
-            window.showCustomConfirm("Clear Memory", "Clear all saved tests from Admin Panel memory?", () => {
-                localStorage.removeItem('myMockTests');
-                window.fetchActiveTests();
-            }, "🗑️");
-        };
 
         // Admin login is not part of the student portal. This build intentionally
         // contains no admin views or admin credentials.
@@ -9776,11 +9586,8 @@
                         `<button class="btn btn-success btn-sm" style="margin:0;width:auto;font-size:9px;padding:3px 10px;" onclick="window.toggleTestStatus('${t.code}',false)">🟢 Active</button>` :
                         `<button class="btn btn-outline btn-sm" style="margin:0;width:auto;font-size:9px;padding:3px 10px;" onclick="window.toggleTestStatus('${t.code}',true)">🔴 Inactive</button>`;
                     let qC = p.qs || t.qs || 0;
-                    if (!qC || qC === 0 || qC === "N/A") {
-                        if (t.questions && Array.isArray(t.questions) && t.questions.length > 0) qC = t.questions
-                            .length;
-                        else if (t.rawText) { const m = String(t.rawText).match(/!!\s*\d+\s*!/g); if (m) qC = m
-                                .length; }
+                    if ((!qC || qC === 0 || qC === "N/A") && t.questions && Array.isArray(t.questions)) {
+                        qC = t.questions.length;
                     }
                     h += `
                         <div class="test-card">
@@ -9814,402 +9621,18 @@
             }).catch(err => { window.showCustomAlert("Error", "Failed to update test status in Database.", "❌"); });
         };
 
-        window.fetchTestForAdmin = function(code, action, mode) {
-            window.adminActionCode = code.trim();
-            window.adminActionMode = action;
-            window.adminPdfMode = mode;
-            window.showLoadingModal("Downloading full test data securely...<br><br><i>Wait just a second...</i>");
-            const testRef = db.collection("tests").doc(window.adminActionCode);
-            testRef.get().then((doc) => {
-                if (!doc.exists) { window.closeModal();
-                    window.showCustomAlert("Error", "Test not found on server!", "❌"); return; }
-                const data = doc.data();
-                // Answers/explanations/predicted-solutions/rawText now live
-                // only in the secure sub-document. Admin can always read it
-                // (see isAdmin() in the Firestore rules) — merge it back in
-                // before handing off to the editor.
-                testRef.collection("secure").doc("key").get().then((secureDoc) => {
-                    if (secureDoc.exists) {
-                        const secure = secureDoc.data();
-                        if (secure.rawText) data.rawText = secure.rawText;
-                        if (secure.answerKey && data.questions) {
-                            data.questions = data.questions.map((q, i) => {
-                                const sk = secure.answerKey[i] || {};
-                                const predicted = (q.predicted || []).map((p, pi) => ({
-                                    q: p.q || "",
-                                    s: (sk.predictedSolutions && sk.predictedSolutions[pi]) || ""
-                                }));
-                                return { ...q, ans: sk.ans || "", exp: sk.exp || "", predicted };
-                            });
-                        }
-                    }
-                    window.handleAdminTestLoad(data);
-                }).catch(() => { window.handleAdminTestLoad(data); });
-            }).catch((error) => { window.closeModal();
-                window.showCustomAlert("Network Error", "Failed to connect to Database.", "❌"); });
-        };
 
-        window.handleAdminTestLoad = function(data) {
-            window.closeModal();
-            let raw = data.rawText || "";
-            if (data.questions) { data.questions = window.sanitizeQuestions(data.questions); }
-            if (raw) { raw = window.sanitizeMath(raw);
-                data.rawText = raw; }
-            if (!raw && data.questions && data.questions.length > 0) {
-                raw = data.questions.map((q, i) => {
-                    const pa = q.passage ? `!P ${String(q.passage).replace(/<br>/g,'\n')}\n` : "";
-                    let qLine =
-                        `!!${i+1}! ${String(q.q||"").replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}`;
-                    if (q.tag && q.tag.trim() !== "") {
-                        qLine += ` !tag(${q.tag})`;
-                    }
-                    const qs = qLine + '\n';
-                    const op = (q.opts || []).map(o => `!${o.id} ${o.text}`).join('\n') + '\n';
-                    const an = `!!! ${q.ans?window.getCleanAns(q.ans):""}\n`;
-                    const ex = q.exp ?
-                        `!!!! ${String(q.exp).replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}\n` : "";
-                    return pa + qs + op + an + ex;
-                }).join('\n');
-                data.rawText = raw;
-            }
-            data.isFetched = true;
-            const sTests = JSON.parse(localStorage.getItem('myMockTests')) || [];
-            const eIdx = sTests.findIndex(t => t.code === data.code);
-            if (eIdx >= 0) { sTests[eIdx] = { ...sTests[eIdx], ...data }; } else { sTests.push(data); }
-            localStorage.setItem('myMockTests', JSON.stringify(sTests));
-            const uIdx = window.adminUnifiedTests.findIndex(t => t.code === data.code);
-            if (uIdx >= 0) { window.adminUnifiedTests[uIdx] = { ...window.adminUnifiedTests[uIdx], ...data }; } else { window
-                    .adminUnifiedTests.push(data); }
-            window.renderDashboard();
-            if (window.adminActionMode === 'edit') window.editTest(window.adminActionCode);
-            else if (window.adminActionMode === 'pdf') window.adminDownloadPDF(window.adminActionCode, window.adminPdfMode);
-        };
 
-        window.editTest = function(code) {
-            const t = window.adminUnifiedTests.find(x => x.code === code);
-            if (!t) return;
-            let raw = t.rawText || "";
-            const hasRealAnswers = t.questions && t.questions.length > 0 && t.questions.some(q => q.ans);
-            // Bulk dashboard listener only ever carries PUBLIC fields (no
-            // answers) by design now — so "questions already present" is no
-            // longer proof we have everything. Refetch (with the secure
-            // merge) whenever answers are actually missing, not just when
-            // questions/rawText are empty.
-            if (!raw && !hasRealAnswers && !t.isFetched) { window.fetchTestForAdmin(code,
-                    'edit', null); return; }
-            if (!raw && t.questions && t.questions.length > 0) {
-                raw = t.questions.map((q, i) => {
-                    const pa = q.passage ? `!P ${String(q.passage).replace(/<br>/g,'\n')}\n` : "";
-                    let qLine =
-                        `!!${i+1}! ${String(q.q||"").replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}`;
-                    if (q.tag && q.tag.trim() !== "") {
-                        qLine += ` !tag(${q.tag})`;
-                    }
-                    const qs = qLine + '\n';
-                    const op = (q.opts || []).map(o => `!${o.id} ${o.text}`).join('\n') + '\n';
-                    const an = `!!! ${q.ans?window.getCleanAns(q.ans):""}\n`;
-                    const ex = q.exp ?
-                        `!!!! ${String(q.exp).replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}\n` : "";
-                    return pa + qs + op + an + ex;
-                }).join('\n');
-                t.rawText = raw;
-            }
-            const p = window.parseHack(t.topic);
-            const aBoard = document.getElementById('a-board');
-            const aExam = document.getElementById('a-exam');
-            const aLogo = document.getElementById('a-logo');
-            const aSummary = document.getElementById('a-summary');
-            const aCat = document.getElementById('a-category');
-            const aCustomCat = document.getElementById('a-custom-cat');
-            const aSub = document.getElementById('a-sub');
-            const aTopic = document.getElementById('a-topic');
-            const aCode = document.getElementById('a-code');
-            const aMarks = document.getElementById('a-marks');
-            const aNeg = document.getElementById('a-neg');
-            const aTotTime = document.getElementById('a-tot-time');
-            const aQTime = document.getElementById('a-q-time');
-            const aPdfType = document.getElementById('a-pdf-type');
-            const aPrice = document.getElementById('a-price');
-            const aRaw = document.getElementById('a-rawdata');
-            const aQsCount = document.getElementById('a-qs-count');
-            if (aBoard) aBoard.value = p.board || t.exam || "";
-            if (aExam) aExam.value = t.exam || "";
-            if (aLogo) aLogo.value = p.logo || "";
-            if (aSummary) aSummary.value = p.summary || "";
-            if (aCat) {
-                const opts = Array.from(aCat.options).map(o => o.value);
-                if (opts.includes(p.cat)) { aCat.value = p.cat; if (aCustomCat) aCustomCat.style.display = 'none'; } else {
-                    aCat.value = "CUSTOM";
-                    if (aCustomCat) { aCustomCat.style.display = 'block';
-                        aCustomCat.value = p.cat; } }
-            }
-            if (aSub) aSub.value = p.subcat || t.subject || t.sub || "";
-            if (aTopic) aTopic.value = p.topic || "";
-            if (aCode) aCode.value = t.code || "";
-            if (aMarks) aMarks.value = t.marks || 2;
-            if (aNeg) aNeg.value = t.neg || 0;
-            if (aTotTime) aTotTime.value = t.totTime || 0;
-            if (aQTime) aQTime.value = t.qTime || 0;
-            const isF = (t.isFree === true || String(t.isFree).toLowerCase() === "true");
-            if (aPdfType) aPdfType.value = isF ? "free" : "paid";
-            if (!isF && aPrice) aPrice.value = t.price || "";
-            if (aRaw) aRaw.value = raw || "";
-            window.updateQsCount();
-            window.togglePriceBox();
-            window.switchAdminTab('create');
-            window.scrollTo(0, 0);
-            const btn = document.getElementById('btn-generate');
-            if (btn) { btn.innerText = "🚀 Update Test";
-                btn.style.background = "#f59e0b"; }
-        };
 
-        window.deleteTest = function(code) {
-            const cleanCode = code.trim();
-            window.showCustomConfirm("Delete Test", `Delete <b>${cleanCode}</b> permanently?`, () => {
-                db.collection("tests").doc(cleanCode).delete().then(() => {
-                    const sT = JSON.parse(localStorage.getItem('myMockTests')) || [];
-                    const filtered = sT.filter(x => x.code !== cleanCode);
-                    localStorage.setItem('myMockTests', JSON.stringify(filtered));
-                    const hidden = window.getHiddenTests();
-                    if (!hidden.includes(cleanCode)) hidden.push(cleanCode);
-                    localStorage.setItem('mockSarthiHidden', JSON.stringify(hidden));
-                    window.globalActiveTests = window.globalActiveTests.filter(x => x.code !== cleanCode);
-                    window.adminUnifiedTests = window.adminUnifiedTests.filter(x => x.code !== cleanCode);
-                    window.renderDashboard();
-                    window.showCustomAlert("Deleted", `Test ${cleanCode} deleted successfully.`, "🗑️");
-                }).catch((error) => { window.showCustomAlert("Error", "Failed to delete: " + error.message,
-                    "❌"); });
-            }, "🗑️");
-        };
 
         /* ==========================================================================
            GENERATE / UPDATE TEST – Manual Tagging Only
            ========================================================================== */
-        window.generateAndSaveLink = async function() {
-            const aBoard = document.getElementById('a-board');
-            const aExam = document.getElementById('a-exam');
-            const aLogo = document.getElementById('a-logo');
-            const aSub = document.getElementById('a-sub');
-            const aTopicElem = document.getElementById('a-topic');
-            const aCodeElem = document.getElementById('a-code');
-            const aSummaryElem = document.getElementById('a-summary');
-            const aMarks = document.getElementById('a-marks');
-            const aNeg = document.getElementById('a-neg');
-            const aTotTime = document.getElementById('a-tot-time');
-            const aQTime = document.getElementById('a-q-time');
-            const aPdfType = document.getElementById('a-pdf-type');
-            const aPriceElem = document.getElementById('a-price');
-            const aCatElem = document.getElementById('a-category');
-            const aCustomCatElem = document.getElementById('a-custom-cat');
-            const aRawDataElem = document.getElementById('a-rawdata');
-            const btn = document.getElementById('btn-generate');
-            const btnVp = document.getElementById('btn-vp-update');
-
-            const eBoard = aBoard ? aBoard.value : "General Exam";
-            const eName = aExam ? aExam.value : "Mock Test";
-            const eLogo = aLogo ? aLogo.value : "";
-            const eSub = aSub ? aSub.value : "Subject";
-            const eTopicRaw = aTopicElem ? aTopicElem.value : "";
-            let eCode = aCodeElem ? aCodeElem.value.trim() : "";
-            let eSummaryRaw = aSummaryElem ? aSummaryElem.value : "";
-            eSummaryRaw = eSummaryRaw.replace(/\|\|\|/g, '');
-            const eSummary = eSummaryRaw.replace(/\n/g, '<br>');
-            if (!eCode) { eCode = "T-" + Math.floor(Math.random() * 99999); if (aCodeElem) aCodeElem.value = eCode; }
-            const eMarks = aMarks ? parseFloat(aMarks.value) || 2 : 2;
-            const eNeg = aNeg ? parseFloat(aNeg.value) || 0 : 0;
-            const tTime = aTotTime ? parseInt(aTotTime.value) || 0 : 0;
-            const qTime = aQTime ? parseInt(aQTime.value) || 0 : 0;
-            const pdfType = aPdfType ? aPdfType.value : "free";
-            const isFree = (pdfType === "free");
-            const ePrice = isFree ? "Free" : (aPriceElem ? (aPriceElem.value || "49") : "49");
-            const eKey = "ANK";
-            let eCategory = aCatElem ? aCatElem.value : "Mock Tests";
-            if (eCategory === "CUSTOM" && aCustomCatElem) { eCategory = aCustomCatElem.value || "Custom Category"; }
-            let rawText = aRawDataElem ? aRawDataElem.value : "";
-            if (!rawText.trim()) return window.showCustomAlert("Empty Box", "Paste questions!", "⚠️");
-            const parsedQs = await window.parseRawQuestionsRemote(rawText);
-            if (parsedQs.length === 0) return window.showCustomAlert("Format Error", "❌ Incorrect format.", "⚠️");
-            const fQs = window.updateQsCount() || parsedQs.length;
-
-            const finalQs = parsedQs.map(q => {
-                if (q.tag && q.tag.trim() !== "") {
-                    return q;
-                } else {
-                    const fallback = eTopicRaw || eSub || "General";
-                    return { ...q, tag: fallback };
-                }
-            });
-
-            const finalTopicRaw = eTopicRaw || eSub || "Test";
-            const eTopic = finalTopicRaw + "|||QS:" + fQs + "|||CAT:" + eCategory + "|||LOGO:" + eLogo + "|||BOARD:" +
-                eBoard + "|||EXAM:" + eName + "|||SUBCAT:" + eSub + "|||SUMMARY:" + eSummary;
-
-            // SECURITY: split into a PUBLIC copy (no answers/explanations/
-            // predicted-solutions — this is what anyone can read per the
-            // Firestore rules on /tests/{code}) and a SECURE answer key
-            // (goes only into /tests/{code}/secure/key, which rules restrict
-            // to admins, free tests, or premium users).
-            const publicQs = finalQs.map(q => {
-                const { ans, exp, predicted, ...rest } = q;
-                const publicPredicted = (predicted || []).map(p => ({ q: p.q || "" }));
-                return { ...rest, predicted: publicPredicted };
-            });
-            const secureAnswerKey = finalQs.map(q => ({
-                ans: q.ans || "",
-                exp: q.exp || "",
-                predictedSolutions: (q.predicted || []).map(p => p.s || "")
-            }));
-
-            const fObj = {
-                exam: eName,
-                category: eCategory,
-                logo: eLogo,
-                subject: eSub,
-                sub: eSub,
-                topic: eTopic,
-                code: eCode,
-                marks: eMarks,
-                neg: eNeg,
-                totTime: tTime,
-                qTime: qTime,
-                isFree: isFree,
-                price: ePrice,
-                key: eKey,
-                questions: publicQs,
-                qs: fQs,
-                isActive: true,
-                tags: finalQs.map(q => q.tag || "General")
-            };
-
-            if (btn) { btn.innerText = "⏳ Saving...";
-                btn.disabled = true; }
-            if (btnVp) { btnVp.innerText = "⏳ Saving...";
-                btnVp.disabled = true; }
-
-            db.collection("tests").doc(eCode).set(fObj).then(() => {
-                // Answers/explanations/predicted-solutions/rawText live ONLY
-                // here from now on.
-                return db.collection("tests").doc(eCode).collection("secure").doc("key").set({
-                    rawText: rawText,
-                    answerKey: secureAnswerKey
-                });
-            }).then(() => {
-                if (btn) { btn.innerText = "🚀 Generate / Update Test";
-                    btn.disabled = false;
-                    btn.style.background = "var(--primary)"; }
-                if (btnVp) { btnVp.innerText = "🚀 Update Test";
-                    btnVp.disabled = false; }
-
-                if (aSub) aSub.value = "";
-                if (aTopicElem) aTopicElem.value = "";
-                if (aCodeElem) aCodeElem.value = "";
-                if (aRawDataElem) aRawDataElem.value = "";
-                if (document.getElementById('a-qs-count')) document.getElementById('a-qs-count').value = "";
-                if (aSummaryElem) aSummaryElem.value = "";
-
-                const tLink = BASE_URL + "?test=" + eCode;
-                const sTests = JSON.parse(localStorage.getItem('myMockTests')) || [];
-                const eIdx = sTests.findIndex(t => t.code === eCode);
-                // Local cache (this admin's own browser storage only) keeps
-                // the FULL data — questions with answers, plus rawText — so
-                // "Edit Test" still works instantly. This never leaves the
-                // admin's own machine; the public Firestore doc above does not.
-                const tObj = { ...fObj, questions: finalQs, rawText: rawText, link: tLink, date: new Date().toLocaleDateString() };
-                if (eIdx >= 0) sTests[eIdx] = tObj;
-                else sTests.push(tObj);
-                localStorage.setItem('myMockTests', JSON.stringify(sTests));
-
-                const uIdx = window.adminUnifiedTests.findIndex(t => t.code === eCode);
-                if (uIdx >= 0) window.adminUnifiedTests[uIdx] = tObj;
-                else window.adminUnifiedTests.push(tObj);
-
-                const gIdx = window.globalActiveTests.findIndex(t => t.code === eCode);
-                if (gIdx >= 0) window.globalActiveTests[gIdx] = tObj;
-                else window.globalActiveTests.push(tObj);
-
-                const generatedLink = document.getElementById('generatedLink');
-                const linkContainer = document.getElementById('linkContainer');
-                if (generatedLink) generatedLink.value = tLink;
-                if (linkContainer) linkContainer.style.display = 'block';
-
-                const tagCount = fObj.tags ? fObj.tags.length : 0;
-                window.showCustomAlert("Success",
-                    `✅ Saved to Firebase! (${fQs} Qs${tagCount > 0 ? ', ' + tagCount + ' tagged' : ''})`, "🎉");
-                window.initQuickFill();
-                const adminManage = document.getElementById('admin-manage-section');
-                if (adminManage && adminManage.style.display === 'block') window.renderDashboard();
-            }).catch((error) => {
-                window.showCustomAlert("Error", error.message, "❌");
-                if (btn) { btn.innerText = "🚀 Generate / Update Test";
-                    btn.disabled = false;
-                    btn.style.background = "var(--primary)"; }
-                if (btnVp) { btnVp.innerText = "🚀 Update Test";
-                    btnVp.disabled = false; }
-            });
-        };
 
         /* ==========================================================================
            PDF DOWNLOAD – Clean tags, no raw syntax, proper Subject:Topic display
            INCLUDES EXPLANATIONS (FIXED)
            ========================================================================== */
-        window.adminDownloadPDF = async function(code, mode) {
-            const t = window.adminUnifiedTests.find(x => x.code === code);
-            if (!t) return window.showCustomAlert("Error", "Data not found!", "❌");
-            let raw = t.rawText || "";
-            const hasRealAnswers = t.questions && t.questions.length > 0 && t.questions.some(q => q.ans);
-            // Bulk dashboard listener only ever carries PUBLIC fields (no
-            // answers) by design now — so "questions already present" is no
-            // longer proof we have everything. Refetch (with the secure
-            // merge) whenever answers are actually missing, not just when
-            // questions/rawText are empty.
-            if (!raw && !hasRealAnswers && !t.isFetched) { window.fetchTestForAdmin(code,
-                    'pdf', mode); return; }
-            if (raw) raw = window.sanitizeMath(raw);
-            if (!raw && t.questions && t.questions.length > 0) {
-                raw = t.questions.map((q, i) => {
-                    const pa = q.passage ? `!P ${String(q.passage).replace(/<br>/g,'\n')}\n` : "";
-                    let qLine =
-                        `!!${i+1}! ${String(q.q||"").replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}`;
-                    if (q.tag && q.tag.trim() !== "") {
-                        qLine += ` !tag(${q.tag})`;
-                    }
-                    const qs = qLine + '\n';
-                    const op = (q.opts || []).map(o => `!${o.id} ${o.text}`).join('\n') + '\n';
-                    const an = `!!! ${q.ans?window.getCleanAns(q.ans):""}\n`;
-                    const ex = q.exp ?
-                        `!!!! ${String(q.exp).replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}\n` : "";
-                    return pa + qs + op + an + ex;
-                }).join('\n');
-                t.rawText = raw;
-            }
-            if (!raw) return window.showCustomAlert("Empty Test", "No questions to print!", "❌");
-            const pQs = await window.parseRawQuestionsRemote(raw);
-            if (!pQs || pQs.length === 0) return window.showCustomAlert("Parse Error", "No valid questions.", "❌");
-
-            const storedQs = t.questions || [];
-            const taggedQs = pQs.map((q, idx) => {
-                const stored = storedQs[idx] || {};
-                return {
-                    ...q,
-                    tag: stored.tag || q.tag || t.tags?.[idx] || "General",
-                    exp: q.exp || stored.exp || ""
-                };
-            });
-
-            window.examData = {
-                exam: t.exam,
-                subject: t.subject || t.sub || "Subject",
-                topic: t.topic,
-                code: t.code,
-                questions: taggedQs,
-                tags: taggedQs.map(q => q.tag || "General"),
-                summary: window.parseHack(t.topic).summary || ""
-            };
-            const customName = window.studentInfo.name || "Sample Student";
-            window.userAnswers = [];
-            taggedQs.forEach((q, i) => { window.userAnswers[i] = window.getCleanAns(q.ans); });
-            window.executePDFPrintWithMathFix(customName, mode);
-        };
 
         /* ---- PDF printer with clean tag display + Explanations (FIXED) ---- */
         window.executePDFPrintWithMathFix = function(studentName, mode) {
@@ -10523,188 +9946,12 @@
         /* ==========================================================================
            VISUAL EDITOR
            ========================================================================== */
-        window.openVisualEditor = function() {
-            const rawData = document.getElementById('a-rawdata').value;
-            if (!rawData.trim()) {
-                return window.showCustomAlert("Empty Box",
-                    "First paste your text into the 'Paste Questions Here' box, then open this editor.",
-                    "⚠️");
-            }
-            const container = document.getElementById('visual-editor-container');
-            if (container) {
-                container.style.display = 'block';
-                container.innerHTML = `
-                    <div class="vp-sticky-header">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                            <h4 style="color:var(--primary); margin:0;font-size:15px;">🖼️ Visual Image & SVG Editor</h4>
-                            <button class="btn btn-danger btn-sm" onclick="window.closeVisualEditor()" style="font-size:11px;">✕ Close</button>
-                        </div>
-                        <p style="font-size:10px; color:var(--text-muted); margin-top:4px; margin-bottom:8px;">Search question number to quickly add SVG/Images without scrolling.</p>
-                        <div class="vp-search-bar">
-                            <input type="number" id="vp-search-input" placeholder="🔍 Search Q. No. (e.g. 111)" onkeyup="window.renderVisualEditorContent()" oninput="window.renderVisualEditorContent()" style="font-size:12px;padding:6px 10px;" />
-                            <button id="btn-vp-update" class="btn btn-success btn-sm" onclick="window.generateAndSaveLink()" style="font-size:11px;">🚀 Update Test</button>
-                        </div>
-                    </div>
-                    <div id="visual-editor-content"></div>
-                    <input type="file" id="hidden-drive-file" accept="image/*" style="display:none;" onchange="window.handleVisualImageSelect(event)" />
-                `;
-                window.renderVisualEditorContent();
-            }
-        };
 
-        window.closeVisualEditor = function() {
-            const container = document.getElementById('visual-editor-container');
-            if (container) container.style.display = 'none';
-            window.updateQsCount();
-        };
 
-        window.renderVisualEditorContent = function() {
-            const rawDataElem = document.getElementById('a-rawdata');
-            if (!rawDataElem) return;
-            const rawData = rawDataElem.value;
-            const lines = rawData.split('\n');
-            let html = '';
-            const searchInput = document.getElementById('vp-search-input');
-            const searchQ = searchInput ? searchInput.value.trim() : "";
-            let currentQNum = 0;
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (!line) continue;
-                if (line.match(/^!!\s*\d+\s*!/)) {
-                    const match = line.match(/^!!\s*(\d+)\s*!/);
-                    if (match) { currentQNum = parseInt(match[1]); } else { currentQNum++; }
-                }
-                let associatedQ = currentQNum;
-                if (line.match(/^!P/i)) { associatedQ = currentQNum + 1; }
-                if (searchQ !== "" && associatedQ.toString() !== searchQ) { continue; }
-                let type = "";
-                if (line.match(/^!!\s*\d+\s*!/)) { type = "📝 Q" + associatedQ; } else if (line.match(/^![A-D]/i)) { type =
-                        "🔘 Option " + line.charAt(1).toUpperCase(); } else if (line.match(/^!!!!/)) { type =
-                        "💡 Explanation"; } else if (line.match(/^!P/i)) { type = "📜 Passage"; }
-                if (type) {
-                    let cleanText = line;
-                    let hasMedia = false;
-                    if (line.includes('<img') || line.includes('<svg')) {
-                        hasMedia = true;
-                        cleanText = line.replace(/<img[^>]*>/g,
-                                '<br><span style="color:var(--success);font-weight:bold;">[🖼️ IMAGE ADDED]</span>')
-                            .replace(/<svg[\s\S]*?<\/svg>/g,
-                                '<br><span style="color:var(--primary);font-weight:bold;">[🖋️ SVG ADDED]</span>');
-                    }
-                    let btnsHTML = `
-                        <button class="vp-btn" id="vp-btn-${i}" onclick="window.triggerVisualUpload(${i})">🖼️ Add Image</button>
-                        <button class="vp-btn svg-btn" onclick="window.triggerVisualSvg(${i})">🖋️ Add SVG</button>
-                    `;
-                    if (hasMedia) {
-                        btnsHTML += `<button class="vp-btn del-btn" onclick="window.deleteVisualMedia(${i})">🗑️ Delete Media</button>`;
-                    }
-                    html += `
-                    <div class="vp-q-block">
-                        <div class="vp-row">
-                            <div class="vp-text"><b>${type}:</b> <br> <span style="font-family:monospace; color:#333;font-size:12px;">${cleanText}</span></div>
-                            <div class="vp-btn-group">${btnsHTML}</div>
-                        </div>
-                    </div>`;
-                }
-            }
-            const contentDiv = document.getElementById('visual-editor-content');
-            if (contentDiv) {
-                if (html === '') {
-                    contentDiv.innerHTML =
-                        `<p style='color:var(--danger); font-weight:bold; padding:8px;font-size:13px;'>No data found for Question No. ${searchQ}</p>`;
-                } else {
-                    contentDiv.innerHTML = html;
-                }
-            }
-        };
 
-        window.triggerVisualUpload = function(lineIdx) {
-            window.currentImageUploadLineIndex = lineIdx;
-            const fileInput = document.getElementById('hidden-drive-file');
-            if (fileInput) { fileInput.value = "";
-                fileInput.click(); }
-        };
 
-        window.triggerVisualSvg = function(lineIdx) {
-            window.showCustomPrompt("Add SVG Code", "Please paste your exact raw SVG code here:", (svgCode) => {
-                if (svgCode && svgCode.trim().toLowerCase().startsWith("<svg")) {
-                    const rawDataElem = document.getElementById('a-rawdata');
-                    const lines = rawDataElem.value.split('\n');
-                    lines[lineIdx] = lines[lineIdx] + ` <br>` + svgCode.trim();
-                    rawDataElem.value = lines.join('\n');
-                    window.showCustomAlert("Success", "SVG Code added successfully! 🎉", "✅");
-                    window.renderVisualEditorContent();
-                } else if (svgCode) {
-                    window.showCustomAlert("Error", "Invalid SVG code. It must start with '<svg...'", "❌");
-                }
-            }, "🖋️");
-        };
 
-        window.deleteVisualMedia = function(lineIdx) {
-            window.showCustomConfirm("Delete Media", "Are you sure you want to delete the image/SVG from this line?", () => {
-                const rawDataElem = document.getElementById('a-rawdata');
-                const lines = rawDataElem.value.split('\n');
-                lines[lineIdx] = lines[lineIdx].replace(/<br>\s*<img[^>]*>/g, '')
-                    .replace(/<img[^>]*>/g, '')
-                    .replace(/<br>\s*<svg[\s\S]*?<\/svg>/g, '')
-                    .replace(/<svg[\s\S]*?<\/svg>/g, '');
-                rawDataElem.value = lines.join('\n');
-                window.renderVisualEditorContent();
-            }, "🗑️");
-        };
 
-        window.handleVisualImageSelect = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const lineIdx = window.currentImageUploadLineIndex;
-            const btn = document.getElementById('vp-btn-' + lineIdx);
-            if (btn) { btn.innerText = "⏳ Uploading...";
-                btn.classList.add('uploading'); }
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const base64Data = evt.target.result.split(',')[1];
-                const formData = new URLSearchParams();
-                formData.append('action', 'upload');
-                formData.append('type', 'question');
-                formData.append('name', file.name);
-                formData.append('mimeType', file.type);
-                formData.append('image', base64Data);
-                fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: formData,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                }).then(res => res.text()).then(text => {
-                    try {
-                        const data = JSON.parse(text);
-                        if (data.status === "success" && data.url) {
-                            const rawDataElem = document.getElementById('a-rawdata');
-                            const lines = rawDataElem.value.split('\n');
-                            lines[lineIdx] = lines[lineIdx] + ` <br><img src="${data.url}">`;
-                            rawDataElem.value = lines.join('\n');
-                            window.showCustomAlert("Success", "Image directly added to your question! 🎉",
-                                "✅");
-                            window.renderVisualEditorContent();
-                        } else {
-                            window.showCustomAlert("Error", "Upload failed: " + (data.message ||
-                                "Unknown error"), "❌");
-                            if (btn) { btn.innerText = "🖼️ Add Image";
-                                btn.classList.remove('uploading'); }
-                        }
-                    } catch (jsonErr) {
-                        window.showCustomAlert("Error",
-                            "Failed to parse Google Script response. Check your App Script deployment.",
-                            "❌");
-                        if (btn) { btn.innerText = "🖼️ Add Image";
-                            btn.classList.remove('uploading'); }
-                    }
-                }).catch(err => {
-                    window.showCustomAlert("Error", "Network error. Please try again.", "❌");
-                    if (btn) { btn.innerText = "🖼️ Add Image";
-                        btn.classList.remove('uploading'); }
-                });
-            };
-            reader.readAsDataURL(file);
-        };
 
         /* ==========================================================================
            EXAM ENGINE
@@ -13125,33 +12372,17 @@
             if (data.questions) { data.questions = window.sanitizeQuestions(data.questions); }
             if (raw) { raw = window.sanitizeMath(raw);
                 data.rawText = raw; }
-            if (!raw && data.questions && data.questions.length > 0) {
-                raw = data.questions.map((q, i) => {
-                    const pa = q.passage ? `!P ${String(q.passage).replace(/<br>/g,'\n')}\n` : "";
-                    let qLine =
-                        `!!${i+1}! ${String(q.q||"").replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}`;
-                    if (q.tag && q.tag.trim() !== "") {
-                        qLine += ` !tag(${q.tag})`;
-                    }
-                    const qs = qLine + '\n';
-                    const op = (q.opts || []).map(o => `!${o.id} ${o.text}`).join('\n') + '\n';
-                    const an = `!!! ${q.ans?window.getCleanAns(q.ans):""}\n`;
-                    const ex = q.exp ?
-                        `!!!! ${String(q.exp).replace(/<br>/g,'\n').replace(/<b>(.*?)<\/b>/g,'**$1**')}\n` : "";
-                    return pa + qs + op + an + ex;
-                }).join('\n');
-            }
-            const pQs = await window.parseRawQuestionsRemote(raw);
-            const oldExam = window.examData;
             const storedQs = data.questions || [];
-            const taggedQs = pQs.map((q, idx) => {
-                const stored = storedQs[idx] || {};
-                return {
-                    ...q,
-                    tag: stored.tag || q.tag || data.tags?.[idx] || "General",
-                    exp: q.exp || stored.exp || ""
-                };
-            });
+            const oldExam = window.examData;
+            // Build the tagged question list directly from the already-structured
+            // data.questions (options/answers/explanations are already present
+            // after the secure merge) — no need to round-trip through raw text
+            // and re-parse, which used to leak the tag-format here.
+            const taggedQs = storedQs.map((q, idx) => ({
+                ...q,
+                tag: q.tag && q.tag.trim() !== "" ? q.tag : (data.tags?.[idx] || "General"),
+                exp: q.exp || ""
+            }));
 
             window.examData = {
                 exam: data.exam,
@@ -13387,11 +12618,6 @@
         /* ==========================================================================
            PRICE TOGGLE
            ========================================================================== */
-        window.togglePriceBox = function() {
-            const pt = document.getElementById('a-pdf-type');
-            const pBox = document.getElementById('price-box');
-            if (pt && pBox) { pBox.style.display = (pt.value === 'free') ? 'none' : 'block'; }
-        };
 
         /* ==========================================================================
            WEAK QUESTIONS FEATURE – NEW FUNCTIONS
@@ -13616,7 +12842,6 @@
         console.log('✅ Sub-graphs also show Correct/Wrong/Blank with proper colors');
         console.log('✅ Detailed performance table includes all topics with status (Strong/Average/Weak)');
         console.log('✅ NEW: Weak Questions feature – practice only your weak questions!');
-        console.log('📌 Tag format: !tag(Subject:Topic)');
         console.log('📌 Solution toggle shows explanation in analysis and report');
     </script>
     <!-- ===== PRINT AREA ===== -->
