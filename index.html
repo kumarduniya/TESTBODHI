@@ -10434,7 +10434,20 @@
 
             for (let i = 0; i < window.examData.questions.length; i++) {
                 const q = window.examData.questions[i];
-                const tag = q.tag || window.examData.tags?.[i] || "General";
+                // Prefer the structured !T topicTag ("Subject :: Chapter :: Topic")
+                // over the legacy !tag ("Subject:Topic") -- this is what real tests
+                // actually use, so the graphs must key off it, not the legacy field.
+                const legacyTag = q.tag || window.examData.tags?.[i] || "";
+                const topicTagVal = (q.topicTag || '').trim();
+                const ttParts = topicTagVal ? topicTagVal.split('::').map(s => s.trim()).filter(Boolean) : [];
+                let tag;
+                if (ttParts.length >= 2) {
+                    tag = ttParts[0] + ':' + ttParts[1]; // "Subject:Chapter" for grouping below
+                } else if (ttParts.length === 1) {
+                    tag = ttParts[0];
+                } else {
+                    tag = legacyTag || "General";
+                }
                 if (tag === "General" || tag.match(/\d{2}\/\d{2}\/\d{4}/)) continue;
                 if (!tagPerformance[tag]) {
                     tagPerformance[tag] = { correct: 0, wrong: 0, blank: 0, total: 0 };
