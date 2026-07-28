@@ -5314,36 +5314,33 @@
                     alt="TEST BODHI Logo" data-shape="round" />
                     <span class="brand-name">TEST <span>BODHI</span></span>
                 </div>
-
-                <div class="header-controls">
-                    <div class="header-profile" id="header-profile" style="display:none;">
-                        <div class="profile-avatar" id="header-avatar" onclick="window.openProfilePhotoLightbox()" title="Tap to enlarge photo">
-                            <span id="header-avatar-text">👤</span>
-                            <img id="header-avatar-img" style="display:none;" />
-                        </div>
-                        <span class="profile-name" id="header-profile-name">Student</span>
-                        <div style="position:relative;">
-                            <button class="header-menu-btn" id="header-menu-btn" onclick="window.toggleHeaderMenu(event)" title="Menu">☰ Menu</button>
-                           <div class="header-menu-dropdown" id="header-menu-dropdown">
-    <button class="hmd-item" onclick="window.closeHeaderMenu();window.openProfileModal()">👤 My Profile</button>
-    <button class="hmd-item" onclick="window.closeHeaderMenu();window.goToMyReport()">📈 My Report</button>
-    
-    <!-- 👇 NAYA DAILY QUIZ BUTTON YAHAN HAI 👇 -->
-    <button class="hmd-item" onclick="window.closeHeaderMenu(); window.open('daily-quiz.html', '_blank')">🔥 Daily CA Quiz</button>
-    <!-- 👆 👆 -->
-
-    <button class="hmd-item" onclick="window.closeHeaderMenu();window.showWeakQuestions()">💪 My Weak Questions</button>
-    <button class="hmd-item" onclick="window.closeHeaderMenu();window.goToLiveTests()">🔴 Live Tests</button>
-    <button class="hmd-item" onclick="window.closeHeaderMenu();window.openProfileUpload();window.scrollTo(0,0);">📸 Change Photo</button>
-    <div class="hmd-divider"></div>
-    <button class="hmd-item hmd-danger" onclick="window.closeHeaderMenu();window.handleStudentLogout()">🚪 Logout</button>
-</div>
-                        </div>
-                    </div>
-                    <button class="theme-toggle" onclick="window.toggleDarkMode()" title="Toggle Theme">🌙 Dark</button>
-                    <div id="timer-box" class="timer" style="display:none;"><span>⏱</span><span id="main-time">00:00</span></div>
-                </div>
+          <div class="header-controls">
+    <div class="header-profile" id="header-profile" style="display:none;">
+        <div class="profile-avatar" id="header-avatar" onclick="window.openProfilePhotoLightbox()" title="Tap to enlarge photo">
+            <span id="header-avatar-text">👤</span>
+            <img id="header-avatar-img" style="display:none;" />
+        </div>
+        <span class="profile-name" id="header-profile-name">Student</span>
+        <div style="position:relative;">
+            <button class="header-menu-btn" id="header-menu-btn" onclick="window.toggleHeaderMenu(event)" title="Menu">☰ Menu</button>
+            <div class="header-menu-dropdown" id="header-menu-dropdown">
+                <button class="hmd-item" onclick="window.closeHeaderMenu();window.openProfileModal()">👤 My Profile</button>
+                <button class="hmd-item" onclick="window.closeHeaderMenu();window.goToMyReport()">📈 My Report</button>
+                
+                <!-- 👇 NAYA DAILY QUIZ BUTTON YAHAN HAI 👇 -->
+                <button class="hmd-item" onclick="window.closeHeaderMenu(); window.open('daily-quiz.html', '_blank')">🔥 Daily CA Quiz</button>
+                
+                <button class="hmd-item" onclick="window.closeHeaderMenu();window.showWeakQuestions()">💪 My Weak Questions</button>
+                <button class="hmd-item" onclick="window.closeHeaderMenu();window.goToLiveTests()">🔴 Live Tests</button>
+                <button class="hmd-item" onclick="window.closeHeaderMenu();window.openProfileUpload();window.scrollTo(0,0);">📸 Change Photo</button>
+                <div class="hmd-divider"></div>
+                <button class="hmd-item hmd-danger" onclick="window.closeHeaderMenu();window.handleStudentLogout()">🚪 Logout</button>
             </div>
+        </div>
+    </div>
+    <button class="theme-toggle" onclick="window.toggleDarkMode()" title="Toggle Theme">🌙 Dark</button>
+    <div id="timer-box" class="timer" style="display:none;"><span>⏱</span><span id="main-time">00:00</span></div>
+</div>
             <div id="student-top-bar" class="tcs-sub-header" style="display:none;">
                 <div class="s-left">
                     <span class="s-name" id="top-sname">👤 Student</span>
